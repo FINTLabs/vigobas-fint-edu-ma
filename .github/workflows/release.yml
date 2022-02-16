@@ -62,4 +62,4 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: vigobas-fint-edu-ma-${{steps.get_tag.outputs.ID}}.zip
+          files: vigobas-fint-edu-ma-*.zip
