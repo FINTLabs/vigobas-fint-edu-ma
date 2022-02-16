@@ -1,0 +1,29 @@
+{
+    "_embedded": {
+        "_entries": [
+            {
+                "beskrivelse": "",
+                "systemId": {
+                    "identifikatorverdi": "test_7034580"
+                },
+                "_links": {
+                    "elev": [
+                        {
+                            "href": "https://beta.felleskomponent.no/utdanning/elev/elev/systemid/test_ddc6ed79c825fe6e609230d0552d2ec804b68f6cae582b85b3afc1bc03d2c4cb"
+                        }
+                    ],
+                    "skole": [
+                        {
+                            "href": "https://beta.felleskomponent.no/utdanning/utdanningsprogram/skole/systemid/2047"
+                        }
+                    ],
+                    "self": [
+                        {
+                            "href": "https://beta.felleskomponent.no/utdanning/elev/elevforhold/systemid/test_7034580"
+                        }
+                    ]
+                }
+            }
+		]
+    }
+}	

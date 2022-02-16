@@ -1,0 +1,44 @@
+{
+    "_embedded": {
+        "_entries": [
+            {
+                "bostedsadresse": {
+                    "adresselinje": [
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    "postnummer": "",
+                    "poststed": ""
+                },
+                "fodselsdato": "1963-08-28T00:00:00Z",
+                "fodselsnummer": {
+                    "identifikatorverdi": "28086339155"
+                },
+                "navn": {
+                    "etternavn": "Bernt",
+                    "fornavn": "Johnsen",
+                    "mellomnavn": ""
+                },
+                "_links": {
+                    "elev": [
+                        {
+                            "href": "https://beta.felleskomponent.no/utdanning/elev/elev/systemid/test_ddc6ed79c825fe6e609230d0552d2ec804b68f6cae582b85b3afc1bc03d2c4cb"
+                        }
+                    ],
+                    "personalressurs": [
+                        {
+                            "href": "https://beta.felleskomponent.no/administrasjon/personal/personalressurs/ansattnummer/502156"
+                        }
+                    ],
+                    "self": [
+                        {
+                            "href": "https://beta.felleskomponent.no/utdanning/elev/person/fodselsnummer/28086339155"
+                        }
+                    ]
+                }
+            }
+		]
+    }
+}			

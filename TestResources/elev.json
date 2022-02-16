@@ -1,0 +1,43 @@
+{
+    "_embedded": {
+        "_entries": [
+            {
+                "brukernavn": {
+                    "identifikatorverdi": "jobe2808"
+                },
+                "elevnummer": {
+                    "identifikatorverdi": "test_15310899"
+                },
+                "feidenavn": {
+                    "identifikatorverdi": ""
+                },
+                "kontaktinformasjon": {
+                    "mobiltelefonnummer": "48 22 65 87",
+                    "nettsted": "",
+                    "sip": "",
+                    "telefonnummer": ""
+                },
+                "systemId": {
+                "identifikatorverdi": "test_ddc6ed79c825fe6e609230d0552d2ec804b68f6cae582b85b3afc1bc03d2c4cb"
+                },
+                "_links": {
+                "person": [
+                        {
+                            "href": "https://beta.felleskomponent.no/utdanning/elev/person/fodselsnummer/28086339155"
+                        }
+                    ],
+                    "elevforhold": [
+                        {
+                            "href": "https://beta.felleskomponent.no/utdanning/elev/elevforhold/systemid/test_7034580"
+                        }
+                    ],
+                    "self": [
+                        {
+                            "href": "https://beta.felleskomponent.no/utdanning/elev/elev/brukernavn/jobe2808"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

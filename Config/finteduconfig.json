@@ -1,0 +1,21 @@
+﻿{
+  "xClient": "test",
+  "scope": "fint-client",
+  "accessTokenUri": "https://namidp01.rogfk.no/nidp/oauth/nam/token",
+  "additionalUtdanningElevPersonUri": "/utdanning/elev/person",
+  "additionalUtdanningElevElevUri": "/utdanning/elev/elev",
+  "additionalUtdanningElevElevforholdUri": "/utdanning/elev/elevforhold",
+  "additionalUtdanningElevMedlemskapUri": "/utdanning/elev/medlemskap",
+  "additionalUtdanningElevBasisgruppeUri": "/utdanning/elev/basisgruppe",
+  "additionalUtdanningElevSkoleressursUri": "/utdanning/elev/skoleressurs",
+  "additionalUtdanningTimeplanUndervisningsgruppeUri": "/utdanning/timeplan/undervisningsgruppe",
+  "additionalUtdanningTimeplanFagUri": "/utdanning/timeplan/fag",
+  "additionalUtdanningUtdanningsprogramArstrinnUri": "/utdanning/utdanningsprogram/arstrinn",
+  "additionalUtdanningUtdanningsprogramProgramomradeUri": "/utdanning/utdanningsprogram/programomrade",
+  "additionalUtdanningUtdanningsprogramUtdanningsprogramUri": "/utdanning/utdanningsprogram/utdanningsprogram",
+  "additionalUtdanningUtdanningsprogramSkoleUri": "/utdanning/utdanningsprogram/skole",
+  "additionalAdministrasjonPersonalPersonUri": "/administrasjon/personal/person",
+  "additionalAdministrasjonPersonalPersonalRessursUri": "/administrasjon/personal/personalressurs",
+  "additionalAdministrasjonPersonalArbeidsforholdUri": "/administrasjon/personal/arbeidsforhold",
+  "additionalAdministrasjonOrganisasjonUri": "/administrasjon/organisasjon/organisasjonselement"
+}

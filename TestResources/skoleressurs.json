@@ -1,0 +1,28 @@
+{
+    "_embedded": {
+        "_entries": [
+            {
+	            "systemId": {
+		            "identifikatorverdi": "2041_test"
+                },
+	            "_links": {
+		            "personalressurs": [
+			            {
+				            "href": "https://beta.felleskomponent.no/administrasjon/personal/personalressurs/ansattnummer/502156"
+			            }
+		            ],
+		            "skole": [
+			            {
+				            "href": "https://beta.felleskomponent.no/utdanning/utdanningsprogram/skole/systemid/2041"
+			            }
+		            ],
+		            "self": [
+			            {
+				            "href": "https://beta.felleskomponent.no/utdanning/elev/skoleressurs/systemid/2041_test"
+			            }
+		            ]
+	            }
+            }
+        ]
+    }
+}
