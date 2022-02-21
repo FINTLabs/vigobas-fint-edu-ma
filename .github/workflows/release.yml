@@ -37,7 +37,7 @@ jobs:
       - name: Set assembly version       
         run: |
           sed -i -E "s/(AssemblyVersion[(]\").*(\"[)])/\1${{steps.get_tag.outputs.ID}}\2/"  ./AssemblyInfo.cs
-          sed -i -E "s/(AssemblyCopyright[(]\"Copyright )\d{4}(.*)/\1$(date +'%Y')\2/"  ./AssemblyInfo.cs
+          sed -i -E "s/(AssemblyCopyright[(]\"Copyright )\d{4}(.*)/\1${{date +'%Y'}}\2/"  ./AssemblyInfo.cs
         shell: bash
 
       - name: Build Solution
