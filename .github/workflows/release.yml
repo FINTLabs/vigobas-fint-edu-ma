@@ -34,12 +34,17 @@ jobs:
         run: echo ::set-output name=ID::${GITHUB_REF/refs\/tags\//}
         shell: bash
 
+      - name: Get Year
+        id: get_year
+        run: echo ::set-output name =YEAR::${date+ '%Y'}
+        shell: bash
+
       - name: Set assembly version       
         run: |
           sed -i -E "s/(AssemblyVersion[(]\").*(\"[)])/\1${{steps.get_tag.outputs.ID}}\2/"  ./AssemblyInfo.cs
-          sed -i -E "s/(AssemblyCopyright[(]\"Copyright )\d{4}(.*)/\1${{date +'%Y'}}\2/"  ./AssemblyInfo.cs
+          sed -i -E "s/(AssemblyCopyright[(]\"Copyright )\d{4}(.*)/\1${{steps.get_year.outputs.YEAR}\2/"  ./AssemblyInfo.cs
         shell: bash
-
+        
       - name: Build Solution
         run: |
           msbuild.exe VigoBAS.FINT.Edu.sln -property:platform="Any CPU" -property:Configuration="Release"
