@@ -1530,24 +1530,30 @@ namespace VigoBAS.FINT.Edu
                 {
                     if (organisasjonselementDict.TryGetValue(currentOrgElementUri, out IEmbeddedResourceObject currentOrgElement))
                     {
-                        var parentLink = currentOrgElement.Links[ResourceLink.parent];
-                        var currentParentUri = LinkToString(parentLink);
-                        Logger.Log.DebugFormat("Overordnet organisasjonselement is {0} is found on the organisasjon endpoint", currentOrgElementUri);
-
-                        if (currentParentUri != currentOrgElementUri)
+                        if (currentOrgElement.Links.TryGetValue(ResourceLink.parent, out IEnumerable<ILinkObject> parentLink))
                         {
-                            currentOrgElementUri = currentParentUri;
+                            var currentParentUri = LinkToString(parentLink);
+                            Logger.Log.Debug($"Organisasjonselement {currentOrgElementUri} is linked to overordnet {currentParentUri}");
+
+                            if (currentParentUri != currentOrgElementUri)
+                            {
+                                currentOrgElementUri = currentParentUri;
+                            }
+                            else
+                            {
+                                Logger.Log.DebugFormat("Overordnet organisasjonselement {0} is pointing to itself. Top organisasjonselement is found", currentOrgElementUri);
+                                topElementFound = true;
+                                topOrgElementUri = currentOrgElementUri;
+                            }
                         }
                         else
                         {
-                            Logger.Log.DebugFormat("Overordnet organisasjonselement {0} is pointing to itself. Top organisasjonselement is found", currentOrgElementUri);
-                            topElementFound = true;
-                            topOrgElementUri = currentOrgElementUri;
-                        }
+                            Logger.Log.Error($"Organisasjonselement {currentOrgElementUri} is missing mandatory link {ResourceLink.parent}");
+                        }                       
                     }
                     else
                     {
-                        Logger.Log.ErrorFormat("Overordnet link {0} is pointing to an organisasjonselement not found on the organisasjon endpoint", currentOrgElementUri);
+                        Logger.Log.Error($"Overordnet link {currentOrgElementUri} is pointing to an organisasjonselement not found on the organisasjon endpoint");
                         orgelementIsPresent = false;
                     }
                 }
@@ -2356,23 +2362,35 @@ namespace VigoBAS.FINT.Edu
             )
         {
             var returnedResourceUri = String.Empty;
-            var personalressursUri = LinkToString(schoolResourceData.Links[ResourceLink.personalResource].First());
 
-            if (_personalressursDict.TryGetValue(personalressursUri, out IEmbeddedResourceObject personalData))
+            if (schoolResourceData.Links.TryGetValue(ResourceLink.personalResource, out IEnumerable<ILinkObject> personalLink))
             {
-                var eduPersonDataLinks = personalData.Links;
-                if (eduPersonDataLinks.TryGetValue(ResourceLink.person, out IEnumerable<ILinkObject> personLink))
+                var personalressursUri = LinkToString(personalLink);
+
+                if (_personalressursDict.TryGetValue(personalressursUri, out IEmbeddedResourceObject personalData))
                 {
-                    var ansattPersonUri = LinkToString(personLink);
-                    if (_ansattPersonDict.TryGetValue(ansattPersonUri, out IEmbeddedResourceObject personalPersonData))
+                    var eduPersonDataLinks = personalData.Links;
+                    if (eduPersonDataLinks.TryGetValue(ResourceLink.person, out IEnumerable<ILinkObject> personLink))
                     {
-                        returnedResourceUri = AddSchoolResourceToCS(schoolResourceUri, orgUri, schoolResourceData, personalPersonData, personalData, ref ssnToSystemId, ref importedObjectsDict);
+                        var ansattPersonUri = LinkToString(personLink);
+                        if (_ansattPersonDict.TryGetValue(ansattPersonUri, out IEmbeddedResourceObject personalPersonData))
+                        {
+                            returnedResourceUri = AddSchoolResourceToCS(schoolResourceUri, orgUri, schoolResourceData, personalPersonData, personalData, ref ssnToSystemId, ref importedObjectsDict);
+                        }
+                    }
+                    else
+                    {
+                        Logger.Log.Error($"Personalressurs {personalressursUri} is lacking mandatory link { ResourceLink.person}");
                     }
                 }
                 else
                 {
-                    Logger.Log.ErrorFormat("Student resource {0} is lacking mandatory link {1}", personalressursUri, ResourceLink.person);
+                    Logger.Log.Error($"Skoleressurs {schoolResourceUri} is linked to personalressurs {personalressursUri} but the resource is missing on the {DefaultValue.administrasjonPersonalPersonalRessursUri} endpoint");
                 }
+            }
+            else
+            {
+                Logger.Log.Error($"Skoleressurs {schoolResourceUri} is lacking mandatory link { ResourceLink.personalResource}");
             }
             return returnedResourceUri;
         }
