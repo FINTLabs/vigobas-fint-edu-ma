@@ -120,9 +120,10 @@ namespace VigoBAS.FINT.Edu
 
                 foreach (var member in GruppeElevListe)
                 {
-                    members.Add(member.ToString());
+                    var memberUri = member.ToString();
+                    members.Add(memberUri);
                     noOfMembers++;
-                    studfacmembers.Add(member.ToString());
+                    studfacmembers.Add(memberUri);
                 }
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeElevListe, members));
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeElevAntall, noOfMembers.ToString()));
@@ -132,8 +133,13 @@ namespace VigoBAS.FINT.Edu
                 IList<object> members = new List<object>();
                 foreach (var member in GruppeLarerListe)
                 {
-                    members.Add(member.ToString());
-                    studfacmembers.Add(member.ToString());
+                    var memberUri = member.ToString();
+                    members.Add(memberUri);
+
+                    if (!studfacmembers.Contains(memberUri))
+                    {
+                        studfacmembers.Add(memberUri);
+                    }
                 }
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeLarerListe, members));
             }
