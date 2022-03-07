@@ -146,7 +146,7 @@ namespace VigoBAS.FINT.Edu
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.username, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateEncryptedStringParameter(Param.password, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.clientId, String.Empty));
-                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateEncryptedStringParameter(Param.openIdSecret, String.Empty));                    
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateEncryptedStringParameter(Param.openIdSecret, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.scope, String.Empty, DefaultValue.scope));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.idpUri, String.Empty, DefaultValue.accessTokenUri));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.assetId, String.Empty));
@@ -174,7 +174,7 @@ namespace VigoBAS.FINT.Edu
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateDividerParameter());
 
                     //configParametersDefinitions.Add(ConfigParameterDefinition.CreateLabelParameter("Importparametre"));
-                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateTextParameter(Param.schoolnumbersToImport, string.Empty ));
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateTextParameter(Param.schoolnumbersToImport, string.Empty));
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateDividerParameter());
 
@@ -453,13 +453,13 @@ namespace VigoBAS.FINT.Edu
                                                 skoleressursUri, basisgruppeUri,  kontaktlarergruppeUri,
                                                 undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, // eksamensgruppeUri,  
                                                 skoleUri, ansattPersonUri, personalRessursUri, arbeidsforholdUri, organisasjonselementUri};
-            
+
             if (useGroupMembershipResources)
             {
-                var groupMembershipEndPoints = new List<string>() { basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri};
+                var groupMembershipEndPoints = new List<string>() { basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri };
                 componentList.AddRange(groupMembershipEndPoints);
             }
-            
+
             //int importNoDaysAhead = Int32.Parse(configParameters[Param.importNoDaysAhead].Value);
             int importNoDaysAhead = 0;
 
@@ -470,7 +470,7 @@ namespace VigoBAS.FINT.Edu
                 itemsCountPerComponent.Add(component, 0);
             }
 
-            var resourceDict = new Dictionary<string, IEmbeddedResourceObject>();            
+            var resourceDict = new Dictionary<string, IEmbeddedResourceObject>();
 
             resourceDict = GetDataFromFINTApi(configParameters, componentList);
 
@@ -530,7 +530,7 @@ namespace VigoBAS.FINT.Edu
                             Logger.Log.DebugFormat("Elevforhold {0} does not have a valid period", uriKey);
                         }
                     }
-                    
+
                 }
                 else if (resourceType == undervisningsforholdUri)
                 {
@@ -569,7 +569,7 @@ namespace VigoBAS.FINT.Edu
                     //_basisgruppeMedlemskapDict.Add(uriKey, resourceDict[uriKey]);
                 }
                 else if (resourceType == kontaktlarergruppeUri)
-                {                    
+                {
                     _kontaktlarergruppeDict.Add(uriKey, resourceDict[uriKey]);
 
                     if (!useGroupMembershipResources)
@@ -592,8 +592,8 @@ namespace VigoBAS.FINT.Edu
                     }
                 }
                 else if (useGroupMembershipResources && resourceType == undervisningsgruppeMedlemskapUri)
-                { 
-                    AddValidMembership (uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ResourceLink.studyGroup, ref _studyGroupAndValidStudentRelationships);
+                {
+                    AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ResourceLink.studyGroup, ref _studyGroupAndValidStudentRelationships);
                     //_undervisningsgruppeMedlemskapDict.Add(uriKey, resourceDict[uriKey]);
                 }
                 // Should be uncommented when ViS delivers data on the eksamensgruppe endpoint
@@ -643,7 +643,7 @@ namespace VigoBAS.FINT.Edu
                     {
                         _organisasjonselementDict.Add(uriKey, orgElementObject);
 
-                      UpdateResourceIdMappingDict(uriKey, orgElementObject,ref _orgelementIdMappingDict);
+                        UpdateResourceIdMappingDict(uriKey, orgElementObject, ref _orgelementIdMappingDict);
                     }
                 }
             }
@@ -664,7 +664,7 @@ namespace VigoBAS.FINT.Edu
                     {
                         var message = string.Format("No items returned for resource {0}. Continuing because abortIfResourceTypeEmpty is set to false in MA config", resource);
                         Logger.Log.Info(message);
-                    }                    
+                    }
                 }
                 else
                 {
@@ -677,7 +677,7 @@ namespace VigoBAS.FINT.Edu
 
             var grepHttpClient = new HttpClient();
             var grepTypes = new List<string> { Grep.fagkoder, Grep.utdanningsprogram, Grep.programomraader, Grep.aarstrinn };
-            
+
             _grepkodeDict = GetGrepCodesForGrepTypes(grepHttpClient, Grep.baseDataUrl, grepTypes);
 
             var ssnToSystemId = new Dictionary<string, string>();
@@ -760,7 +760,7 @@ namespace VigoBAS.FINT.Edu
                     {
                         Logger.Log.InfoFormat("School number {0} for school {1} is in schools to import list and will be added to CS", schoolNumber, schoolUri);
                     }
-                    try 
+                    try
                     {
                         importedObjectsDict.Add(schoolUri, new ImportListItem { eduOrgUnit = eduOrgUnit });
 
@@ -1025,7 +1025,7 @@ namespace VigoBAS.FINT.Edu
                     if (skoleDataLinks.TryGetValue(ResourceLink.studentRelationship, out IEnumerable<ILinkObject> studentRelationshipLinks))
                     {
                         foreach (var studentRelationshipLink in studentRelationshipLinks)
-                        {                            
+                        {
                             var uriElevforholdKey = LinkToString(studentRelationshipLink);
                             Logger.Log.Debug($"Parsing {uriElevforholdKey}");
 
@@ -1076,28 +1076,36 @@ namespace VigoBAS.FINT.Edu
 
                                         if (_elevDict.TryGetValue(uriElevKey, out IEmbeddedResourceObject elevData))
                                         {
-                                            var uriElevPersonKey = LinkToString(elevData.Links[ResourceLink.person]);
-                                            if (_elevPersonDict.TryGetValue(uriElevPersonKey, out IEmbeddedResourceObject elevPersonData))
+                                            if (elevData.Links.TryGetValue(ResourceLink.person, out IEnumerable<ILinkObject> uriElevPersonLink))
                                             {
-                                                var newUriKey = AddStudentToCS(
-                                                    uriElevKey,
-                                                    elevData,
-                                                    elevPersonData,
-                                                    organisasjonIdUri,
-                                                    ref ssnToSystemId,
-                                                    ref importedObjectsDict
-                                                    );
-
-                                                if (importedObjectsDict.TryGetValue(newUriKey, out ImportListItem eduPersonData))
+                                                var uriElevPersonKey = LinkToString(uriElevPersonLink);
+                                                if (_elevPersonDict.TryGetValue(uriElevPersonKey, out IEmbeddedResourceObject elevPersonData))
                                                 {
-                                                    var eduPerson = eduPersonData.eduPerson;
-                                                    AddPersonToOrgUnit(ClassType.studentRelationship, studentCategory, isMainSchool, ref eduPerson, ref eduOrgUnit);
+                                                    var newUriKey = AddStudentToCS(
+                                                        uriElevKey,
+                                                        elevData,
+                                                        elevPersonData,
+                                                        organisasjonIdUri,
+                                                        ref ssnToSystemId,
+                                                        ref importedObjectsDict
+                                                        );
+
+                                                    if (importedObjectsDict.TryGetValue(newUriKey, out ImportListItem eduPersonData))
+                                                    {
+                                                        var eduPerson = eduPersonData.eduPerson;
+                                                        AddPersonToOrgUnit(ClassType.studentRelationship, studentCategory, isMainSchool, ref eduPerson, ref eduOrgUnit);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    Logger.Log.ErrorFormat("{0} linked to from resource {1} but not found on the /utdanning/elev/person endpoint. The adapter is supplying inconsistent data", uriElevPersonKey, uriElevKey);
                                                 }
                                             }
                                             else
                                             {
-                                                Logger.Log.ErrorFormat("{0} linked to from resource {1} but not found on the /utdanning/elev/person endpoint. The adapter is supplying inconsistent data", uriElevPersonKey, uriElevKey);
+                                                Logger.Log.Error($"{uriElevKey} is missing mandatory link to: {ResourceLink.person}");
                                             }
+
                                         }
                                         else
                                         {
@@ -1111,7 +1119,7 @@ namespace VigoBAS.FINT.Edu
                                 }
                             }
                         }
-                    }                    
+                    }
                     foreach (var memberType in memberTypes)
                     {
                         if (skoleDataLinks.TryGetValue(memberType, out IEnumerable<ILinkObject> dummyValue))
@@ -1133,7 +1141,7 @@ namespace VigoBAS.FINT.Edu
                                     if (!orgGroupMembers.Contains(member))
                                     {
                                         orgGroupMembers.Add(member);
-                                    }                                    
+                                    }
                                 }
                             }
                         }
@@ -1204,7 +1212,7 @@ namespace VigoBAS.FINT.Edu
             return new OpenImportConnectionResults();
         }
 
-        private void AddValidMembership(string uriKey, Dictionary<string, IEmbeddedResourceObject> resourceDict,  int dayBeforeStudentStarts, int dayBeforeStudentEnds, string groupRelation, ref Dictionary<string, List<string>> groupAndValidStudentRelationships)
+        private void AddValidMembership(string uriKey, Dictionary<string, IEmbeddedResourceObject> resourceDict, int dayBeforeStudentStarts, int dayBeforeStudentEnds, string groupRelation, ref Dictionary<string, List<string>> groupAndValidStudentRelationships)
         {
             if (resourceDict.TryGetValue(uriKey, out IEmbeddedResourceObject membershipResource))
             {
@@ -1268,7 +1276,7 @@ namespace VigoBAS.FINT.Edu
                             {
                                 groupMembers.Add(studentRelationshipUri);
                             }
-                        }                        
+                        }
                     }
                 }
             }
@@ -1322,7 +1330,7 @@ namespace VigoBAS.FINT.Edu
                 importReturnInfo.CSEntries = csentries;
                 return importReturnInfo;
             }
-       
+
 
             // Parse a full page or to the end
             for (int currentPage = 0;
@@ -1395,7 +1403,7 @@ namespace VigoBAS.FINT.Edu
                 elevUri,
                 skoleressursUri
             };
-                    
+
 
             var resources = GetDataFromFINTApi(configParameters, uriPaths);
 
@@ -1505,7 +1513,7 @@ namespace VigoBAS.FINT.Edu
 
                 var felleskomponentUri = importConfigParameters[Param.felleskomponentUri].Value;
                 var classPath = DefaultValue.administrasjonOrganisasjonOrganisasjonselementUri;
-                topOrgElementUri = GetUriStringFromIdValue(felleskomponentUri, classPath ,FintAttribute.organisasjonsId, organisasjonsId);
+                topOrgElementUri = GetUriStringFromIdValue(felleskomponentUri, classPath, FintAttribute.organisasjonsId, organisasjonsId);
                 Logger.Log.DebugFormat("GetTopOrgElement: Using top organisasjonselement from MA config. Top organisasjonselement uri is {0}", topOrgElementUri);
             }
             else
@@ -1542,28 +1550,28 @@ namespace VigoBAS.FINT.Edu
                         Logger.Log.ErrorFormat("Overordnet link {0} is pointing to an organisasjonselement not found on the organisasjon endpoint", currentOrgElementUri);
                         orgelementIsPresent = false;
                     }
-                }                
+                }
             }
 
             if (organisasjonselementDict.TryGetValue(topOrgElementUri, out IEmbeddedResourceObject topOrgObject))
-                {
+            {
                 return topOrgObject;
             }
-            else 
+            else
             {
                 if (!string.IsNullOrEmpty(topOrgElementUri))
                 {
                     Logger.Log.ErrorFormat("Top organisasjoonselement {0} not found on the organisasjon endpoint", topOrgElementUri);
-                }                    
+                }
                 return null;
-            }    
-            
+            }
+
         }
         private void UpdateResourceIdMappingDict(string idUri, IEmbeddedResourceObject resourceObject, ref Dictionary<string, string> idMappingDict)
-        { 
+        {
             if (resourceObject.Links.TryGetValue(ResourceLink.self, out IEnumerable<ILinkObject> selfLinks))
             {
-                foreach(var link in selfLinks)
+                foreach (var link in selfLinks)
                 {
                     var selfUri = LinkToString(link);
                     Logger.Log.DebugFormat("UpdateResourceIdMappingDict: Adding key {0} and value {1} to dictionary", selfUri, idUri);
@@ -1596,7 +1604,7 @@ namespace VigoBAS.FINT.Edu
             return dict;
         }
 
-        private string GetSchoolOrgElement(string orgElementUri, HashSet<string> schoolOrgElementsTable )
+        private string GetSchoolOrgElement(string orgElementUri, HashSet<string> schoolOrgElementsTable)
         {
             Logger.Log.DebugFormat("Trying to find corresponding school org element for {0}", orgElementUri);
 
@@ -1654,7 +1662,7 @@ namespace VigoBAS.FINT.Edu
             var uriClassPath = GetUriPathForClass(selfLinkUri);
             var uriPath = felleskomponentUri + uriClassPath;
 
-            foreach (KeyValuePair<string, IStateValue> stateObject in resource.State )
+            foreach (KeyValuePair<string, IStateValue> stateObject in resource.State)
             {
                 IStateValue stateValue = stateObject.Value;
                 try
@@ -1678,7 +1686,7 @@ namespace VigoBAS.FINT.Edu
         private (bool resourceActiveAtSchool, bool isMainSchool) CheckResourceActiveAtSchool(
             string personalResourceUri,
             string schoolOrganizationElement,
-            Dictionary <string, string> principalForSchoolDict,
+            Dictionary<string, string> principalForSchoolDict,
             Dictionary<string, string> workplaceOrgUnitToSchoolOrgUnit,
             Dictionary<string, IEmbeddedResourceObject> personalressursDict,
             Dictionary<string, IEmbeddedResourceObject> arbeidsforholdDict,
@@ -1846,7 +1854,7 @@ namespace VigoBAS.FINT.Edu
                             break;
                         }
                 }
-                var eduGroup = new EduGroup();  
+                var eduGroup = new EduGroup();
 
                 if (importedObjectsDict.TryGetValue(schoolUri, out ImportListItem eduOrgUnitItem))
                 {
@@ -1872,7 +1880,7 @@ namespace VigoBAS.FINT.Edu
                         var link = string.Empty;
                         var itemDict = new Dictionary<string, IEmbeddedResourceObject>();
                         var membershipDict = new Dictionary<string, List<string>>();
-                        
+
 
                         switch (groupType)
                         {
@@ -1941,7 +1949,7 @@ namespace VigoBAS.FINT.Edu
                         {
                             //var studentRelationships = groupData.Links[ClassType.studentRelationship];
                             if (membershipDict.TryGetValue(groupUri, out List<string> validStudentRelationships))
-                            {                            
+                            {
                                 AddEduPersonsInGroupToCS(
                                     ClassType.studentRelationship,
                                     groupUri,
@@ -1952,7 +1960,7 @@ namespace VigoBAS.FINT.Edu
                                     _elevDict,
                                     _elevPersonDict,
                                     ref ssnToSystemId,
-                                    ref importedObjectsDict);                                
+                                    ref importedObjectsDict);
                             }
 
                         }
@@ -2073,7 +2081,7 @@ namespace VigoBAS.FINT.Edu
             var programmeAreaGrepkode = new Grepkode();
 
             Logger.Log.Debug($"Relationshiptype is {relationshipType}");
-            
+
             if (relationshipType == ClassType.studentRelationship)
             {
                 foreach (var studentRelationshipUri in relationshipLinks)
@@ -2243,7 +2251,7 @@ namespace VigoBAS.FINT.Edu
         }
 
         private void AddStudentToProgrammeAreaGroup(string studentRescourceUri, string programmeareaUri, EduOrgUnit eduOrgUnit, ref Dictionary<string, ImportListItem> importedObjectsDict)
-        {          
+        {
             var eduOrgUnitId = eduOrgUnit.Anchor();
             var programmeareaId = programmeareaUri.Split('/').Last();
 
@@ -2266,7 +2274,7 @@ namespace VigoBAS.FINT.Edu
 
                         importedObjectsDict.Add(programmeareaGroupUri, new ImportListItem() { eduGroup = programmeareaGroup });
                     }
-                }               
+                }
             }
             if (programmeareaGroup.GruppeElevListe != null && !programmeareaGroup.GruppeElevListe.Contains(studentRescourceUri))
             {
@@ -2279,7 +2287,7 @@ namespace VigoBAS.FINT.Edu
             string relationshipType,
             string studentCategoryUri,
             bool isMainSchool,
-            string  programmeAreaUri,
+            string programmeAreaUri,
             string eduGroupAnchor,
             EduGroup eduGroup,
             EduOrgUnit eduOrgUnit,
@@ -2339,11 +2347,11 @@ namespace VigoBAS.FINT.Edu
             }
         }
 
-        private string AddNonStudentToCS (
+        private string AddNonStudentToCS(
             string schoolResourceUri,
             string orgUri,
             IEmbeddedResourceObject schoolResourceData,
-            ref Dictionary<string,string> ssnToSystemId,
+            ref Dictionary<string, string> ssnToSystemId,
             ref Dictionary<string, ImportListItem> importedObjectsDict
             )
         {
@@ -2393,7 +2401,7 @@ namespace VigoBAS.FINT.Edu
             personalResource = PersonalressursFactory.Create(personalResourceData.State);
 
             var eduPerson = new EduPerson();
-            eduPerson = EduPersonFactory.Create(schoolResourceUri, person, schoolResource, personalResource, orgUri );
+            eduPerson = EduPersonFactory.Create(schoolResourceUri, person, schoolResource, personalResource, orgUri);
             var eduPersonSSN = eduPerson.PersonFodselsnummer;
 
             if (!ssnToSystemId.TryGetValue(eduPersonSSN, out string eduPersonSystemId))
@@ -2422,7 +2430,7 @@ namespace VigoBAS.FINT.Edu
 
         private void AddGroupMembershipToCS(string relationshipType, string eduGroupAnchor, string eduPersonAnchor, ref EduGroup eduGroup, ref EduPerson eduPerson)
         {
-            Logger.Log.DebugFormat("Trying to add group membership, person {0} and group {1}",  eduPersonAnchor, eduGroupAnchor);
+            Logger.Log.DebugFormat("Trying to add group membership, person {0} and group {1}", eduPersonAnchor, eduGroupAnchor);
             if (relationshipType == ClassType.studentRelationship)
             {
                 var groupType = eduGroup.EduGroupType;
@@ -2468,7 +2476,7 @@ namespace VigoBAS.FINT.Edu
                     Logger.Log.ErrorFormat("Adapter Error: Teacher {0} is already member of group {1}. There are duplicates in the teacher relationship links for this group", eduPersonAnchor, eduGroupAnchor);
                 }
             }
-            
+
         }
 
         private void AddPersonToOrgUnit(
@@ -2478,7 +2486,7 @@ namespace VigoBAS.FINT.Edu
             ref EduPerson eduPerson,
             ref EduOrgUnit eduOrgUnit
             )
-        {            
+        {
             var personRelationToSchool = new List<string>();
             var schoolRelationToPerson = new List<string>();
 
@@ -2493,7 +2501,7 @@ namespace VigoBAS.FINT.Edu
                     {
                         personRelationToSchool = eduPerson.ElevforholdSkole;
                         schoolRelationToPerson = eduOrgUnit.SkoleElevforhold;
-                        
+
                         if (!string.IsNullOrEmpty(studentCategoryUri))
                         {
                             if (!eduPerson.ElevforholdKategori.Contains(studentCategoryUri))
@@ -2538,7 +2546,7 @@ namespace VigoBAS.FINT.Edu
 
             if (!personRelationToSchool.Contains(eduOrgUnitAnchor))
             {
-                personRelationToSchool.Add(eduOrgUnitAnchor);                
+                personRelationToSchool.Add(eduOrgUnitAnchor);
                 var item = eduPersonType + Delimiter.roleSchool + schoolId;
                 roleAndSchool.Add(item);
             }
@@ -2553,7 +2561,7 @@ namespace VigoBAS.FINT.Edu
         {
             var systemIdValue = GetIdentifikatorValue(resource, FintAttribute.systemId);
 
-            var selfLinkUri = LinkToString( resource.Links[ResourceLink.self]);
+            var selfLinkUri = LinkToString(resource.Links[ResourceLink.self]);
 
             var uriClassPath = GetUriPathForClass(selfLinkUri);
 
@@ -2572,7 +2580,7 @@ namespace VigoBAS.FINT.Edu
             var systemIdValue = systemId.Identifikatorverdi;
             return systemIdValue;
         }
-        
+
 
         private void SetGrepkodeOnGroup(
             IEmbeddedResourceObject groupData,
@@ -2625,7 +2633,7 @@ namespace VigoBAS.FINT.Edu
             }
         }
 
-        private (Grepkode StudyProgramme, Grepkode ProgramArea) GetGrepCodesForStudyProgAndProgArea (string programmeAreaUri)            
+        private (Grepkode StudyProgramme, Grepkode ProgramArea) GetGrepCodesForStudyProgAndProgArea(string programmeAreaUri)
         {
             var programmeAreaGrepkode = new Grepkode();
             var studyProgrammeGrepkode = new Grepkode();
@@ -2712,7 +2720,7 @@ namespace VigoBAS.FINT.Edu
             return grepCodeDict;
         }
 
-        private List <string> GenerateEntitlementItems(string role, EduGroup group, string orgNumber, string grepIdAsParameter = null)
+        private List<string> GenerateEntitlementItems(string role, EduGroup group, string orgNumber, string grepIdAsParameter = null)
         {
             var eduPersonEntitlement = new List<string>();
 
@@ -2795,7 +2803,7 @@ namespace VigoBAS.FINT.Edu
             foreach (var resource in resources)
             {
                 var resourceUri = baseUri + resource;
-                var lastUpdatedUrl = resourceUri   + "/last-updated";
+                var lastUpdatedUrl = resourceUri + "/last-updated";
                 try
                 {
                     var response = httpClient.GetStringAsync(lastUpdatedUrl).Result;
@@ -2923,7 +2931,7 @@ namespace VigoBAS.FINT.Edu
         static private async Task<HalJsonParseResult> ProcessURLAsync(string uriPath, string felleskomponentUri, IHalHttpClient client, bool useLocalCache)
         {
             HalJsonParseResult result = null;
-            
+
             string jsonFolder = MAUtils.MAFolder;
             string fileName = uriPath.Substring(1).Replace('/', '_');
             string filePath = jsonFolder + "\\" + fileName + ".json";
@@ -2951,8 +2959,8 @@ namespace VigoBAS.FINT.Edu
                     var sizeUri = uriString + "/cache/size";
 
                     string response = client.HttpClient.GetStringAsync(sizeUri).Result;
-                    var totalItems = JsonConvert.DeserializeObject<CacheSize>(response).Size;                    
-                    
+                    var totalItems = JsonConvert.DeserializeObject<CacheSize>(response).Size;
+
                     var httpResponse = await client.HttpClient.GetStringAsync(uri);
 
                     Logger.Log.InfoFormat("Data from {0} returned. Parsing json response", uri.ToString());
@@ -3031,7 +3039,7 @@ namespace VigoBAS.FINT.Edu
             return result;
         }
 
-        private static HalJsonParseResult HandleRequestError (Uri uri, Exception ex, string filePath)
+        private static HalJsonParseResult HandleRequestError(Uri uri, Exception ex, string filePath)
         {
             HalJsonParseResult result;
             var message = ex?.Message;
@@ -3071,12 +3079,12 @@ namespace VigoBAS.FINT.Edu
         {
             using (StreamWriter file = File.CreateText(filePath))
             {
-                JsonSerializer serializer = new JsonSerializer();           
+                JsonSerializer serializer = new JsonSerializer();
                 serializer.Serialize(file, dataObject);
             }
         }
 
-        private void GetDataFromFile (string filePath, ref Dictionary<string, IEmbeddedResourceObject> resourcesDict)
+        private void GetDataFromFile(string filePath, ref Dictionary<string, IEmbeddedResourceObject> resourcesDict)
         {
             using (StreamReader reader = new StreamReader(filePath))
             {
@@ -3084,15 +3092,15 @@ namespace VigoBAS.FINT.Edu
                 var halJsonParser = new HalJsonParser();
                 var result = halJsonParser.Parse(resourceJson);
                 var entries = result.EmbeddedResources;
-                
+
                 foreach (var entry in entries)
                 {
-                    var resourceUri = LinkToString( entry.Links[ResourceLink.self]);
+                    var resourceUri = LinkToString(entry.Links[ResourceLink.self]);
 
                     if (!(resourcesDict.ContainsKey(resourceUri)))
                     {
                         resourcesDict.Add(resourceUri, entry);
-                    }                 
+                    }
                 }
             }
         }
@@ -3170,13 +3178,13 @@ namespace VigoBAS.FINT.Edu
 
                                 changedValue = csentry.AttributeChanges[CSAttribute.SkoleressursFeidenavn].ValueChanges[0].Value.ToString();
                                 changedAttributes.Add(CSAttribute.SkoleressursFeidenavn, changedValue);
-                                
+
                                 personsToModify.Add(personUri, changedAttributes);
 
                                 Logger.Log.DebugFormat("Export {0}: {1}", CSAttribute.SkoleressursFeidenavn, changedValue);
                             }
                             break;
-                        }                    
+                        }
                 }
             }
         }
@@ -3204,7 +3212,7 @@ namespace VigoBAS.FINT.Edu
                     }
                 }
             }
-            
+
             if (updateDictionary.Count > 0)
             {
                 UpdateResourcesAsync(updateDictionary).Wait();
@@ -3287,32 +3295,32 @@ namespace VigoBAS.FINT.Edu
                                 statusUrl = statusQueue.Dequeue();
                                 Logger.Log.InfoFormat("Location url {0}: Dequeuing and checking status", statusUrl);
 
-                                    statusCode = await CheckUpdateStatusAsync(statusUrl, client).ConfigureAwait(false);
+                                statusCode = await CheckUpdateStatusAsync(statusUrl, client).ConfigureAwait(false);
 
-                                    if (statusCode == HttpStatusCode.Accepted)
-                                    {
-                                        statusQueue.Enqueue(statusUrl);
-                                        Logger.Log.InfoFormat("Location url {0}: Statuscode {1}, enqueuing url again", statusUrl, statusCode.ToString());
-                                    }
-                                    else if (statusCode == HttpStatusCode.OK)
-                                    {
-                                        Logger.Log.InfoFormat("Location url {0}: Statuscode {1} - Update confirmed", statusUrl, HttpStatusCode.OK);
-                                    }
+                                if (statusCode == HttpStatusCode.Accepted)
+                                {
+                                    statusQueue.Enqueue(statusUrl);
+                                    Logger.Log.InfoFormat("Location url {0}: Statuscode {1}, enqueuing url again", statusUrl, statusCode.ToString());
+                                }
+                                else if (statusCode == HttpStatusCode.OK)
+                                {
+                                    Logger.Log.InfoFormat("Location url {0}: Statuscode {1} - Update confirmed", statusUrl, HttpStatusCode.OK);
+                                }
 
-                                    if (count == remainingQueueLength)
-                                    {
-                                        ++cycleCount;
-                                        remainingQueueLength = statusQueue.Count;
-                                        delay *= factor;
-                                        var waitmilliseconds = (int)Math.Round(delay);
+                                if (count == remainingQueueLength)
+                                {
+                                    ++cycleCount;
+                                    remainingQueueLength = statusQueue.Count;
+                                    delay *= factor;
+                                    var waitmilliseconds = (int)Math.Round(delay);
 
-                                        Logger.Log.InfoFormat("The status queue was not emptied during this cycle, {0} elements remaining. Waiting {1} milliseconds before running cycle no {2}",
-                                            remainingQueueLength.ToString(), waitmilliseconds.ToString(), cycleCount.ToString());
+                                    Logger.Log.InfoFormat("The status queue was not emptied during this cycle, {0} elements remaining. Waiting {1} milliseconds before running cycle no {2}",
+                                        remainingQueueLength.ToString(), waitmilliseconds.ToString(), cycleCount.ToString());
 
-                                        await Task.Delay(waitmilliseconds).ConfigureAwait(false);
+                                    await Task.Delay(waitmilliseconds).ConfigureAwait(false);
 
-                                        count = 0;
-                                    }
+                                    count = 0;
+                                }
 
 
                             }
@@ -3336,77 +3344,77 @@ namespace VigoBAS.FINT.Edu
                 statusCode = statusResponse.Message.StatusCode;
             }
             catch (AggregateException aggregateEx)
+            {
+                aggregateEx.Handle(e =>
                 {
-                    aggregateEx.Handle(e =>
+                    if (e is HalHttpRequestException hal)
                     {
-                        if (e is HalHttpRequestException hal)
+                        var halStatusCode = hal.StatusCode; // response status code
+
+                        statusCode = halStatusCode;
+
+                        var statusCodeDescription = string.Empty;
+
+                        switch (halStatusCode)
                         {
-                            var halStatusCode = hal.StatusCode; // response status code
-
-                            statusCode = halStatusCode;
-
-                            var statusCodeDescription = string.Empty;
-
-                            switch (halStatusCode)
-                            {
-                                case HttpStatusCode.BadRequest:
-                                    {
-                                        statusCodeDescription = "400 Bad request";
-                                        break;
-                                    }
-                                case HttpStatusCode.NotFound:
-                                    {
-                                        statusCodeDescription = "404 Not found";
-                                        break;
-                                    }
-                                case HttpStatusCode.InternalServerError:
-                                    {
-                                        statusCodeDescription = "500 Internal server error";
-                                        break;
-                                    }
-                            }
-                            var resource = hal.Resource;
-
-                            var message = string.Empty;
-                            var responsestatus = string.Empty;
-                            var exception = string.Empty;
-
-                            if (resource != null)
-                            {
-                                if (resource.State != null)
+                            case HttpStatusCode.BadRequest:
                                 {
-                                    var state = resource.State;
-                                    foreach (var key in state.Keys)
-                                    {
-                                        switch (key)
-                                        {
-                                            case "message":
-                                                {
-                                                    message = state[key].Value;
-                                                    break;
-                                                }
+                                    statusCodeDescription = "400 Bad request";
+                                    break;
+                                }
+                            case HttpStatusCode.NotFound:
+                                {
+                                    statusCodeDescription = "404 Not found";
+                                    break;
+                                }
+                            case HttpStatusCode.InternalServerError:
+                                {
+                                    statusCodeDescription = "500 Internal server error";
+                                    break;
+                                }
+                        }
+                        var resource = hal.Resource;
 
-                                            case "responseStatus":
-                                                {
-                                                    responsestatus = state[key].Value;
-                                                    break;
-                                                }
-                                            case "exception":
-                                                {
-                                                    exception = state[key].Value;
-                                                    break;
-                                                }
-                                        }
+                        var message = string.Empty;
+                        var responsestatus = string.Empty;
+                        var exception = string.Empty;
+
+                        if (resource != null)
+                        {
+                            if (resource.State != null)
+                            {
+                                var state = resource.State;
+                                foreach (var key in state.Keys)
+                                {
+                                    switch (key)
+                                    {
+                                        case "message":
+                                            {
+                                                message = state[key].Value;
+                                                break;
+                                            }
+
+                                        case "responseStatus":
+                                            {
+                                                responsestatus = state[key].Value;
+                                                break;
+                                            }
+                                        case "exception":
+                                            {
+                                                exception = state[key].Value;
+                                                break;
+                                            }
                                     }
                                 }
-                                Logger.Log.ErrorFormat("Location {0}: Getting update status failed. HTTP response: {1}, Message: {2}, Inner response status: {3}, Exception: {4}"
-                                    ,statusUri , statusCodeDescription, message, responsestatus, exception);
                             }
-                            return true;
-
+                            Logger.Log.ErrorFormat("Location {0}: Getting update status failed. HTTP response: {1}, Message: {2}, Inner response status: {3}, Exception: {4}"
+                                , statusUri, statusCodeDescription, message, responsestatus, exception);
                         }
-                        return false;
-                    });
+                        return true;
+
+                    }
+                    return false;
+                });
 
             }
             catch (HalHttpRequestException e)
@@ -3441,7 +3449,7 @@ namespace VigoBAS.FINT.Edu
             return statusCode;
 
         }
-     
+
         private async Task<string> UpdateResourceAsync(string resourceUri, JObject jsonObject, IHalHttpClient client)
         {
             var statusUri = String.Empty;
@@ -3455,7 +3463,7 @@ namespace VigoBAS.FINT.Edu
 
                 Logger.Log.InfoFormat("Resource {0}: status uri for PUT Response {1}", resourceUri, statusUri);
 
-             
+
             }
             catch (AggregateException aggregateEx)
             {
@@ -3524,7 +3532,7 @@ namespace VigoBAS.FINT.Edu
             }
             catch (HalHttpRequestException e)
             {
-                var halStatusCode = e.StatusCode; 
+                var halStatusCode = e.StatusCode;
                 var statusCodeDescription = string.Empty;
 
                 switch (halStatusCode)
@@ -3553,17 +3561,17 @@ namespace VigoBAS.FINT.Edu
             }
             return statusUri;
         }
-    
+
 
         private JObject GetUpdateObject(string resourceUri, Dictionary<string, string> attributes)
         {
             var jsonObject = new JObject();
 
             if (_resourceDict.TryGetValue(resourceUri, out IEmbeddedResourceObject response))
-            {             
+            {
                 var elevResourceAsJson = string.Empty;
                 var attrvalues = string.Empty;
-                
+
                 var settings = new JsonSerializerSettings
                 {
                     NullValueHandling = NullValueHandling.Ignore,
@@ -3620,7 +3628,7 @@ namespace VigoBAS.FINT.Edu
                 Logger.Log.ErrorFormat("Udating resource {0} failed. The resource is not available in FINT", resourceUri);
             }
             return jsonObject;
-        }      
+        }
 
         private JObject GetJsonLinks(IReadOnlyDictionary<string, IEnumerable<ILinkObject>> links)
         {
@@ -3638,7 +3646,7 @@ namespace VigoBAS.FINT.Edu
                             {
                                 dynamic link = new JObject();
                                 var hrefValue = linkObject.Href.ToString();
-                               link.href = hrefValue;
+                                link.href = hrefValue;
                                 jValue.person.Add(link);
                             }
                             break;
@@ -3710,7 +3718,7 @@ namespace VigoBAS.FINT.Edu
             return TokenResponse;
         }
 
-        private string GetBearenToken (string accessTokenUri, string clientId, string clientSecret, string username, string password, string scope)
+        private string GetBearenToken(string accessTokenUri, string clientId, string clientSecret, string username, string password, string scope)
         {
 
             var tokenClient = new HttpClient();
@@ -3761,7 +3769,7 @@ namespace VigoBAS.FINT.Edu
             var escapedUriString = Uri.EscapeUriString(uriString);
 
             var uri = new Uri(escapedUriString);
-            
+
             var response = new HttpResponseMessage() as IHalHttpResponseMessage;
 
             switch (method)
