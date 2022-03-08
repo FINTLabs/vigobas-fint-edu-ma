@@ -16,5 +16,6 @@ No new features
 * Multiple identifiers for skoleressurs
 * Multiple identifiers for elev
 * Handling of missing elev link in elevforhold
+* Handling of missing person link in elev
 * Handling of missing personalressurs link in skoleressurs
 * Handling of missing overordnet link in organisasjonselement
