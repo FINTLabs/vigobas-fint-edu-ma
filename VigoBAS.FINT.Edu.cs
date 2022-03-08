@@ -1044,78 +1044,85 @@ namespace VigoBAS.FINT.Edu
                                 {
                                     isMainSchool = Convert.ToBoolean(hovedskoleValue.Value);
                                 }
-                                var studentUri = LinkToString(elevForholdDataLinks[ResourceLink.student]);
+                                if (elevForholdDataLinks.TryGetValue(ResourceLink.student, out IEnumerable<ILinkObject> studentLink))
+                                {                                
+                                    var studentUri = LinkToString(studentLink);
 
-                                if (_elevIdMappingDict.TryGetValue(studentUri, out string uriElevKey))
-                                {
-                                    if (importedObjectsDict.TryGetValue(uriElevKey, out ImportListItem elevImportListItem))
+                                    if (_elevIdMappingDict.TryGetValue(studentUri, out string uriElevKey))
                                     {
-                                        Logger.Log.Debug($"{uriElevKey} is already added to CS. Checking if student is already related in CS to school {schoolUri}");
-                                        var orgUnits = elevImportListItem.eduPerson.EduPersonOrgUnitDN;
-
-                                        var notInUnit = true;
-
-                                        foreach (var orgUnitRef in orgUnits)
+                                        if (importedObjectsDict.TryGetValue(uriElevKey, out ImportListItem elevImportListItem))
                                         {
-                                            if (orgUnitRef == schoolUri)
+                                            Logger.Log.Debug($"{uriElevKey} is already added to CS. Checking if student is already related in CS to school {schoolUri}");
+                                            var orgUnits = elevImportListItem.eduPerson.EduPersonOrgUnitDN;
+
+                                            var notInUnit = true;
+
+                                            foreach (var orgUnitRef in orgUnits)
                                             {
-                                                notInUnit = false;
+                                                if (orgUnitRef == schoolUri)
+                                                {
+                                                    notInUnit = false;
+                                                }
+                                            }
+                                            if (notInUnit)
+                                            {
+                                                Logger.Log.Debug($"{uriElevKey} not yet related in CS to school {schoolUri}, relation is added now");
+
+                                                var eduPerson = elevImportListItem.eduPerson;
+                                                AddPersonToOrgUnit(ClassType.studentRelationship, studentCategory, isMainSchool, ref eduPerson, ref eduOrgUnit);
                                             }
                                         }
-                                        if (notInUnit)
+                                        else
                                         {
-                                            Logger.Log.Debug($"{uriElevKey} not yet related in CS to school {schoolUri}, relation is added now");
+                                            Logger.Log.Info($"{uriElevKey} is not connected to any groups at school {schoolUri}. Trying to add to CS based on the {DefaultValue.utdanningElevElevforholdUri} endpoint");
 
-                                            var eduPerson = elevImportListItem.eduPerson;
-                                            AddPersonToOrgUnit(ClassType.studentRelationship, studentCategory, isMainSchool, ref eduPerson, ref eduOrgUnit);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Logger.Log.Info($"{uriElevKey} is not connected to any groups at school {schoolUri}. Trying to add to CS based on the {DefaultValue.utdanningElevElevforholdUri} endpoint");
-
-                                        if (_elevDict.TryGetValue(uriElevKey, out IEmbeddedResourceObject elevData))
-                                        {
-                                            if (elevData.Links.TryGetValue(ResourceLink.person, out IEnumerable<ILinkObject> uriElevPersonLink))
+                                            if (_elevDict.TryGetValue(uriElevKey, out IEmbeddedResourceObject elevData))
                                             {
-                                                var uriElevPersonKey = LinkToString(uriElevPersonLink);
-                                                if (_elevPersonDict.TryGetValue(uriElevPersonKey, out IEmbeddedResourceObject elevPersonData))
+                                                if (elevData.Links.TryGetValue(ResourceLink.person, out IEnumerable<ILinkObject> uriElevPersonLink))
                                                 {
-                                                    var newUriKey = AddStudentToCS(
-                                                        uriElevKey,
-                                                        elevData,
-                                                        elevPersonData,
-                                                        organisasjonIdUri,
-                                                        ref ssnToSystemId,
-                                                        ref importedObjectsDict
-                                                        );
-
-                                                    if (importedObjectsDict.TryGetValue(newUriKey, out ImportListItem eduPersonData))
+                                                    var uriElevPersonKey = LinkToString(uriElevPersonLink);
+                                                    if (_elevPersonDict.TryGetValue(uriElevPersonKey, out IEmbeddedResourceObject elevPersonData))
                                                     {
-                                                        var eduPerson = eduPersonData.eduPerson;
-                                                        AddPersonToOrgUnit(ClassType.studentRelationship, studentCategory, isMainSchool, ref eduPerson, ref eduOrgUnit);
+                                                        var newUriKey = AddStudentToCS(
+                                                            uriElevKey,
+                                                            elevData,
+                                                            elevPersonData,
+                                                            organisasjonIdUri,
+                                                            ref ssnToSystemId,
+                                                            ref importedObjectsDict
+                                                            );
+
+                                                        if (importedObjectsDict.TryGetValue(newUriKey, out ImportListItem eduPersonData))
+                                                        {
+                                                            var eduPerson = eduPersonData.eduPerson;
+                                                            AddPersonToOrgUnit(ClassType.studentRelationship, studentCategory, isMainSchool, ref eduPerson, ref eduOrgUnit);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        Logger.Log.ErrorFormat("{0} linked to from resource {1} but not found on the /utdanning/elev/person endpoint. The adapter is supplying inconsistent data", uriElevPersonKey, uriElevKey);
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    Logger.Log.ErrorFormat("{0} linked to from resource {1} but not found on the /utdanning/elev/person endpoint. The adapter is supplying inconsistent data", uriElevPersonKey, uriElevKey);
+                                                    Logger.Log.Error($"{uriElevKey} is missing mandatory link to: {ResourceLink.person}");
                                                 }
+
                                             }
                                             else
                                             {
-                                                Logger.Log.Error($"{uriElevKey} is missing mandatory link to: {ResourceLink.person}");
+                                                Logger.Log.ErrorFormat("{0} linked to from resource {1} but not found on the /utdanning/elev/elev endpoint. The adapter is supplying inconsistent data", uriElevKey, uriElevforholdKey);
                                             }
-
                                         }
-                                        else
-                                        {
-                                            Logger.Log.ErrorFormat("{0} linked to from resource {1} but not found on the /utdanning/elev/elev endpoint. The adapter is supplying inconsistent data", uriElevKey, uriElevforholdKey);
-                                        }
+                                    }
+                                    else
+                                    {
+                                        Logger.Log.Error($"{studentUri} is referenced by {studentRelationshipLink.Href} but the resource is missing on the {DefaultValue.utdanningElevElevUri} endpoint");
                                     }
                                 }
                                 else
                                 {
-                                    Logger.Log.Error($"{studentUri} is referenced by {studentRelationshipLink.Href} but the resource is missing on the {DefaultValue.utdanningElevElevUri} endpoint");
+                                    Logger.Log.Error($"Elevforhold {uriElevforholdKey} is missing mandatory link {ResourceLink.student}");
                                 }
                             }
                         }
@@ -1146,7 +1153,6 @@ namespace VigoBAS.FINT.Edu
                             }
                         }
                     }
-
                 }
             }
 
