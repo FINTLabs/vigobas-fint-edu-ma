@@ -8,13 +8,13 @@ Version 1.7.0 is the first public versjon. For older versions see: https://vigob
 
 
 ## Change log
-Version | Description
-------- | -------------
-1.7.0   | Moved from devops. 
 
+## Version 1.7.0   
+Moved from Azure devops 
 
+### Features
 
-## Bugfixes
+### Bugfixes
 
 * Relation to more than one school for students without class group
 * Multiple identifiers for skoleressurs
