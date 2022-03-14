@@ -56,9 +56,12 @@ namespace VigoBAS.FINT.Edu
     {
         private KeyedCollection<string, ConfigParameter> _exportConfigParameters;
         private KeyedCollection<string, ConfigParameter> _importConfigParameters;
+        private OpenImportConnectionRunStep _importRunStepParameters;
 
         //For export for now maybe merge with elevDict in import
         private Dictionary<string, IEmbeddedResourceObject> _resourceDict = new Dictionary<string, IEmbeddedResourceObject>();
+
+        private List<string> _deltaResourceUris = new List<string>();
 
         private Dictionary<string, IEmbeddedResourceObject> _elevPersonDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _elevDict = new Dictionary<string, IEmbeddedResourceObject>();
@@ -414,7 +417,10 @@ namespace VigoBAS.FINT.Edu
                                                 Schema types,
                                                 OpenImportConnectionRunStep importRunStep)
         {
+            Logger.Log.Info ("Entering OpenImportConnectionResults");
+
             _importConfigParameters = configParameters;
+            _importRunStepParameters = importRunStep;
 
             var elevPersonUri = DefaultValue.utdanningElevPersonUri;
             var elevUri = DefaultValue.utdanningElevElevUri;
@@ -448,7 +454,6 @@ namespace VigoBAS.FINT.Edu
 
             bool useGroupMembershipResources = _importConfigParameters[Param.useGroupMembershipResources].Value == "1";
 
-
             var componentList = new List<string>() {  elevPersonUri, elevUri, elevforholdUri, undervisningsforholdUri,
                                                 skoleressursUri, basisgruppeUri,  kontaktlarergruppeUri,
                                                 undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, // eksamensgruppeUri,  
@@ -459,6 +464,10 @@ namespace VigoBAS.FINT.Edu
                 var groupMembershipEndPoints = new List<string>() { basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri };
                 componentList.AddRange(groupMembershipEndPoints);
             }
+
+
+            var jsonFolder = MAUtils.MAFolder;
+            var lastUpdatedFilePath = jsonFolder + "\\lastUpdated.json";
 
             //int importNoDaysAhead = Int32.Parse(configParameters[Param.importNoDaysAhead].Value);
             int importNoDaysAhead = 0;
@@ -471,8 +480,11 @@ namespace VigoBAS.FINT.Edu
             }
 
             var resourceDict = new Dictionary<string, IEmbeddedResourceObject>();
+            var deltaResourceDict = new Dictionary<string, IEmbeddedResourceObject>();
 
-            resourceDict = GetDataFromFINTApi(configParameters, componentList);
+            bool useLocalCache = configParameters[Param.useLocalCache].Value == "1";
+
+            resourceDict = GetDataFromFINTApi(configParameters, componentList, useLocalCache, OperationType.Full, lastUpdatedFilePath);
 
             string startStudentValue = _importConfigParameters[Param.daysBeforeStudentStarts].Value;
             int daysBeforeStudentStarts = (string.IsNullOrEmpty(startStudentValue)) ? 0 : Int32.Parse(startStudentValue);
@@ -1211,11 +1223,220 @@ namespace VigoBAS.FINT.Edu
                 var objectToImport = importedObjectsDict[key];
                 ImportedObjectsList.Add(objectToImport);
             }
-
             GetImportEntriesIndex = 0;
             GetImportEntriesPageSize = importRunStep.PageSize;
 
+            if (_importRunStepParameters.ImportType == OperationType.Delta)
+            {
+                deltaResourceDict = GetDataFromFINTApi(configParameters, componentList, useLocalCache, OperationType.Delta, lastUpdatedFilePath);
+
+                var result = HandleDeltaInfo(deltaResourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds);
+            }
+
+            Logger.Log.Info("Leaving OpenImportConnectionResults");
             return new OpenImportConnectionResults();
+        }
+
+        private HashSet<string> HandleDeltaInfo (Dictionary<string, IEmbeddedResourceObject> deltaResourceDict, int daysBeforeStudentStarts, int daysBeforeStudentEnds)
+        {
+            HashSet<string> result = new HashSet<string>();
+
+            foreach (var uriKey in deltaResourceDict.Keys)
+            {
+                //Logger.Log.DebugFormat("Adding resource {0} to dictionary", uriKey);
+                var resourceType = GetUriPathForClass(uriKey);
+
+                var deltaUri = string.Empty;
+
+                if (resourceType == DefaultValue.utdanningElevPersonUri)
+                {
+                    //_elevPersonDict.Add(uriKey, deltaResourceDict[uriKey]);
+                    deltaUri = uriKey;
+                }
+                else if (resourceType == DefaultValue.utdanningElevElevUri)
+                {
+                    //var elevResource = deltaResourceDict[uriKey];
+                    ////var uriPath = felleskomponentUri + elevUri;
+
+                    //var systemIdUri = GetSystemIdUri(elevResource, DefaultValue.felleskomponentUri);
+
+                    //if (!_elevDict.TryGetValue(systemIdUri, out IEmbeddedResourceObject existingElevResource))
+                    //{
+                    //    _elevDict.Add(systemIdUri, elevResource);
+
+                    //    UpdateResourceIdMappingDict(systemIdUri, elevResource, ref _elevIdMappingDict);
+                    //}
+                    //else
+                    //{
+                    //    Logger.Log.ErrorFormat("Duplicate systemid {0} in elev items. Something is wrong in source system", systemIdUri);
+                    //}
+                    deltaUri = uriKey;
+
+                }
+                //else if (resourceType == DefaultValue.utdanningElevPersonUri)
+                //{
+                //    if (deltaResourceDict.TryGetValue(uriKey, out IEmbeddedResourceObject elevforholdResource))
+                //    {
+                //        bool relationshipIsValid = true;
+
+                //        if (elevforholdResource.State.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue periodeValue))
+                //        {
+                //            relationshipIsValid = CheckValidPeriod(periodeValue, daysBeforeStudentStarts, daysBeforeStudentEnds);
+                //        }
+                //        if (relationshipIsValid)
+                //        {
+                //            _elevforholdDict.Add(uriKey, elevforholdResource);
+                //        }
+                //        else if (periodeValue != null)
+                //        {
+                //            Logger.Log.DebugFormat("Elevforhold {0} does not have a valid period", uriKey);
+                //        }
+                //    }
+
+                //}
+                else if (resourceType == DefaultValue.utdanningElevUndervisningsforholdUri)
+                {
+                    //_undervisningsforholdDict.Add(uriKey, deltaResourceDict[uriKey]);
+                    deltaUri = uriKey;
+                }
+                //else if (resourceType == skoleressursUri)
+                //{
+                //    //skoleressursDict.Add(uriKey, resourceDict[uriKey]);
+
+                //    var skoleressursResource = resourceDict[uriKey];
+
+                //    var systemIdUri = GetSystemIdUri(skoleressursResource, felleskomponentUri);
+
+                //    if (!_skoleressursDict.TryGetValue(systemIdUri, out IEmbeddedResourceObject existingSkoleressursResource))
+                //    {
+                //        _skoleressursDict.Add(systemIdUri, skoleressursResource);
+                //        UpdateResourceIdMappingDict(systemIdUri, skoleressursResource, ref _skoleressursIdMappingDict);
+                //    }
+                //    else
+                //    {
+                //        Logger.Log.ErrorFormat("Duplicate systemid {0} in skoleressurs items. Something is wrong in source system", systemIdUri);
+                //    }
+                //}
+                //else if (resourceType == basisgruppeUri)
+                //{
+                //    _basisgruppeDict.Add(uriKey, resourceDict[uriKey]);
+
+                //    if (!useGroupMembershipResources)
+                //    {
+                //        AddValidMembershipsForGroup(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ref _basicGroupAndValidStudentRelationships);
+                //    }
+                //}
+                //else if (useGroupMembershipResources && resourceType == basisgruppeMedlemskapUri)
+                //{
+                //    AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ResourceLink.basicGroup, ref _basicGroupAndValidStudentRelationships);
+                //    //_basisgruppeMedlemskapDict.Add(uriKey, resourceDict[uriKey]);
+                //}
+                //else if (resourceType == kontaktlarergruppeUri)
+                //{
+                //    _kontaktlarergruppeDict.Add(uriKey, resourceDict[uriKey]);
+
+                //    if (!useGroupMembershipResources)
+                //    {
+                //        AddValidMembershipsForGroup(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ref _contactGroupAndValidStudentRelationships);
+                //    }
+                //}
+                //else if (useGroupMembershipResources && resourceType == kontaktlarergruppeMedlemskapUri)
+                //{
+                //    AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ResourceLink.contactTeacherGroup, ref _contactGroupAndValidStudentRelationships);
+                //    //_kontaktlarergruppeMedlemskapDict.Add(uriKey, resourceDict[uriKey]);
+                //}
+                //else if (resourceType == undervisningsgruppeUri)
+                //{
+                //    _undervisningsgruppeDict.Add(uriKey, resourceDict[uriKey]);
+
+                //    if (!useGroupMembershipResources)
+                //    {
+                //        AddValidMembershipsForGroup(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ref _studyGroupAndValidStudentRelationships);
+                //    }
+                //}
+                //else if (useGroupMembershipResources && resourceType == undervisningsgruppeMedlemskapUri)
+                //{
+                //    AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ResourceLink.studyGroup, ref _studyGroupAndValidStudentRelationships);
+                //    //_undervisningsgruppeMedlemskapDict.Add(uriKey, resourceDict[uriKey]);
+                //}
+                //// Should be uncommented when ViS delivers data on the eksamensgruppe endpoint
+                ////else if (resourceType == eksamensgruppeUri)
+                ////{
+                ////    eksamensgruppeDict.Add(uriKey, resourceDict[uriKey]);
+                ////}
+                //else if (resourceType == fagUri)
+                //{
+                //    _fagDict.Add(uriKey, resourceDict[uriKey]);
+                //}
+                //else if (resourceType == arstrinnUri)
+                //{
+                //    _arstrinnDict.Add(uriKey, resourceDict[uriKey]);
+                //}
+                //else if (resourceType == programomradeUri)
+                //{
+                //    _programomradeDict.Add(uriKey, resourceDict[uriKey]);
+                //}
+                //else if (resourceType == utdanningsprogramUri)
+                //{
+                //    _utdanningsprogramDict.Add(uriKey, resourceDict[uriKey]);
+                //}
+                //else if (resourceType == skoleUri)
+                //{
+                //    var schoolResource = resourceDict[uriKey];
+                //    //var uriPath = felleskomponentUri + skoleUri;
+                //    var systemIdUri = GetSystemIdUri(schoolResource, felleskomponentUri);
+
+                //    _skoleDict.Add(systemIdUri, schoolResource);
+                //}
+                //else if (resourceType == ansattPersonUri)
+                //{
+                //    _ansattPersonDict.Add(uriKey, resourceDict[uriKey]);
+                //}
+                //else if (resourceType == personalRessursUri)
+                //{
+                //    _personalressursDict.Add(uriKey, resourceDict[uriKey]);
+                //}
+                //else if (resourceType == arbeidsforholdUri)
+                //{
+                //    _arbeidsforholdDict.Add(uriKey, resourceDict[uriKey]);
+                //}
+                //else if (resourceType == organisasjonselementUri)
+                //{
+                //    if (resourceDict.TryGetValue(uriKey, out IEmbeddedResourceObject orgElementObject))
+                //    {
+                //        _organisasjonselementDict.Add(uriKey, orgElementObject);
+
+                //        UpdateResourceIdMappingDict(uriKey, orgElementObject, ref _orgelementIdMappingDict);
+                //    }
+                //}
+
+                if(!result.TryGetValue(deltaUri, out string deltaValue))
+                {
+                    result.Add(deltaUri);
+                }
+            }
+
+            return result;
+        }
+
+        private List<string> CreateDeltaComponentUriList(List<string> componentList, string felleskomponentUri, string lastUpdatedFilePath)
+        {
+            List<string> deltaComponentUriList = new List<string>();
+
+            List<LastUpdateTimestamp> lastUpdateTimestamps = GetLastUpdatedDataFromFile(lastUpdatedFilePath);
+
+            foreach (var lastUpdateTimestamp in lastUpdateTimestamps)
+            {
+                string resourceUri = lastUpdateTimestamp.Resource;
+                string componentPart = resourceUri.Substring(felleskomponentUri.Length);                
+
+                if (componentList.Contains(componentPart))
+                {
+                    string deltaUri = componentPart + "?sinceTimeStamp=" + lastUpdateTimestamp.LastUpdated.ToString();
+                    deltaComponentUriList.Add(deltaUri);
+                }
+            }
+            return deltaComponentUriList;
         }
 
         private void AddValidMembership(string uriKey, Dictionary<string, IEmbeddedResourceObject> resourceDict, int dayBeforeStudentStarts, int dayBeforeStudentEnds, string groupRelation, ref Dictionary<string, List<string>> groupAndValidStudentRelationships)
@@ -1410,8 +1631,12 @@ namespace VigoBAS.FINT.Edu
                 skoleressursUri
             };
 
+            bool useLocalCache = configParameters[Param.useLocalCache].Value == "1";
 
-            var resources = GetDataFromFINTApi(configParameters, uriPaths);
+            var jsonFolder = MAUtils.MAFolder;
+            var lastUpdatedFilePath = jsonFolder + "\\lastUpdated.json";
+
+            var resources = GetDataFromFINTApi(configParameters, uriPaths, useLocalCache, OperationType.Full, lastUpdatedFilePath);
 
             foreach (var uriKey in resources.Keys)
             {
@@ -2850,7 +3075,7 @@ namespace VigoBAS.FINT.Edu
             return lastUpdatedTimestamps;
         }
 
-        private Dictionary<string, IEmbeddedResourceObject> GetDataFromFINTApi(KeyedCollection<string, ConfigParameter> configParameters, List<string> uriPaths)
+        private Dictionary<string, IEmbeddedResourceObject> GetDataFromFINTApi(KeyedCollection<string, ConfigParameter> configParameters, List<string> componentPaths, bool useLocalCache, OperationType importType, string lastUpdatedFilePath)
         {
             var accessTokenUri = configParameters[Param.idpUri].Value;
             var clientId = configParameters[Param.clientId].Value;
@@ -2879,29 +3104,37 @@ namespace VigoBAS.FINT.Edu
 
                 client.HttpClient.Timeout = TimeSpan.FromMinutes(httpClientTimeout);
 
+                Logger.Log.Info("Get all resources started");
+
+                if (useLocalCache && importType == OperationType.Full )
+                {
+                    Logger.Log.Info($"Parameter {Param.useLocalCache} is set to true. All resources are fetched from local cache");
+                }
+
+                List<string> uriPaths = new List<string>();
+
+                if (importType == OperationType.Delta)
+                {
+                    uriPaths = CreateDeltaComponentUriList(componentPaths, felleskomponentUri, lastUpdatedFilePath);
+                    useLocalCache = false;
+                }
+                else
+                {
+                    uriPaths = componentPaths;
+                }
+
+                var responseList = GetDataAsync(felleskomponentUri, uriPaths, client, useLocalCache, importType).Result;
+
+                Logger.Log.Info("Get all resources ended");
+
                 Logger.Log.InfoFormat("Getting lastupdated timestamps for all resources");
-                var lastUpdatedTimeStamps = GetLastUpdatedTimestamps(client.HttpClient, felleskomponentUri, uriPaths);
+                var lastUpdatedTimeStamps = GetLastUpdatedTimestamps(client.HttpClient, felleskomponentUri, componentPaths);
 
-                var jsonFolder = MAUtils.MAFolder;
-                var filePath = jsonFolder + "\\lastUpdated.json";
-
-                using (StreamWriter file = File.CreateText(filePath))
+                using (StreamWriter file = File.CreateText(lastUpdatedFilePath))
                 {
                     JsonSerializer serializer = new JsonSerializer();
                     serializer.Serialize(file, lastUpdatedTimeStamps);
                 }
-
-                Logger.Log.Info("Get all resources started");
-
-                bool useLocalCache = configParameters[Param.useLocalCache].Value == "1";
-
-                if (useLocalCache)
-                {
-                    Logger.Log.Info($"Parameter {Param.useLocalCache} is set to true. All resources are fetched from local cache");
-                }
-                var responseList = GetDataAsync(felleskomponentUri, uriPaths, client, useLocalCache).Result;
-
-                Logger.Log.Info("Get all resources ended");
 
                 var resourcesDict = new Dictionary<string, IEmbeddedResourceObject>();
                 foreach (var response in responseList)
@@ -2936,12 +3169,12 @@ namespace VigoBAS.FINT.Edu
             }
         }
 
-        static private async Task<HalJsonParseResult[]> GetDataAsync(string felleskomponentUri, List<string> uriPaths, IHalHttpClient client, bool useLocalCache)
+        static private async Task<HalJsonParseResult[]> GetDataAsync(string felleskomponentUri, List<string> uriPaths, IHalHttpClient client, bool useLocalCache, OperationType importType)
         {
             Logger.Log.Info("GetDataAsync started");
 
             IEnumerable<Task<HalJsonParseResult>> downloadTaskQuery =
-                    from uriPath in uriPaths select ProcessURLAsync(uriPath, felleskomponentUri, client, useLocalCache);
+                    from uriPath in uriPaths select ProcessURLAsync(uriPath, felleskomponentUri, client, useLocalCache, importType);
 
             Task<HalJsonParseResult>[] downloadTasks = downloadTaskQuery.ToArray();
 
@@ -2952,12 +3185,13 @@ namespace VigoBAS.FINT.Edu
             return employeeData;
         }
 
-        static private async Task<HalJsonParseResult> ProcessURLAsync(string uriPath, string felleskomponentUri, IHalHttpClient client, bool useLocalCache)
+        static private async Task<HalJsonParseResult> ProcessURLAsync(string uriPath, string felleskomponentUri, IHalHttpClient client, bool useLocalCache, OperationType importType)
         {
             HalJsonParseResult result = null;
 
+            string componentUri = importType == OperationType.Full ? uriPath : uriPath.Split('?')[0];
             string jsonFolder = MAUtils.MAFolder;
-            string fileName = uriPath.Substring(1).Replace('/', '_');
+            string fileName = componentUri.Substring(1).Replace('/', '_') + (importType == OperationType.Delta ?  "_delta": "");
             string filePath = jsonFolder + "\\" + fileName + ".json";
 
             if (useLocalCache)
@@ -2977,26 +3211,30 @@ namespace VigoBAS.FINT.Edu
                 string uriString = felleskomponentUri + uriPath;
                 Uri uri = new Uri(uriString);
 
-                Logger.Log.InfoFormat("Getting data from {0}", uriString);
                 try
                 {
-                    var sizeUri = uriString + "/cache/size";
+                    string fullComponentUri = felleskomponentUri + componentUri;
+                    string  sizeUri = fullComponentUri + "/cache/size";                   
 
                     string response = client.HttpClient.GetStringAsync(sizeUri).Result;
-                    var totalItems = JsonConvert.DeserializeObject<CacheSize>(response).Size;
+                    int totalItems = JsonConvert.DeserializeObject<CacheSize>(response).Size;
 
-                    var httpResponse = await client.HttpClient.GetStringAsync(uri);
-
-                    Logger.Log.InfoFormat("Data from {0} returned. Parsing json response", uri.ToString());
-                    var halJsonParser = new HalJsonParser();
-                    result = halJsonParser.Parse(httpResponse);
-
-                    var stateValues = result.StateValues.First().Value;
-
-                    //Logger.Log.InfoFormat("Data from {0} returned with {1} items", uri.ToString(), totalItems.ToString());
+                    Logger.Log.Info($"Cache size for {fullComponentUri}: {totalItems}");
 
                     if (totalItems > 0)
                     {
+                        Logger.Log.InfoFormat("Getting data from {0}", uriString);
+
+                        var httpResponse = await client.HttpClient.GetStringAsync(uri);
+
+                        Logger.Log.InfoFormat("Data from {0} returned. Parsing json response", uri.ToString());
+                        var halJsonParser = new HalJsonParser();
+                        result = halJsonParser.Parse(httpResponse);
+
+                        var stateValues = result.StateValues.First().Value;
+
+                        //Logger.Log.InfoFormat("Data from {0} returned with {1} items", uri.ToString(), totalItems.ToString());
+
                         Logger.Log.InfoFormat("Writing response to file {0}", filePath);
                         var httpResponseAsJson = JObject.Parse(httpResponse);
 
@@ -3085,6 +3323,23 @@ namespace VigoBAS.FINT.Edu
             }
             return result;
 
+        }
+
+        private static List<LastUpdateTimestamp> GetLastUpdatedDataFromFile(string filePath)
+        {
+            List<LastUpdateTimestamp> result =new List<LastUpdateTimestamp>();
+            using (StreamReader reader = new StreamReader(filePath))
+            {
+                var jsonString = reader.ReadToEnd();
+                var jsonArray = JArray.Parse(jsonString);
+
+                foreach (var jToken in jsonArray)
+                {
+                    var updateItem = JsonConvert.DeserializeObject<LastUpdateTimestamp>(jToken.ToString());
+                    result.Add(updateItem);
+                }
+            }
+            return result;
         }
 
         private static HalJsonParseResult GetDataFromFile(string filePath)
