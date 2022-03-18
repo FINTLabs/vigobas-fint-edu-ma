@@ -28,6 +28,7 @@ namespace VigoBAS.FINT.Edu
     class Constants
     {
         public const string dateFormat = "yyyy-MM-dd";
+        public const string hourFormat = "HH\\:mm\\:ss";
         public const string zeroDate = "1900-01-01";
         public const string infinityDate = "2099-01-01";
         public const int initialDelayMilliseconds = 500; 
@@ -69,6 +70,10 @@ namespace VigoBAS.FINT.Edu
             public const string generateAggrFacultyGroups = "Generer grupper for alle lærere";
             public const string generateAggrEmployeeGroups = "Generer grupper for alle ansatte";
             public const string generateProgAreaGroups = "Generer programområdegrupper";
+
+            public const string examSchoolnumbersToImport = "Eksamensskoler";
+            public const string examPeriodStartDate = "Eksamensperiode startdato (yyyy-MM-dd)";
+            public const string examPeriodEndDate = "Eksamensperiode sluttdato (yyyy-MM-dd)";
 
             public const string daysBeforeStudentStarts = "Antall dager før aktivt elevforhold";
             public const string daysBeforeStudentEnds = "Antall dager etter aktivt elevforhold";
@@ -158,6 +163,7 @@ namespace VigoBAS.FINT.Edu
             public const string basicGroup = "basisgruppe";
             public const string contactTeacherGroup = "kontaktlarergruppe";
             public const string studyGroup = "undervisningsgruppe";
+            public const string examGroup = "eksamensgruppe";
             public const string groupMembership = "gruppemedlemskap";
             public const string subject = "fag";
             public const string level = "trinn";
@@ -294,6 +300,8 @@ namespace VigoBAS.FINT.Edu
             public const string GruppeBeskrivelse = "GruppeBeskrivelse";
             public const string GruppePeriodeStart = "GruppePeriodeStart";
             public const string GruppePeriodeSlutt = "GruppePeriodeSlutt";
+            public const string GruppePeriodeStartTime = "GruppePeriodeStartTime";
+            public const string GruppePeriodeSluttTime = "GruppePeriodeSluttTime";
             public const string GruppeSkoleRef = "GruppeSkoleRef";
             public const string GruppeSkoleSkolenummer = "GruppeSkoleSkolenummer";
             public const string GruppeElevListe = "GruppeElevListe";

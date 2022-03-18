@@ -28,6 +28,26 @@ namespace VigoBAS.FINT.Edu
     class EduGroupFactory
     {
         public static EduGroup Create(
+            string schoolUri, 
+            string examDate
+        )
+        {
+            var groupUri = schoolUri + "_" + examDate;
+            var systemId = schoolUri.Split('/').Last() + "_" + examDate;
+            var groupName = examDate + " Alle kandidater";
+            var elevListe = new List<string>();
+
+            return new EduGroup
+            {
+                GruppeSystemIdUri = groupUri,
+                GruppeSystemId = systemId,
+                GruppeNavn = groupName,
+                EduGroupType = ClassType.examGroup,
+                GruppeSkoleRef = schoolUri,
+                GruppeElevListe = elevListe
+            };
+        }
+        public static EduGroup Create(
             string systemIdUri,
             Gruppe basicGroup,
             string groupType,
@@ -41,10 +61,19 @@ namespace VigoBAS.FINT.Edu
             var beskrivelse = basicGroup?.Beskrivelse;
             string periodeStart = string.Empty;
             string periodeSlutt = string.Empty;
+            string periodeStartTime = string.Empty;
+            string periodeSluttTime = string.Empty;
+
             if (basicGroup.Periode.Count > 0)
             {
                 periodeStart = basicGroup.Periode[0]?.Start.ToString(dateFormat);
                 periodeSlutt = basicGroup.Periode[0]?.Slutt?.ToString(dateFormat);
+
+                if (groupType == ClassType.examGroup)
+                {
+                    periodeStartTime = basicGroup.Periode[0]?.Start.ToString(hourFormat);
+                    periodeSluttTime = basicGroup.Periode[0]?.Slutt?.ToString(hourFormat);
+                }
             }
             var grepkode = new Grepkode();
 
@@ -65,6 +94,8 @@ namespace VigoBAS.FINT.Edu
                 GruppeBeskrivelse = beskrivelse,
                 GruppePeriodeStart = periodeStart,
                 GruppePeriodeSlutt = periodeSlutt,
+                GruppePeriodeStartTime = periodeStartTime,
+                GruppePeriodeSluttTime = periodeSluttTime,
                 Grepkode = grepkode,
                 GruppeElevListe = elevListe,
                 GruppeLarerListe = larerListe,

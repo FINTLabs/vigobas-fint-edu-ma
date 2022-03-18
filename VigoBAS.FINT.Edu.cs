@@ -24,6 +24,7 @@ using FINT.Model.Resource;
 using FINT.Model.Utdanning.Basisklasser;
 using FINT.Model.Utdanning.Elev;
 using FINT.Model.Utdanning.Utdanningsprogram;
+using FINT.Model.Utdanning.Vurdering;
 using HalClient.Net;
 using HalClient.Net.Parser;
 using IdentityModel;
@@ -72,10 +73,11 @@ namespace VigoBAS.FINT.Edu
         private Dictionary<string, IEmbeddedResourceObject> _kontaktlarergruppeMedlemskapDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _undervisningsgruppeDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _undervisningsgruppeMedlemskapDict = new Dictionary<string, IEmbeddedResourceObject>();
+        private Dictionary<string, IEmbeddedResourceObject> _eksamensgruppeDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, List<String>> _basicGroupAndValidStudentRelationships = new Dictionary<string, List<string>>();
         private Dictionary<string, List<String>> _contactGroupAndValidStudentRelationships = new Dictionary<string, List<string>>();
         private Dictionary<string, List<String>> _studyGroupAndValidStudentRelationships = new Dictionary<string, List<string>>();
-        private Dictionary<string, IEmbeddedResourceObject> _eksamensgruppeDict = new Dictionary<string, IEmbeddedResourceObject>();
+        private Dictionary<string, List<String>> _examGroupAndValidStudentRelationships = new Dictionary<string, List<string>>();
         private Dictionary<string, IEmbeddedResourceObject> _fagDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _arstrinnDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _programomradeDict = new Dictionary<string, IEmbeddedResourceObject>();
@@ -88,6 +90,7 @@ namespace VigoBAS.FINT.Edu
         private Dictionary<string, IEmbeddedResourceObject> _organisasjonselementDict = new Dictionary<string, IEmbeddedResourceObject>();
 
         private Dictionary<string, string> _orgelementIdMappingDict = new Dictionary<string, string>();
+        private Dictionary<string, string> _skoleIdMappingDict = new Dictionary<string, string>();
         private Dictionary<string, string> _elevIdMappingDict = new Dictionary<string, string>();
         private Dictionary<string, string> _skoleressursIdMappingDict = new Dictionary<string, string>();
 
@@ -185,6 +188,13 @@ namespace VigoBAS.FINT.Edu
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.daysBeforeStudentEnds, String.Empty, String.Empty));
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(Param.useGroupMembershipResources, false));
+
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateDividerParameter());
+
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateLabelParameter("Parametre eksamen"));
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.examSchoolnumbersToImport, String.Empty, String.Empty));
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.examPeriodStartDate, String.Empty, String.Empty));
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.examPeriodEndDate, String.Empty, String.Empty));
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateDividerParameter());
 
@@ -306,10 +316,12 @@ namespace VigoBAS.FINT.Edu
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeBeskrivelse, AttributeType.String, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppePeriodeStart, AttributeType.String, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppePeriodeSlutt, AttributeType.String, AttributeOperation.ImportOnly));
+            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppePeriodeStartTime, AttributeType.String, AttributeOperation.ImportOnly));
+            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppePeriodeSluttTime, AttributeType.String, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeSkoleRef, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeSkoleSkolenummer, AttributeType.String, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeElevListe, AttributeType.Reference, AttributeOperation.ImportOnly));
-            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeElevAntall, AttributeType.String, AttributeOperation.ImportOnly));
+            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeElevAntall, AttributeType.Integer, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeLarerListe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeLarerOgElevListe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeFagRef, AttributeType.Reference, AttributeOperation.ImportOnly));
@@ -451,7 +463,7 @@ namespace VigoBAS.FINT.Edu
 
             var componentList = new List<string>() {  elevPersonUri, elevUri, elevforholdUri, undervisningsforholdUri,
                                                 skoleressursUri, basisgruppeUri,  kontaktlarergruppeUri,
-                                                undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, // eksamensgruppeUri,  
+                                                undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, eksamensgruppeUri,  
                                                 skoleUri, ansattPersonUri, personalRessursUri, arbeidsforholdUri, organisasjonselementUri};
 
             if (useGroupMembershipResources)
@@ -595,12 +607,12 @@ namespace VigoBAS.FINT.Edu
                 {
                     AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ResourceLink.studyGroup, ref _studyGroupAndValidStudentRelationships);
                     //_undervisningsgruppeMedlemskapDict.Add(uriKey, resourceDict[uriKey]);
+                }                
+                else if (resourceType == eksamensgruppeUri)
+                {
+                    _eksamensgruppeDict.Add(uriKey, resourceDict[uriKey]);
+                    AddValidMembershipsForGroup(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ref _examGroupAndValidStudentRelationships);
                 }
-                // Should be uncommented when ViS delivers data on the eksamensgruppe endpoint
-                //else if (resourceType == eksamensgruppeUri)
-                //{
-                //    eksamensgruppeDict.Add(uriKey, resourceDict[uriKey]);
-                //}
                 else if (resourceType == fagUri)
                 {
                     _fagDict.Add(uriKey, resourceDict[uriKey]);
@@ -624,6 +636,7 @@ namespace VigoBAS.FINT.Edu
                     var systemIdUri = GetSystemIdUri(schoolResource, felleskomponentUri);
 
                     _skoleDict.Add(systemIdUri, schoolResource);
+                    UpdateResourceIdMappingDict(systemIdUri, schoolResource, ref _skoleIdMappingDict);
                 }
                 else if (resourceType == ansattPersonUri)
                 {
@@ -729,11 +742,11 @@ namespace VigoBAS.FINT.Edu
                 eduOrgUnitGroup = EduOrgUnitGroupFactory.Create(organisasjonIdUri, eduOrg, memberType);
 
                 importedObjectsDict.Add(eduOrgUnitGroup.GroupId, new ImportListItem { eduOrgUnitGroup = eduOrgUnitGroup });
-
             }
-
             var schoolOrgElementsTable = new HashSet<string>();
             var principalForSchoolDict = new Dictionary<string, string>();
+
+            HashSet<string> examSchoolsToImportUris = new HashSet<string>();
 
             // Når organisasjon-relasjonen kommer fra FINT bør dette kanskje gjøres om
             foreach (var skoleDictItem in _skoleDict)
@@ -749,10 +762,9 @@ namespace VigoBAS.FINT.Edu
 
                 var eduOrgUnit = EduOrgUnitFactory.Create(schoolUri, skoleResource, organisasjonIdUri);
 
-
-                var schoolnumbersToImport = configParameters[Param.schoolnumbersToImport].Value;
-
                 var schoolNumber = eduOrgUnit.SkoleSkolenummer;
+                var schoolnumbersToImport = configParameters[Param.schoolnumbersToImport].Value;
+                var examSchoolnumbersToImport = configParameters[Param.examSchoolnumbersToImport].Value;
 
                 if (string.IsNullOrEmpty(schoolnumbersToImport) || schoolnumbersToImport.Contains(schoolNumber))
                 {
@@ -764,6 +776,10 @@ namespace VigoBAS.FINT.Edu
                     {
                         importedObjectsDict.Add(schoolUri, new ImportListItem { eduOrgUnit = eduOrgUnit });
 
+                        if (examSchoolnumbersToImport.Contains(schoolNumber))
+                        {
+                            examSchoolsToImportUris.Add(schoolUri);
+                        }
                         if (skoleResource.Links.TryGetValue(ResourceLink.organization, out List<Link> orgLink))
                         {
                             string orgLinkUri = orgLink.First().href;
@@ -832,6 +848,16 @@ namespace VigoBAS.FINT.Edu
 
             excludedPositionCodes = GetExcludedItemCodes(paramExcludedPositionCodes);
 
+            string examPeriodStartDateValue = _importConfigParameters[Param.examPeriodStartDate].Value;
+            DateTime examPeriodStartDate = DateTime.Parse(examPeriodStartDateValue);
+
+            string examPeriodEndDateValue = _importConfigParameters[Param.examPeriodEndDate].Value;
+            DateTime examPeriodEndDate = DateTime.Parse(examPeriodEndDateValue);
+
+            Dictionary<string, List<(string groupUri, string examDate)>> _schoolsAndExamGroups = GeneratSchoolsAndExamGroups(_eksamensgruppeDict, examSchoolsToImportUris, examPeriodStartDate, examPeriodEndDate);
+
+            Dictionary<string, List<string>> _schoolsAndAggregatedExamGroups = GeneratSchoolsAndAggregatedExamGroups(_schoolsAndExamGroups, ref importedObjectsDict);
+
             foreach (var skoleDictItem in _skoleDict)
             {
                 var schoolUri = skoleDictItem.Key;
@@ -845,15 +871,21 @@ namespace VigoBAS.FINT.Edu
 
                     var schoolName = eduOrgUnit.SkoleNavn;
 
-                    var skoleDataLinks = skoleData.Links;
+                    var skoleDataLinks = skoleData.Links;                    
+                    var gruppeDict = new Dictionary<string, IEmbeddedResourceObject>();
 
-                    var groupLinks = new Collection<string> { ResourceLink.basicGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup };
+                    var groupLinks = new Collection<string> { ResourceLink.basicGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup, ResourceLink.examGroup };
+
+                    var groups = new List<string>();
 
                     foreach (var groupLink in groupLinks)
                     {
-                        if (skoleDataLinks.TryGetValue(groupLink, out IEnumerable<ILinkObject> groups))
+                        if (skoleDataLinks.TryGetValue(groupLink, out IEnumerable<ILinkObject> groupLinkObjects))
                         {
-                            var gruppeDict = new Dictionary<string, IEmbeddedResourceObject>();
+                            foreach (var groupLinkObject in groupLinkObjects)
+                            {
+                                groups.Add(groupLinkObject.Href.ToString());
+                            }                               
 
                             switch (groupLink)
                             {
@@ -872,20 +904,55 @@ namespace VigoBAS.FINT.Edu
                                         gruppeDict = _kontaktlarergruppeDict;
                                         break;
                                     }
-                            }
-                            foreach (var group in groups)
-                            {
-                                var groupUri = LinkToString(group);
-
-                                if (gruppeDict.TryGetValue(groupUri, out IEmbeddedResourceObject groupData))
-                                {
-                                    HandleGroup(groupLink, groupUri, schoolUri, organisasjonIdUri, groupData, importNoDaysAhead, null, ref ssnToSystemId, ref importedObjectsDict);
-                                }
+                                case ResourceLink.examGroup:
+                                    {
+                                        gruppeDict = _eksamensgruppeDict;
+                                        break;
+                                    }
                             }
                         }
                         else
                         {
                             Logger.Log.InfoFormat("Data for school {0} does not contain any {1} links", schoolName, groupLink);
+
+                            if (groupLink == ResourceLink.examGroup)
+                            {
+                                Logger.Log.InfoFormat($"Trying to add exam groups for school {schoolName} based on school links from the exam groups");
+
+                                if (_schoolsAndExamGroups.TryGetValue(schoolUri, out List<(string groupId, string examDate)> examGroups))
+                                {
+                                    gruppeDict = _eksamensgruppeDict;
+                                    groups = examGroups.Select(item =>item.groupId ).ToList();
+                                }
+                            }                            
+                        }
+
+                        foreach (var groupUri in groups)
+                        {
+                            if (gruppeDict.TryGetValue(groupUri, out IEmbeddedResourceObject groupData))
+                            {
+                                var examGroup =HandleGroup(groupLink, groupUri, schoolUri, organisasjonIdUri, groupData, importNoDaysAhead, null, ref ssnToSystemId, ref importedObjectsDict);
+
+                                if (groupLink == ResourceLink.examGroup && examGroup?.GruppeElevListe != null && examGroup.GruppeElevListe.Count > 0)
+                                {
+                                    string examDate = examGroup.GruppePeriodeStart;
+                                    string aggrExamGroupUri = schoolUri + "_" + examDate;
+                                     
+                                    if (importedObjectsDict.TryGetValue(aggrExamGroupUri, out ImportListItem aggregatedGroupImportListItem))
+                                    {
+                                        var examGroupMembers = examGroup.GruppeElevListe;
+                                        var aggregatedGroupMembers = aggregatedGroupImportListItem.eduGroup.GruppeElevListe;                                        
+
+                                        foreach (var member in examGroupMembers)
+                                        {
+                                            if (!(aggregatedGroupMembers.Contains(member)))
+                                            {
+                                                aggregatedGroupMembers.Add(member);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     if (skoleDataLinks.TryGetValue(ResourceLink.studyprogramme, out IEnumerable<ILinkObject> studyprogrammes))
@@ -896,7 +963,7 @@ namespace VigoBAS.FINT.Edu
 
                             if (_utdanningsprogramDict.TryGetValue(studyprogrammeUri, out IEmbeddedResourceObject studyprogrammeData))
                             {
-                                HandleGroup(ClassType.educationProgramme, studyprogrammeUri, schoolUri, organisasjonIdUri, studyprogrammeData, 0, null, ref ssnToSystemId, ref importedObjectsDict);
+                                var educationProgrammeGroup = HandleGroup(ClassType.educationProgramme, studyprogrammeUri, schoolUri, organisasjonIdUri, studyprogrammeData, 0, null, ref ssnToSystemId, ref importedObjectsDict);
 
                                 var studyProgramme = new EduGroup();
 
@@ -914,7 +981,7 @@ namespace VigoBAS.FINT.Edu
                                         var groupUri = LinkToString(programmearea);
                                         if (_programomradeDict.TryGetValue(groupUri, out IEmbeddedResourceObject groupData))
                                         {
-                                            HandleGroup(ClassType.programmeArea, groupUri, schoolUri, organisasjonIdUri, groupData, 0, studyProgramme, ref ssnToSystemId, ref importedObjectsDict);
+                                            var programmeAreaGroup = HandleGroup(ClassType.programmeArea, groupUri, schoolUri, organisasjonIdUri, groupData, 0, studyProgramme, ref ssnToSystemId, ref importedObjectsDict);
                                         }
                                     }
                                 }
@@ -1216,6 +1283,90 @@ namespace VigoBAS.FINT.Edu
             GetImportEntriesPageSize = importRunStep.PageSize;
 
             return new OpenImportConnectionResults();
+        }
+
+        private Dictionary<string, List<string>> GeneratSchoolsAndAggregatedExamGroups(Dictionary<string, List<(string, string)>> schoolsAndExamGroups, ref Dictionary<string, ImportListItem> importedObjectsDict)
+        {
+            Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
+
+            foreach (var schoolUri in schoolsAndExamGroups.Keys)
+            {
+                if (schoolsAndExamGroups.TryGetValue(schoolUri, out List<(string groupId, string examDate)> examgroups))
+                {
+                    var examDates = examgroups.Select(item => item.examDate).ToList();
+
+                    List<string> aggregatedGroups = new List<string>();
+
+                    foreach (var examDate in examDates)
+                    {
+                        var aggregatedGroup = EduGroupFactory.Create(schoolUri, examDate);
+                        var groupUri = aggregatedGroup.GruppeSystemIdUri;
+
+                        if (!(importedObjectsDict.TryGetValue(groupUri, out ImportListItem dummyValue)))
+                        {
+                            importedObjectsDict.Add(groupUri, new ImportListItem() { eduGroup = aggregatedGroup });
+                            aggregatedGroups.Add(groupUri);
+                        }
+                    }
+                    result.Add(schoolUri, aggregatedGroups);
+                }
+            }
+            return result;
+        }
+
+        private Dictionary<string, List<(string groupUri, string examDate)>> GeneratSchoolsAndExamGroups(
+            Dictionary<string, IEmbeddedResourceObject> eksamensgruppeDict, 
+            HashSet<string> schoolsToImportUris,
+            DateTime examPeriodStartDate,
+            DateTime examPeriodEndDate)
+        {
+            Dictionary<string, List<(string, string)>> schoolAndExamGroups = new Dictionary<string, List<(string, string)>>();
+                       
+            var examGroupsFilePath = MAUtils.MAFolder + "\\examgroups.txt";
+            HashSet<string> examGroupsToInclude = GetExamGroupsFromFile(examGroupsFilePath);
+
+            Logger.Log.Debug($"GeneratSchoolsAndExamGroups started for {eksamensgruppeDict.Keys.Count} exam groups");
+            foreach (var examGroupUri in eksamensgruppeDict.Keys)
+            {
+                IEmbeddedResourceObject examGroup = eksamensgruppeDict[examGroupUri];
+
+                if (examGroup.Links.TryGetValue(ResourceLink.school, out IEnumerable<ILinkObject> schoolLink))
+                {
+                    var schoolUri = LinkToString(schoolLink);
+
+                    if (_skoleIdMappingDict.TryGetValue(schoolUri, out string schoolSystemIdUri))
+                    {
+                        if (schoolsToImportUris.TryGetValue(schoolSystemIdUri, out string schoolValue))
+                        {
+                            Eksamensgruppe eksamensgruppe = EksamensgruppeFactory.Create(examGroup.State);
+                            var examDate = eksamensgruppe?.Periode?.First()?.Start;
+
+                            if (examDate != null)
+                            {
+                                if (CheckExamGroupValid(examDate, examPeriodStartDate, examPeriodEndDate))
+                                {
+                                    string examGroupId = schoolSystemIdUri.Split(Delimiter.path).Last() + '_' + eksamensgruppe.Navn;
+                                    string examDateString = eksamensgruppe?.Periode?.First()?.Start.ToString(dateFormat);
+
+                                    if (examGroupsToInclude.TryGetValue(examGroupId, out string dummy))
+                                    {
+                                        if (schoolAndExamGroups.TryGetValue(schoolSystemIdUri, out List<(string, string)> examGroupsList))
+                                        {
+                                            examGroupsList.Add((examGroupUri, examDateString));
+                                        }
+                                        else
+                                        {
+                                            schoolAndExamGroups.Add(schoolSystemIdUri, new List<(string, string)> { (examGroupUri, examDateString) });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }                  
+                }
+            }
+            Logger.Log.Debug($"GeneratSchoolsAndExamGroups ended");
+            return schoolAndExamGroups;
         }
 
         private void AddValidMembership(string uriKey, Dictionary<string, IEmbeddedResourceObject> resourceDict, int dayBeforeStudentStarts, int dayBeforeStudentEnds, string groupRelation, ref Dictionary<string, List<string>> groupAndValidStudentRelationships)
@@ -1819,7 +1970,7 @@ namespace VigoBAS.FINT.Edu
         }
 
 
-        private void HandleGroup(
+        private EduGroup HandleGroup(
             string groupType,
             string groupUri,
             string schoolUri,
@@ -1832,6 +1983,8 @@ namespace VigoBAS.FINT.Edu
             ref Dictionary<string, ImportListItem> importedObjectsDict
         )
         {
+            var eduGroup = new EduGroup();
+
             if (!importedObjectsDict.TryGetValue(groupUri, out ImportListItem eduGroupValue))
             {
                 var groupState = groupData.State;
@@ -1855,6 +2008,11 @@ namespace VigoBAS.FINT.Edu
                             group = UndervisningsgruppeFactory.Create(groupState);
                             break;
                         }
+                    case ClassType.examGroup:
+                        {
+                            group = UtdanningsprogramFactory.Create(groupState);
+                            break;
+                        }
                     case ClassType.programmeArea:
                         {
                             group = ProgramomradeFactory.Create(groupState);
@@ -1866,8 +2024,6 @@ namespace VigoBAS.FINT.Edu
                             break;
                         }
                 }
-                var eduGroup = new EduGroup();
-
                 if (importedObjectsDict.TryGetValue(schoolUri, out ImportListItem eduOrgUnitItem))
                 {
                     EduOrgUnit eduOrgUnit = eduOrgUnitItem.eduOrgUnit;
@@ -1876,8 +2032,9 @@ namespace VigoBAS.FINT.Edu
 
                     // Filters on date such that a student has to be member of an active group in order to be added to CS
                     var groupPeriodStart = (!string.IsNullOrEmpty(eduGroup.GruppePeriodeStart)) ? DateTime.Parse(eduGroup.GruppePeriodeStart) : DateTime.Parse(zeroDate);
-                    //var groupPeriodEnd = (!string.IsNullOrEmpty(eduGroup.GruppePeriodeSlutt)) ? DateTime.Parse(eduGroup.GruppePeriodeSlutt) : DateTime.Parse(infinityDate);
+                    var groupPeriodEnd = (!string.IsNullOrEmpty(eduGroup.GruppePeriodeSlutt)) ? DateTime.Parse(eduGroup.GruppePeriodeSlutt) : DateTime.Parse(infinityDate);
 
+                    //var examgroupsVisibleStartDate = DateTime.Parse("2022-03-01");
                     var today = DateTime.Today.AddDays(+importNoDaysAhead);
 
                     //groupType != ClassType.programmeArea && groupPeriodStart != DateTime.Parse(zeroDate) &&
@@ -1885,14 +2042,15 @@ namespace VigoBAS.FINT.Edu
                     //if ( groupPeriodStart <= today && groupPeriodEnd >= today)
 
                     // For now all group and their members are added to CS
-                    if (groupType == ClassType.educationProgramme || (!string.IsNullOrEmpty(eduGroup.GruppePeriodeStart) && groupPeriodStart <= today))
+                    if (groupType == ClassType.educationProgramme 
+                        || (groupType == ClassType.examGroup) // && examgroupsVisibleStartDate <= groupPeriodStart
+                        || (!(groupType == ClassType.examGroup) && !string.IsNullOrEmpty(eduGroup.GruppePeriodeStart) && groupPeriodStart <= today))
                     {
                         Logger.Log.InfoFormat("Adding new resource to CS: {0}", groupUri);
 
                         var link = string.Empty;
                         var itemDict = new Dictionary<string, IEmbeddedResourceObject>();
                         var membershipDict = new Dictionary<string, List<string>>();
-
 
                         switch (groupType)
                         {
@@ -1915,6 +2073,12 @@ namespace VigoBAS.FINT.Edu
                                     membershipDict = _studyGroupAndValidStudentRelationships;
                                     break;
                                 }
+                            case ClassType.examGroup:
+                                {
+                                    link = ResourceLink.examGroup;
+                                    membershipDict = _examGroupAndValidStudentRelationships;
+                                    break;
+                                }
                             case ClassType.programmeArea:
                                 {
                                     link = ResourceLink.programmearea;
@@ -1932,8 +2096,10 @@ namespace VigoBAS.FINT.Edu
                                     break;
                                 }
                         }
-                        SetGrepkodeOnGroup(groupData, link, itemDict, ref eduGroup);
-
+                        if (!(groupType == ClassType.examGroup))
+                        {
+                            SetGrepkodeOnGroup(groupData, link, itemDict, ref eduGroup);
+                        }
                         if (groupData.Links.TryGetValue(ResourceLink.subject, out IEnumerable<ILinkObject> subjectLink))
                         {
                             var subjectUri = LinkToString(subjectLink);
@@ -1952,7 +2118,7 @@ namespace VigoBAS.FINT.Edu
                                     importedObjectsDict.Add(subjectUri, new ImportListItem() { eduSubject = eduSubject });
                                 }
                             }
-                        }
+                        }                        
                         Logger.Log.InfoFormat("Group {0} is active. The group and members of the group will be added to CS", groupUri);
 
                         importedObjectsDict.Add(groupUri, new ImportListItem() { eduGroup = eduGroup });
@@ -2003,6 +2169,7 @@ namespace VigoBAS.FINT.Edu
                     }
                 }
             }
+            return eduGroup;
         }
 
         private string AddStudentToCS(
@@ -3087,6 +3254,19 @@ namespace VigoBAS.FINT.Edu
 
         }
 
+        private static HashSet<string> GetExamGroupsFromFile (string filePath)
+        {
+            HashSet<string> result = new HashSet<string>();
+
+            foreach (string line in File.ReadLines(filePath))
+            {
+                if (!result.TryGetValue(line, out string dummy))
+                {
+                    result.Add(line);
+                }
+            }
+            return result;
+        }
         private static HalJsonParseResult GetDataFromFile(string filePath)
         {
             HalJsonParseResult result;
