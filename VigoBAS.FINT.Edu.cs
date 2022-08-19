@@ -1415,6 +1415,8 @@ namespace VigoBAS.FINT.Edu
 
             if (resourceDict.TryGetValue(uriKey, out IEmbeddedResourceObject groupObject))
             {
+                bool isExamgroup = GetUriPathForClass(uriKey).Equals(DefaultValue.utdanningVurderingEksamensgruppeUri);
+
                 if (groupObject.Links.TryGetValue(ResourceLink.studentRelationship, out IEnumerable<ILinkObject> studentRelationshipLinks))
                 {
                     foreach (var studentRelationshipLink in studentRelationshipLinks)
@@ -1423,12 +1425,17 @@ namespace VigoBAS.FINT.Edu
 
                         if (resourceDict.TryGetValue(studentRelationshipUri, out IEmbeddedResourceObject studentRelationshipObject))
                         {
-                            bool relationshipIsValid = true;
+                            bool relationshipIsValid;
 
-                            if (studentRelationshipObject.State.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue periodeValue))
+                            if (!isExamgroup && studentRelationshipObject.State.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue periodeValue))
                             {
                                 relationshipIsValid = CheckValidPeriod(periodeValue, dayBeforeStudentStarts, dayBeforeStudentEnds);
                             }
+                            else
+                            {
+                                relationshipIsValid = isExamgroup;
+                            }
+
                             if (relationshipIsValid)
                             {
                                 groupMembers.Add(studentRelationshipUri);
