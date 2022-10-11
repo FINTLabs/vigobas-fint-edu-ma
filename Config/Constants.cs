@@ -61,6 +61,7 @@ namespace VigoBAS.FINT.Edu
 
             public const string useLocalCache = "Importer fra lokal cache";
             public const string abortIfResourceTypeEmpty = "Stopp import hvis en ressurstype er tom";
+            public const string abortIfDownloadError = "Stopp import ved nedlastingsfeil";
             public const string importStudentsWithoutStudyRelationShip = "Importer elever uten skoletilknytning";
 
             public const string useGroupMembershipResources = "Bruk gruppemedlemskapsressurser";

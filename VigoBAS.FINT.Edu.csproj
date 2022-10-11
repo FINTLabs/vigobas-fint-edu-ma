@@ -367,6 +367,7 @@
     <Compile Include="ImportListItem.cs" />
     <Compile Include="Factories\PersonFactory.cs" />
     <Compile Include="Utilities\CacheSize.cs" />
+    <Compile Include="Utilities\FINTDownloadFailedException.cs" />
     <Compile Include="Utilities\FINTResourceEmptyException.cs" />
     <Compile Include="Utilities\FINTTopOrgelementMissingException.cs" />
     <Compile Include="Utilities\LastUpdateTimestamp.cs" />

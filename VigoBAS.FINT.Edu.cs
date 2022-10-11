@@ -163,6 +163,7 @@ namespace VigoBAS.FINT.Edu
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.httpClientTimeout, String.Empty, DefaultValue.httpClientTimeout));
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(Param.useLocalCache, false));
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(Param.abortIfDownloadError, true));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(Param.abortIfResourceTypeEmpty, true));
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateDividerParameter());
@@ -309,7 +310,7 @@ namespace VigoBAS.FINT.Edu
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeSkoleRef, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeSkoleSkolenummer, AttributeType.String, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeElevListe, AttributeType.Reference, AttributeOperation.ImportOnly));
-            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeElevAntall, AttributeType.String, AttributeOperation.ImportOnly));
+            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeElevAntall, AttributeType.Integer, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeLarerListe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeLarerOgElevListe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeFagRef, AttributeType.Reference, AttributeOperation.ImportOnly));
@@ -2894,12 +2895,13 @@ namespace VigoBAS.FINT.Edu
                 Logger.Log.Info("Get all resources started");
 
                 bool useLocalCache = configParameters[Param.useLocalCache].Value == "1";
+                bool abortIfDownloadError = configParameters[Param.abortIfDownloadError].Value == "1";
 
                 if (useLocalCache)
                 {
                     Logger.Log.Info($"Parameter {Param.useLocalCache} is set to true. All resources are fetched from local cache");
                 }
-                var responseList = GetDataAsync(felleskomponentUri, uriPaths, client, useLocalCache).Result;
+                var responseList = GetDataAsync(felleskomponentUri, uriPaths, client, useLocalCache, abortIfDownloadError).Result;
 
                 Logger.Log.Info("Get all resources ended");
 
@@ -2936,12 +2938,12 @@ namespace VigoBAS.FINT.Edu
             }
         }
 
-        static private async Task<HalJsonParseResult[]> GetDataAsync(string felleskomponentUri, List<string> uriPaths, IHalHttpClient client, bool useLocalCache)
+        static private async Task<HalJsonParseResult[]> GetDataAsync(string felleskomponentUri, List<string> uriPaths, IHalHttpClient client, bool useLocalCache, bool abortIfDownloadError)
         {
             Logger.Log.Info("GetDataAsync started");
 
             IEnumerable<Task<HalJsonParseResult>> downloadTaskQuery =
-                    from uriPath in uriPaths select ProcessURLAsync(uriPath, felleskomponentUri, client, useLocalCache);
+                    from uriPath in uriPaths select ProcessURLAsync(uriPath, felleskomponentUri, client, useLocalCache, abortIfDownloadError);
 
             Task<HalJsonParseResult>[] downloadTasks = downloadTaskQuery.ToArray();
 
@@ -2952,7 +2954,7 @@ namespace VigoBAS.FINT.Edu
             return employeeData;
         }
 
-        static private async Task<HalJsonParseResult> ProcessURLAsync(string uriPath, string felleskomponentUri, IHalHttpClient client, bool useLocalCache)
+        static private async Task<HalJsonParseResult> ProcessURLAsync(string uriPath, string felleskomponentUri, IHalHttpClient client, bool useLocalCache, bool abortIfDownloadError)
         {
             HalJsonParseResult result = null;
 
@@ -3026,7 +3028,7 @@ namespace VigoBAS.FINT.Edu
 
                 catch (HalHttpRequestException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath);
+                    result = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
                     if (result == null)
                     {
                         throw ex;
@@ -3034,7 +3036,7 @@ namespace VigoBAS.FINT.Edu
                 }
                 catch (HttpRequestException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath);
+                    result = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
                     if (result == null)
                     {
                         Logger.Log.ErrorFormat("Reading file {0} returned no objects", filePath);
@@ -3043,7 +3045,7 @@ namespace VigoBAS.FINT.Edu
                 }
                 catch (TaskCanceledException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath);
+                    result = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
                     if (result == null)
                     {
                         Logger.Log.ErrorFormat("Reading file {0} returned no objects", filePath);
@@ -3052,7 +3054,7 @@ namespace VigoBAS.FINT.Edu
                 }
                 catch (WebException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath);
+                    result = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
                     if (result == null)
                     {
                         Logger.Log.ErrorFormat("Reading file {0} returned no objects", filePath);
@@ -3063,25 +3065,34 @@ namespace VigoBAS.FINT.Edu
             return result;
         }
 
-        private static HalJsonParseResult HandleRequestError(Uri uri, Exception ex, string filePath)
+        private static HalJsonParseResult HandleRequestError(Uri uri, Exception ex, string filePath, bool abortIfDownloadError)
         {
             HalJsonParseResult result;
             var message = ex?.Message;
             var exceptionType = ex?.GetType().ToString();
             var innerexception = ex?.InnerException?.Message;
-            Logger.Log.ErrorFormat("Getting resource uri: {0} failed with error type {1}. HTTP Message: {2}, Inner exception: {3}"
-                            , uri.ToString(), exceptionType, message, innerexception);
+            var errorMessage = $"Getting resource uri: {uri} failed with error type {exceptionType}. HTTP Message: {message}, Inner exception: {innerexception}";
+            Logger.Log.Error(errorMessage);
 
-            if (File.Exists(filePath))
+            if (abortIfDownloadError)
             {
-                Logger.Log.InfoFormat("Getting last saved response from file {0}", filePath);
-                result = GetDataFromFile(filePath);
-                Logger.Log.DebugFormat("Finished getting last saved response from file {0}", filePath);
+                Logger.Log.Error("abortIfDownloadError is set to true. Aborting the import");
+                throw new FINTDownloadFailedException("The FINT Edu MA import was aborted due to download errors. See the MA log for details");
             }
             else
             {
-                Logger.Log.InfoFormat("File {0} does not exist, no previous responses has been saved to disk", filePath);
-                result = null;
+                if (File.Exists(filePath))
+                {
+                    Logger.Log.InfoFormat("Getting last saved response from file {0}", filePath);
+                    result = GetDataFromFile(filePath);
+                    Logger.Log.DebugFormat("Finished getting last saved response from file {0}", filePath);
+                }
+                else
+                {
+                    Logger.Log.InfoFormat("File {0} does not exist, no previous responses has been saved to disk", filePath);
+                    result = null;
+                }
+
             }
             return result;
 
