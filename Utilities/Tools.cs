@@ -181,5 +181,11 @@ namespace VigoBAS.FINT.Edu.Utilities
             // Return the fully-RFC3986-escaped string.
             return escaped.ToString();
         }
+        public enum DataRetrievalStatus 
+        {
+            DownloadOK,
+            FileReadOK,
+            FileReadFailed
+        }
     }
 }

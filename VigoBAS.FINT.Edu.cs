@@ -93,8 +93,6 @@ namespace VigoBAS.FINT.Edu
 
         private Dictionary<string, Grepkode> _grepkodeDict = new Dictionary<string, Grepkode>();
 
-
-
         #region Page Size
 
         public int ImportMaxPageSize { get; } = 50;
@@ -2880,17 +2878,17 @@ namespace VigoBAS.FINT.Edu
 
                 client.HttpClient.Timeout = TimeSpan.FromMinutes(httpClientTimeout);
 
-                Logger.Log.InfoFormat("Getting lastupdated timestamps for all resources");
-                var lastUpdatedTimeStamps = GetLastUpdatedTimestamps(client.HttpClient, felleskomponentUri, uriPaths);
+                //Logger.Log.InfoFormat("Getting lastupdated timestamps for all resources");
+                //var lastUpdatedTimeStamps = GetLastUpdatedTimestamps(client.HttpClient, felleskomponentUri, uriPaths);
 
-                var jsonFolder = MAUtils.MAFolder;
-                var filePath = jsonFolder + "\\lastUpdated.json";
+                //var jsonFolder = MAUtils.MAFolder;
+                //var filePath = jsonFolder + "\\lastUpdated.json";
 
-                using (StreamWriter file = File.CreateText(filePath))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    serializer.Serialize(file, lastUpdatedTimeStamps);
-                }
+                //using (StreamWriter file = File.CreateText(filePath))
+                //{
+                //    JsonSerializer serializer = new JsonSerializer();
+                //    serializer.Serialize(file, lastUpdatedTimeStamps);
+                //}
 
                 Logger.Log.Info("Get all resources started");
 
@@ -2901,10 +2899,23 @@ namespace VigoBAS.FINT.Edu
                 {
                     Logger.Log.Info($"Parameter {Param.useLocalCache} is set to true. All resources are fetched from local cache");
                 }
-                var responseList = GetDataAsync(felleskomponentUri, uriPaths, client, useLocalCache, abortIfDownloadError).Result;
+                var (responseList, dataRetrievalStatus) = GetDataAsync(felleskomponentUri, uriPaths, client, useLocalCache, abortIfDownloadError).Result;
 
                 Logger.Log.Info("Get all resources ended");
-
+                if (abortIfDownloadError && dataRetrievalStatus != (int)DataRetrievalStatus.DownloadOK)
+                {
+                    var message = $"Import is aborted. There were download errors and parameter '{Param.abortIfDownloadError}' is set to true";
+                    Logger.Log.Info(message);
+                    var throwMessage = message + ". See MA log for further details";
+                    throw new FINTDownloadFailedException(throwMessage);
+                }
+                if (dataRetrievalStatus == (int) DataRetrievalStatus.FileReadFailed)
+                {
+                    var message = "Import is aborted. Reading from local cache failed for at least one endpoint";
+                    Logger.Log.Info(message);
+                    var throwMessage = message + ". See MA log for further details";
+                    throw new DataFromLocalCacheFaildeException(throwMessage);
+                }
                 var resourcesDict = new Dictionary<string, IEmbeddedResourceObject>();
                 foreach (var response in responseList)
                 {
@@ -2938,25 +2949,43 @@ namespace VigoBAS.FINT.Edu
             }
         }
 
-        static private async Task<HalJsonParseResult[]> GetDataAsync(string felleskomponentUri, List<string> uriPaths, IHalHttpClient client, bool useLocalCache, bool abortIfDownloadError)
+        static private async Task<(HalJsonParseResult[], int)> GetDataAsync(string felleskomponentUri, List<string> uriPaths, IHalHttpClient client, bool useLocalCache, bool abortIfDownloadError)
         {
             Logger.Log.Info("GetDataAsync started");
 
-            IEnumerable<Task<HalJsonParseResult>> downloadTaskQuery =
+            IEnumerable<Task<(HalJsonParseResult, int)>> downloadTaskQuery =
                     from uriPath in uriPaths select ProcessURLAsync(uriPath, felleskomponentUri, client, useLocalCache, abortIfDownloadError);
 
-            Task<HalJsonParseResult>[] downloadTasks = downloadTaskQuery.ToArray();
+            Task<(HalJsonParseResult, int)>[] downloadTasks = downloadTaskQuery.ToArray();
 
-            HalJsonParseResult[] employeeData = await Task.WhenAll(downloadTasks);
+            (HalJsonParseResult parseResult, int dataRetrievalStatus)[] returnData = await Task.WhenAll(downloadTasks);
+
+            HalJsonParseResult[] parseResults = returnData.Select(element => element.parseResult).ToArray();
+
+            int dataRetrievalStatus;
+
+            if (returnData.All(element => element.dataRetrievalStatus == (int) DataRetrievalStatus.DownloadOK))
+            {
+                dataRetrievalStatus = (int)DataRetrievalStatus.DownloadOK;
+            }
+            else if (returnData.Any(element => element.dataRetrievalStatus == (int)DataRetrievalStatus.FileReadFailed))
+            {
+                dataRetrievalStatus = (int)DataRetrievalStatus.FileReadFailed;
+            }
+            else
+            {
+                dataRetrievalStatus = (int)DataRetrievalStatus.FileReadOK;
+            }
 
             Logger.Log.Info("GetDataAsync ended");
 
-            return employeeData;
+            return  (parseResults, dataRetrievalStatus);
         }
 
-        static private async Task<HalJsonParseResult> ProcessURLAsync(string uriPath, string felleskomponentUri, IHalHttpClient client, bool useLocalCache, bool abortIfDownloadError)
+        static private async Task<(HalJsonParseResult, int)> ProcessURLAsync(string uriPath, string felleskomponentUri, IHalHttpClient client, bool useLocalCache, bool abortIfDownloadError)
         {
             HalJsonParseResult result = null;
+            int dataRetrievalStatus = 0;
 
             string jsonFolder = MAUtils.MAFolder;
             string fileName = uriPath.Substring(1).Replace('/', '_');
@@ -2982,18 +3011,18 @@ namespace VigoBAS.FINT.Edu
                 Logger.Log.InfoFormat("Getting data from {0}", uriString);
                 try
                 {
-                    var sizeUri = uriString + "/cache/size";
+                    //var sizeUri = uriString + "/cache/size";
 
-                    string response = client.HttpClient.GetStringAsync(sizeUri).Result;
-                    var totalItems = JsonConvert.DeserializeObject<CacheSize>(response).Size;
+                    //string response = await client.HttpClient.GetStringAsync(sizeUri);
+                    //var totalItems = JsonConvert.DeserializeObject<CacheSize>(response).Size;
 
                     var httpResponse = await client.HttpClient.GetStringAsync(uri);
 
-                    Logger.Log.InfoFormat("Data from {0} returned. Parsing json response", uri.ToString());
+                    Logger.Log.Info($"Data from {uri} returned. Parsing json response");
                     var halJsonParser = new HalJsonParser();
                     result = halJsonParser.Parse(httpResponse);
 
-                    var stateValues = result.StateValues.First().Value;
+                    var totalItems = GetTotalItems(result.StateValues);
 
                     //Logger.Log.InfoFormat("Data from {0} returned with {1} items", uri.ToString(), totalItems.ToString());
 
@@ -3008,93 +3037,88 @@ namespace VigoBAS.FINT.Edu
                     }
                     else
                     {
+                        Logger.Log.Error($"Data from {uri} returned O items. Trying to get data from local cache instead");
                         if (File.Exists(filePath))
                         {
                             Logger.Log.InfoFormat("Getting last saved response from file {0}", filePath);
                             result = GetDataFromFile(filePath);
-                            Logger.Log.DebugFormat("Finished getting last saved response from file {0}", filePath);
+                            if (result != null)
+                            {                                
+                                Logger.Log.DebugFormat("Finished getting last saved response from file {0}", filePath);
+                            }
+                            else
+                            {
+                                Logger.Log.Error($"Reading from file {filePath} returned null");
+                                dataRetrievalStatus = (int)DataRetrievalStatus.FileReadFailed;
+                            }
                         }
                         else
                         {
-                            Logger.Log.InfoFormat("File {0} does not exist, no previous responses has been saved to disk", filePath);
+                            Logger.Log.Error($"File {filePath} does not exist"); 
+                            dataRetrievalStatus = (int)DataRetrievalStatus.FileReadFailed;
                         }
                     }
-                }
-                catch (AggregateException ex)
-                {
-                    Logger.Log.ErrorFormat("Getting data from {0} failed with response: {1}", uri.ToString(), ex.Message);
-                    throw ex;
                 }
 
                 catch (HalHttpRequestException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
-                    if (result == null)
-                    {
-                        throw ex;
-                    }
+                    (result, dataRetrievalStatus) = HandleRequestError(uri, ex, filePath, abortIfDownloadError);                    
                 }
                 catch (HttpRequestException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
-                    if (result == null)
-                    {
-                        Logger.Log.ErrorFormat("Reading file {0} returned no objects", filePath);
-                        throw ex;
-                    }
+                    (result, dataRetrievalStatus) = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
                 }
                 catch (TaskCanceledException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
-                    if (result == null)
-                    {
-                        Logger.Log.ErrorFormat("Reading file {0} returned no objects", filePath);
-                        throw ex;
-                    }
+                    (result, dataRetrievalStatus) = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
                 }
                 catch (WebException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
-                    if (result == null)
-                    {
-                        Logger.Log.ErrorFormat("Reading file {0} returned no objects", filePath);
-                        throw ex;
-                    }
+                    (result, dataRetrievalStatus) = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
                 }
             }
-            return result;
+            return (result, dataRetrievalStatus);
         }
 
-        private static HalJsonParseResult HandleRequestError(Uri uri, Exception ex, string filePath, bool abortIfDownloadError)
+        private static int GetTotalItems(IEnumerable<IStateValue> stateValues)
+        {
+            int totalItems = 0;
+
+            foreach(IStateValue stateValue in stateValues)
+            {
+                if (stateValue.Name == "total_items")
+                {
+                    totalItems = Int32.Parse( stateValue.Value);
+                }
+            }
+            return totalItems;
+        }
+
+        private static (HalJsonParseResult, int) HandleRequestError(Uri uri, Exception ex, string filePath, bool abortIfDownloadError)
         {
             HalJsonParseResult result;
+            int readResult;
+            
             var message = ex?.Message;
             var exceptionType = ex?.GetType().ToString();
             var innerexception = ex?.InnerException?.Message;
             var errorMessage = $"Getting resource uri: {uri} failed with error type {exceptionType}. HTTP Message: {message}, Inner exception: {innerexception}";
             Logger.Log.Error(errorMessage);
 
-            if (abortIfDownloadError)
+            if (File.Exists(filePath))
             {
-                Logger.Log.Error("abortIfDownloadError is set to true. Aborting the import");
-                throw new FINTDownloadFailedException("The FINT Edu MA import was aborted due to download errors. See the MA log for details");
+                Logger.Log.InfoFormat("Getting last saved response from file {0}", filePath);
+                result = GetDataFromFile(filePath);
+                readResult = (int)DataRetrievalStatus.FileReadOK;
+                Logger.Log.DebugFormat("Finished getting last saved response from file {0}", filePath);
             }
             else
             {
-                if (File.Exists(filePath))
-                {
-                    Logger.Log.InfoFormat("Getting last saved response from file {0}", filePath);
-                    result = GetDataFromFile(filePath);
-                    Logger.Log.DebugFormat("Finished getting last saved response from file {0}", filePath);
-                }
-                else
-                {
-                    Logger.Log.InfoFormat("File {0} does not exist, no previous responses has been saved to disk", filePath);
-                    result = null;
-                }
-
-            }
-            return result;
+                readResult = (int)DataRetrievalStatus.FileReadFailed;
+                Logger.Log.Error($"File {filePath} does not exist");
+                result = null;
+            }            
+            return (result, readResult);
 
         }
 
