@@ -189,6 +189,7 @@ namespace VigoBAS.FINT.Edu
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateLabelParameter("Parametre ansatte"));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.daysBeforeEmploymentStarts, String.Empty, String.Empty));
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.daysBeforeEmploymentEnds, String.Empty, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.excludedResourceTypes, String.Empty, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.excludedEmploymentTypes, String.Empty, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.excludedPositionCodes, String.Empty, String.Empty));
@@ -814,7 +815,10 @@ namespace VigoBAS.FINT.Edu
             Logger.Log.DebugFormat("Generate WorkplaceOrgUnitToSchoolOrgUnit table ended");
 
             string startValue = _importConfigParameters[Param.daysBeforeEmploymentStarts].Value;
-            int dayBeforeEmploymentStarts = (string.IsNullOrEmpty(startValue)) ? 0 : Int32.Parse(startValue);
+            int daysBeforeEmploymentStarts = (string.IsNullOrEmpty(startValue)) ? 0 : Int32.Parse(startValue);
+
+            string endValue = _importConfigParameters[Param.daysBeforeEmploymentEnds].Value;
+            int daysAfterEmploymentEnds = (string.IsNullOrEmpty(endValue)) ? 0 : Int32.Parse(endValue);
 
             HashSet<string> excludedResourceTypes = new HashSet<string>();
             var paramExcludedResourceTypes = _importConfigParameters[Param.excludedResourceTypes].Value;
@@ -976,7 +980,8 @@ namespace VigoBAS.FINT.Edu
                                                     _personalressursDict,
                                                     _arbeidsforholdDict,
                                                     _organisasjonselementDict,
-                                                    dayBeforeEmploymentStarts,
+                                                    daysBeforeEmploymentStarts,
+                                                    daysAfterEmploymentEnds,
                                                     excludedEmploymentTypes,
                                                     excludedPositionCodes
                                                     );
@@ -1713,7 +1718,8 @@ namespace VigoBAS.FINT.Edu
             Dictionary<string, IEmbeddedResourceObject> personalressursDict,
             Dictionary<string, IEmbeddedResourceObject> arbeidsforholdDict,
             Dictionary<string, IEmbeddedResourceObject> organisasjonselementDict,
-            int dayBeforeEmploymentStarts,
+            int daysBeforeEmploymentStarts,
+            int daysAfterEmploymentEnds,
             HashSet<string> excludedEmploymentTypes,
             HashSet<string> excludedPositionsCodes)
         {
@@ -1760,7 +1766,7 @@ namespace VigoBAS.FINT.Edu
                                             var employmentResourceState = employmentResource.State;
                                             if (employmentResourceState.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue validEmploymentPeriod))
                                             {
-                                                bool periodIsValid = CheckValidPeriod(validEmploymentPeriod, dayBeforeEmploymentStarts, 0);
+                                                bool periodIsValid = CheckValidPeriod(validEmploymentPeriod, daysBeforeEmploymentStarts, daysAfterEmploymentEnds);
 
                                                 if (periodIsValid)
                                                 {

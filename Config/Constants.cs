@@ -76,6 +76,7 @@ namespace VigoBAS.FINT.Edu
             public const string daysBeforeStudentEnds = "Antall dager etter aktivt elevforhold";
 
             public const string daysBeforeEmploymentStarts = "Antall dager før aktivt arbeidsforhold";
+            public const string daysBeforeEmploymentEnds = "Antall dager etter aktivt arbeidsforhold";
             public const string excludedResourceTypes = "Ignorer ressurskategorier";
             public const string excludedEmploymentTypes = "Ignorer arbeidsforholdtyper";
             public const string excludedPositionCodes = "Ignorer stillingskoder";
