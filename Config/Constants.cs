@@ -40,6 +40,7 @@ namespace VigoBAS.FINT.Edu
             public const char path = '/';
             public const char roleSchool = '@';
             public const char categorySchool = '@';
+            public const char levelAtSchool = '@';
         }
         
 

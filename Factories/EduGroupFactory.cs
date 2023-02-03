@@ -94,5 +94,25 @@ namespace VigoBAS.FINT.Edu
                 GruppeSkoleSkolenummer = schoolNumber
             };
         }
+        internal static EduGroup Create(string levelGroupUri, EduOrgUnit school, List<string> members)
+        {
+            var gruppeSystemId = levelGroupUri.Split('/').Last();
+            var schoolUri = school.SystemIdUri;
+            var groupName = gruppeSystemId.Split(Delimiter.levelAtSchool)[0];
+            var schoolNumber = school.SkoleSkolenummer;
+
+            var elevListe = members;
+
+            return new EduGroup
+            {
+                GruppeSystemIdUri = levelGroupUri,
+                GruppeSystemId = gruppeSystemId,
+                GruppeNavn = groupName,
+                EduGroupType = ClassType.level,
+                GruppeElevListe = elevListe,
+                GruppeSkoleRef = schoolUri,
+                GruppeSkoleSkolenummer = schoolNumber
+            };
+        }
     }
 }

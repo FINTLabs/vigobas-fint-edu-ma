@@ -47,6 +47,12 @@ namespace VigoBAS.FINT.Edu.Utilities
 
             return idValue;
         }
+        public static string GetIdValueFromUri(string uri)
+        {
+            string idValue = uri.Split('/').Last();
+
+            return idValue;
+        }
         public static string LinkToString(ILinkObject link)
         {
             var uriAsString = link.Href.ToString();

@@ -848,6 +848,8 @@ namespace VigoBAS.FINT.Edu
 
                     var groupLinks = new Collection<string> { ResourceLink.basicGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup };
 
+                    var levelGroupDictionary = new Dictionary<string, List<string>>();
+
                     foreach (var groupLink in groupLinks)
                     {
                         if (skoleDataLinks.TryGetValue(groupLink, out IEnumerable<ILinkObject> groups))
@@ -878,13 +880,22 @@ namespace VigoBAS.FINT.Edu
 
                                 if (gruppeDict.TryGetValue(groupUri, out IEmbeddedResourceObject groupData))
                                 {
-                                    HandleGroup(groupLink, groupUri, schoolUri, organisasjonIdUri, groupData, importNoDaysAhead, null, ref ssnToSystemId, ref importedObjectsDict);
+                                    HandleGroup(groupLink, groupUri, schoolUri, organisasjonIdUri, groupData, importNoDaysAhead, null, ref levelGroupDictionary, ref ssnToSystemId, ref importedObjectsDict);
                                 }
                             }
                         }
                         else
                         {
                             Logger.Log.InfoFormat("Data for school {0} does not contain any {1} links", schoolName, groupLink);
+                        }
+                    }
+                    if (levelGroupDictionary.Count > 0)
+                    {
+                        foreach (var levelGroupUri in levelGroupDictionary.Keys)
+                        {
+                            var levelGroupMembers = levelGroupDictionary[levelGroupUri];
+                            var levelEduGroup = EduGroupFactory.Create(levelGroupUri, eduOrgUnit, levelGroupMembers);
+                            importedObjectsDict.Add(levelGroupUri, new ImportListItem { eduGroup = levelEduGroup });
                         }
                     }
                     if (skoleDataLinks.TryGetValue(ResourceLink.studyprogramme, out IEnumerable<ILinkObject> studyprogrammes))
@@ -895,7 +906,7 @@ namespace VigoBAS.FINT.Edu
 
                             if (_utdanningsprogramDict.TryGetValue(studyprogrammeUri, out IEmbeddedResourceObject studyprogrammeData))
                             {
-                                HandleGroup(ClassType.educationProgramme, studyprogrammeUri, schoolUri, organisasjonIdUri, studyprogrammeData, 0, null, ref ssnToSystemId, ref importedObjectsDict);
+                                HandleGroup(ClassType.educationProgramme, studyprogrammeUri, schoolUri, organisasjonIdUri, studyprogrammeData, 0, null, ref levelGroupDictionary, ref ssnToSystemId, ref importedObjectsDict);
 
                                 var studyProgramme = new EduGroup();
 
@@ -913,7 +924,7 @@ namespace VigoBAS.FINT.Edu
                                         var groupUri = LinkToString(programmearea);
                                         if (_programomradeDict.TryGetValue(groupUri, out IEmbeddedResourceObject groupData))
                                         {
-                                            HandleGroup(ClassType.programmeArea, groupUri, schoolUri, organisasjonIdUri, groupData, 0, studyProgramme, ref ssnToSystemId, ref importedObjectsDict);
+                                            HandleGroup(ClassType.programmeArea, groupUri, schoolUri, organisasjonIdUri, groupData, 0, studyProgramme, ref levelGroupDictionary, ref ssnToSystemId, ref importedObjectsDict);
                                         }
                                     }
                                 }
@@ -1827,6 +1838,7 @@ namespace VigoBAS.FINT.Edu
             int importNoDaysAhead,
             //Dictionary<string, Grepkode> grepkodeDict,
             EduGroup studyProgramme,
+            ref Dictionary<string, List<string>> levelGroupDictionary,
             ref Dictionary<string, string> ssnToSystemId,
             ref Dictionary<string, ImportListItem> importedObjectsDict
         )
@@ -1973,7 +1985,30 @@ namespace VigoBAS.FINT.Edu
                                     ref ssnToSystemId,
                                     ref importedObjectsDict);
                             }
+                            if (groupType == ClassType.basicGroup)
+                            {
+                                string levelGroupUri;
 
+                                if (groupLinks.TryGetValue(ResourceLink.level, out IEnumerable<ILinkObject> levelLink))
+                                {
+                                    levelGroupUri = LinkToString(levelLink) + Delimiter.levelAtSchool + GetIdValueFromUri(schoolUri);
+
+                                    if (!levelGroupDictionary.ContainsKey(levelGroupUri))
+                                    {
+                                        var members = new List<string>();
+                                        levelGroupDictionary.Add(levelGroupUri, members);
+                                    }
+
+                                    var alreadyMembers = levelGroupDictionary[levelGroupUri];
+                                    foreach (string member in eduGroup.GruppeElevListe)
+                                    {
+                                        if (!alreadyMembers.Contains(member))
+                                        {
+                                            alreadyMembers.Add(member);
+                                        }
+                                    }
+                                }
+                            }
                         }
                         if (groupData.Links.TryGetValue(ResourceLink.teachingRelationship, out IEnumerable<ILinkObject> teachingRelationshipLinks))
                         {
