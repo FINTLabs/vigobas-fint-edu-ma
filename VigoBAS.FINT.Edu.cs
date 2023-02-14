@@ -312,6 +312,7 @@ namespace VigoBAS.FINT.Edu
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeElevAntall, AttributeType.Integer, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeLarerListe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeLarerOgElevListe, AttributeType.Reference, AttributeOperation.ImportOnly));
+            eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeGruppeListe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeFagRef, AttributeType.Reference, AttributeOperation.ImportOnly));
 
             SchemaType eduOrgUnit = SchemaType.Create(CSObjectType.eduOrgUnit, true);
@@ -852,7 +853,7 @@ namespace VigoBAS.FINT.Edu
 
                     var groupLinks = new Collection<string> { ResourceLink.basicGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup };
 
-                    var levelGroupDictionary = new Dictionary<string, List<string>>();
+                    var levelGroupDictionary = new Dictionary<string, (List<string> studentmembers, List<string> teachermembers, List<string>basGroupmembers)>();
 
                     foreach (var groupLink in groupLinks)
                     {
@@ -1844,7 +1845,7 @@ namespace VigoBAS.FINT.Edu
             int importNoDaysAhead,
             //Dictionary<string, Grepkode> grepkodeDict,
             EduGroup studyProgramme,
-            ref Dictionary<string, List<string>> levelGroupDictionary,
+            ref Dictionary<string, (List<string> studentmembers, List<string> teachermembers, List<string> basGroupmembers)> levelGroupDictionary,
             ref Dictionary<string, string> ssnToSystemId,
             ref Dictionary<string, ImportListItem> importedObjectsDict
         )
@@ -1991,30 +1992,6 @@ namespace VigoBAS.FINT.Edu
                                     ref ssnToSystemId,
                                     ref importedObjectsDict);
                             }
-                            if (groupType == ClassType.basicGroup)
-                            {
-                                string levelGroupUri;
-
-                                if (groupLinks.TryGetValue(ResourceLink.level, out IEnumerable<ILinkObject> levelLink))
-                                {
-                                    levelGroupUri = LinkToString(levelLink) + Delimiter.levelAtSchool + GetIdValueFromUri(schoolUri);
-
-                                    if (!levelGroupDictionary.ContainsKey(levelGroupUri))
-                                    {
-                                        var members = new List<string>();
-                                        levelGroupDictionary.Add(levelGroupUri, members);
-                                    }
-
-                                    var alreadyMembers = levelGroupDictionary[levelGroupUri];
-                                    foreach (string member in eduGroup.GruppeElevListe)
-                                    {
-                                        if (!alreadyMembers.Contains(member))
-                                        {
-                                            alreadyMembers.Add(member);
-                                        }
-                                    }
-                                }
-                            }
                         }
                         if (groupData.Links.TryGetValue(ResourceLink.teachingRelationship, out IEnumerable<ILinkObject> teachingRelationshipLinks))
                         {
@@ -2035,6 +2012,47 @@ namespace VigoBAS.FINT.Edu
                                 _ansattPersonDict,
                                 ref ssnToSystemId,
                                 ref importedObjectsDict);
+                        }
+                        if (groupType == ClassType.basicGroup)
+                        {
+                            string levelGroupUri;
+
+                            if (groupLinks.TryGetValue(ResourceLink.level, out IEnumerable<ILinkObject> levelLink))
+                            {
+                                levelGroupUri = LinkToString(levelLink) + Delimiter.levelAtSchool + GetIdValueFromUri(schoolUri);
+
+                                if (!levelGroupDictionary.ContainsKey(levelGroupUri))
+                                {
+                                    var studentMembers = new List<string>();
+                                    var teacherMembers = new List<string>();
+                                    var basicGroupMembers = new List<string>();
+                                    levelGroupDictionary.Add(levelGroupUri, (studentMembers, teacherMembers, basicGroupMembers));
+                                }
+
+                                var alreadyStudentMembers = levelGroupDictionary[levelGroupUri].studentmembers;
+                                foreach (string member in eduGroup.GruppeElevListe)
+                                {
+                                    if (!alreadyStudentMembers.Contains(member))
+                                    {
+                                        alreadyStudentMembers.Add(member);
+                                    }
+                                }
+
+                                var alreadyTeacherMembers = levelGroupDictionary[levelGroupUri].teachermembers;
+                                foreach (string member in eduGroup.GruppeLarerListe)
+                                {
+                                    if (!alreadyTeacherMembers.Contains(member))
+                                    {
+                                        alreadyTeacherMembers.Add(member);
+                                    }
+                                }
+                                var alreadyBacicGroupMembers = levelGroupDictionary[levelGroupUri].basGroupmembers;
+
+                                if (!alreadyBacicGroupMembers.Contains(groupUri))
+                                {
+                                    alreadyBacicGroupMembers.Add(groupUri);
+                                }
+                            }
                         }
                     }
                     else

@@ -46,6 +46,7 @@ namespace VigoBAS.FINT.Edu
         //public string GruppeVigoReferanse;
         public List<string> GruppeElevListe;
         public List<string> GruppeLarerListe;
+        public List<string> GruppeGruppeListe;
 
 
         // Fint basisgruppe
@@ -146,6 +147,21 @@ namespace VigoBAS.FINT.Edu
             if (studfacmembers.Count > 0)
             {
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeLarerOgElevListe, studfacmembers));
+            }
+            if (GruppeGruppeListe != null && GruppeGruppeListe.Count > 0)
+            {
+                IList<object> members = new List<object>();
+                foreach (var member in GruppeGruppeListe)
+                {
+                    var memberUri = member.ToString();
+                    members.Add(memberUri);
+
+                    if (!studfacmembers.Contains(memberUri))
+                    {
+                        studfacmembers.Add(memberUri);
+                    }
+                }
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeGruppeListe, members));
             }
 
             return csentry;

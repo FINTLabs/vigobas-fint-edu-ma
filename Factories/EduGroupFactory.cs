@@ -94,14 +94,18 @@ namespace VigoBAS.FINT.Edu
                 GruppeSkoleSkolenummer = schoolNumber
             };
         }
-        internal static EduGroup Create(string levelGroupUri, EduOrgUnit school, List<string> members)
+        internal static EduGroup Create(string levelGroupUri, 
+            EduOrgUnit school, 
+            (List<string> studentmembers, List<string> teachermembers, List<string> basisGroupmembers) memberships)
         {
             var gruppeSystemId = levelGroupUri.Split('/').Last();
             var schoolUri = school.SystemIdUri;
             var groupName = gruppeSystemId.Split(Delimiter.levelAtSchool)[0];
             var schoolNumber = school.SkoleSkolenummer;
 
-            var elevListe = members;
+            var elevListe = memberships.studentmembers;
+            var larerListe = memberships.teachermembers;
+            var basisgruppeListe = memberships.basisGroupmembers;
 
             return new EduGroup
             {
@@ -110,6 +114,8 @@ namespace VigoBAS.FINT.Edu
                 GruppeNavn = groupName,
                 EduGroupType = ClassType.level,
                 GruppeElevListe = elevListe,
+                GruppeLarerListe = larerListe,
+                GruppeGruppeListe = basisgruppeListe,
                 GruppeSkoleRef = schoolUri,
                 GruppeSkoleSkolenummer = schoolNumber
             };
