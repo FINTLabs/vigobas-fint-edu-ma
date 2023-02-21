@@ -93,8 +93,6 @@ namespace VigoBAS.FINT.Edu
 
         private Dictionary<string, Grepkode> _grepkodeDict = new Dictionary<string, Grepkode>();
 
-
-
         #region Page Size
 
         public int ImportMaxPageSize { get; } = 50;
@@ -163,6 +161,7 @@ namespace VigoBAS.FINT.Edu
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.httpClientTimeout, String.Empty, DefaultValue.httpClientTimeout));
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(Param.useLocalCache, false));
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(Param.abortIfDownloadError, true));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(Param.abortIfResourceTypeEmpty, true));
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateDividerParameter());
@@ -190,6 +189,7 @@ namespace VigoBAS.FINT.Edu
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateLabelParameter("Parametre ansatte"));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.daysBeforeEmploymentStarts, String.Empty, String.Empty));
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.daysBeforeEmploymentEnds, String.Empty, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.excludedResourceTypes, String.Empty, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.excludedEmploymentTypes, String.Empty, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.excludedPositionCodes, String.Empty, String.Empty));
@@ -309,9 +309,10 @@ namespace VigoBAS.FINT.Edu
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeSkoleRef, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeSkoleSkolenummer, AttributeType.String, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeElevListe, AttributeType.Reference, AttributeOperation.ImportOnly));
-            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeElevAntall, AttributeType.String, AttributeOperation.ImportOnly));
+            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeElevAntall, AttributeType.Integer, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeLarerListe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeLarerOgElevListe, AttributeType.Reference, AttributeOperation.ImportOnly));
+            eduGroup.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.GruppeGruppeListe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeFagRef, AttributeType.Reference, AttributeOperation.ImportOnly));
 
             SchemaType eduOrgUnit = SchemaType.Create(CSObjectType.eduOrgUnit, true);
@@ -815,7 +816,10 @@ namespace VigoBAS.FINT.Edu
             Logger.Log.DebugFormat("Generate WorkplaceOrgUnitToSchoolOrgUnit table ended");
 
             string startValue = _importConfigParameters[Param.daysBeforeEmploymentStarts].Value;
-            int dayBeforeEmploymentStarts = (string.IsNullOrEmpty(startValue)) ? 0 : Int32.Parse(startValue);
+            int daysBeforeEmploymentStarts = (string.IsNullOrEmpty(startValue)) ? 0 : Int32.Parse(startValue);
+
+            string endValue = _importConfigParameters[Param.daysBeforeEmploymentEnds].Value;
+            int daysAfterEmploymentEnds = (string.IsNullOrEmpty(endValue)) ? 0 : Int32.Parse(endValue);
 
             HashSet<string> excludedResourceTypes = new HashSet<string>();
             var paramExcludedResourceTypes = _importConfigParameters[Param.excludedResourceTypes].Value;
@@ -849,6 +853,8 @@ namespace VigoBAS.FINT.Edu
 
                     var groupLinks = new Collection<string> { ResourceLink.basicGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup };
 
+                    var levelGroupDictionary = new Dictionary<string, (List<string> studentmembers, List<string> teachermembers, List<string>basGroupmembers)>();
+
                     foreach (var groupLink in groupLinks)
                     {
                         if (skoleDataLinks.TryGetValue(groupLink, out IEnumerable<ILinkObject> groups))
@@ -879,13 +885,22 @@ namespace VigoBAS.FINT.Edu
 
                                 if (gruppeDict.TryGetValue(groupUri, out IEmbeddedResourceObject groupData))
                                 {
-                                    HandleGroup(groupLink, groupUri, schoolUri, organisasjonIdUri, groupData, importNoDaysAhead, null, ref ssnToSystemId, ref importedObjectsDict);
+                                    HandleGroup(groupLink, groupUri, schoolUri, organisasjonIdUri, groupData, importNoDaysAhead, null, ref levelGroupDictionary, ref ssnToSystemId, ref importedObjectsDict);
                                 }
                             }
                         }
                         else
                         {
                             Logger.Log.InfoFormat("Data for school {0} does not contain any {1} links", schoolName, groupLink);
+                        }
+                    }
+                    if (levelGroupDictionary.Count > 0)
+                    {
+                        foreach (var levelGroupUri in levelGroupDictionary.Keys)
+                        {
+                            var levelGroupMembers = levelGroupDictionary[levelGroupUri];
+                            var levelEduGroup = EduGroupFactory.Create(levelGroupUri, eduOrgUnit, levelGroupMembers);
+                            importedObjectsDict.Add(levelGroupUri, new ImportListItem { eduGroup = levelEduGroup });
                         }
                     }
                     if (skoleDataLinks.TryGetValue(ResourceLink.studyprogramme, out IEnumerable<ILinkObject> studyprogrammes))
@@ -896,7 +911,7 @@ namespace VigoBAS.FINT.Edu
 
                             if (_utdanningsprogramDict.TryGetValue(studyprogrammeUri, out IEmbeddedResourceObject studyprogrammeData))
                             {
-                                HandleGroup(ClassType.educationProgramme, studyprogrammeUri, schoolUri, organisasjonIdUri, studyprogrammeData, 0, null, ref ssnToSystemId, ref importedObjectsDict);
+                                HandleGroup(ClassType.educationProgramme, studyprogrammeUri, schoolUri, organisasjonIdUri, studyprogrammeData, 0, null, ref levelGroupDictionary, ref ssnToSystemId, ref importedObjectsDict);
 
                                 var studyProgramme = new EduGroup();
 
@@ -914,7 +929,7 @@ namespace VigoBAS.FINT.Edu
                                         var groupUri = LinkToString(programmearea);
                                         if (_programomradeDict.TryGetValue(groupUri, out IEmbeddedResourceObject groupData))
                                         {
-                                            HandleGroup(ClassType.programmeArea, groupUri, schoolUri, organisasjonIdUri, groupData, 0, studyProgramme, ref ssnToSystemId, ref importedObjectsDict);
+                                            HandleGroup(ClassType.programmeArea, groupUri, schoolUri, organisasjonIdUri, groupData, 0, studyProgramme, ref levelGroupDictionary, ref ssnToSystemId, ref importedObjectsDict);
                                         }
                                     }
                                 }
@@ -966,7 +981,8 @@ namespace VigoBAS.FINT.Edu
                                                     _personalressursDict,
                                                     _arbeidsforholdDict,
                                                     _organisasjonselementDict,
-                                                    dayBeforeEmploymentStarts,
+                                                    daysBeforeEmploymentStarts,
+                                                    daysAfterEmploymentEnds,
                                                     excludedEmploymentTypes,
                                                     excludedPositionCodes
                                                     );
@@ -1703,7 +1719,8 @@ namespace VigoBAS.FINT.Edu
             Dictionary<string, IEmbeddedResourceObject> personalressursDict,
             Dictionary<string, IEmbeddedResourceObject> arbeidsforholdDict,
             Dictionary<string, IEmbeddedResourceObject> organisasjonselementDict,
-            int dayBeforeEmploymentStarts,
+            int daysBeforeEmploymentStarts,
+            int daysAfterEmploymentEnds,
             HashSet<string> excludedEmploymentTypes,
             HashSet<string> excludedPositionsCodes)
         {
@@ -1750,7 +1767,7 @@ namespace VigoBAS.FINT.Edu
                                             var employmentResourceState = employmentResource.State;
                                             if (employmentResourceState.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue validEmploymentPeriod))
                                             {
-                                                bool periodIsValid = CheckValidPeriod(validEmploymentPeriod, dayBeforeEmploymentStarts, 0);
+                                                bool periodIsValid = CheckValidPeriod(validEmploymentPeriod, daysBeforeEmploymentStarts, daysAfterEmploymentEnds);
 
                                                 if (periodIsValid)
                                                 {
@@ -1828,6 +1845,7 @@ namespace VigoBAS.FINT.Edu
             int importNoDaysAhead,
             //Dictionary<string, Grepkode> grepkodeDict,
             EduGroup studyProgramme,
+            ref Dictionary<string, (List<string> studentmembers, List<string> teachermembers, List<string> basGroupmembers)> levelGroupDictionary,
             ref Dictionary<string, string> ssnToSystemId,
             ref Dictionary<string, ImportListItem> importedObjectsDict
         )
@@ -1974,7 +1992,6 @@ namespace VigoBAS.FINT.Edu
                                     ref ssnToSystemId,
                                     ref importedObjectsDict);
                             }
-
                         }
                         if (groupData.Links.TryGetValue(ResourceLink.teachingRelationship, out IEnumerable<ILinkObject> teachingRelationshipLinks))
                         {
@@ -1995,6 +2012,47 @@ namespace VigoBAS.FINT.Edu
                                 _ansattPersonDict,
                                 ref ssnToSystemId,
                                 ref importedObjectsDict);
+                        }
+                        if (groupType == ClassType.basicGroup)
+                        {
+                            string levelGroupUri;
+
+                            if (groupLinks.TryGetValue(ResourceLink.level, out IEnumerable<ILinkObject> levelLink))
+                            {
+                                levelGroupUri = LinkToString(levelLink) + Delimiter.levelAtSchool + GetIdValueFromUri(schoolUri);
+
+                                if (!levelGroupDictionary.ContainsKey(levelGroupUri))
+                                {
+                                    var studentMembers = new List<string>();
+                                    var teacherMembers = new List<string>();
+                                    var basicGroupMembers = new List<string>();
+                                    levelGroupDictionary.Add(levelGroupUri, (studentMembers, teacherMembers, basicGroupMembers));
+                                }
+
+                                var alreadyStudentMembers = levelGroupDictionary[levelGroupUri].studentmembers;
+                                foreach (string member in eduGroup.GruppeElevListe)
+                                {
+                                    if (!alreadyStudentMembers.Contains(member))
+                                    {
+                                        alreadyStudentMembers.Add(member);
+                                    }
+                                }
+
+                                var alreadyTeacherMembers = levelGroupDictionary[levelGroupUri].teachermembers;
+                                foreach (string member in eduGroup.GruppeLarerListe)
+                                {
+                                    if (!alreadyTeacherMembers.Contains(member))
+                                    {
+                                        alreadyTeacherMembers.Add(member);
+                                    }
+                                }
+                                var alreadyBacicGroupMembers = levelGroupDictionary[levelGroupUri].basGroupmembers;
+
+                                if (!alreadyBacicGroupMembers.Contains(groupUri))
+                                {
+                                    alreadyBacicGroupMembers.Add(groupUri);
+                                }
+                            }
                         }
                     }
                     else
@@ -2879,30 +2937,44 @@ namespace VigoBAS.FINT.Edu
 
                 client.HttpClient.Timeout = TimeSpan.FromMinutes(httpClientTimeout);
 
-                Logger.Log.InfoFormat("Getting lastupdated timestamps for all resources");
-                var lastUpdatedTimeStamps = GetLastUpdatedTimestamps(client.HttpClient, felleskomponentUri, uriPaths);
+                //Logger.Log.InfoFormat("Getting lastupdated timestamps for all resources");
+                //var lastUpdatedTimeStamps = GetLastUpdatedTimestamps(client.HttpClient, felleskomponentUri, uriPaths);
 
-                var jsonFolder = MAUtils.MAFolder;
-                var filePath = jsonFolder + "\\lastUpdated.json";
+                //var jsonFolder = MAUtils.MAFolder;
+                //var filePath = jsonFolder + "\\lastUpdated.json";
 
-                using (StreamWriter file = File.CreateText(filePath))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    serializer.Serialize(file, lastUpdatedTimeStamps);
-                }
+                //using (StreamWriter file = File.CreateText(filePath))
+                //{
+                //    JsonSerializer serializer = new JsonSerializer();
+                //    serializer.Serialize(file, lastUpdatedTimeStamps);
+                //}
 
                 Logger.Log.Info("Get all resources started");
 
                 bool useLocalCache = configParameters[Param.useLocalCache].Value == "1";
+                bool abortIfDownloadError = configParameters[Param.abortIfDownloadError].Value == "1";
 
                 if (useLocalCache)
                 {
                     Logger.Log.Info($"Parameter {Param.useLocalCache} is set to true. All resources are fetched from local cache");
                 }
-                var responseList = GetDataAsync(felleskomponentUri, uriPaths, client, useLocalCache).Result;
+                var (responseList, dataRetrievalStatus) = GetDataAsync(felleskomponentUri, uriPaths, client, useLocalCache, abortIfDownloadError).Result;
 
                 Logger.Log.Info("Get all resources ended");
-
+                if (abortIfDownloadError && dataRetrievalStatus != (int)DataRetrievalStatus.DownloadOK)
+                {
+                    var message = $"Import is aborted. There were download errors and parameter '{Param.abortIfDownloadError}' is set to true";
+                    Logger.Log.Info(message);
+                    var throwMessage = message + ". See MA log for further details";
+                    throw new FINTDownloadFailedException(throwMessage);
+                }
+                if (dataRetrievalStatus == (int) DataRetrievalStatus.FileReadFailed)
+                {
+                    var message = "Import is aborted. Reading from local cache failed for at least one endpoint";
+                    Logger.Log.Info(message);
+                    var throwMessage = message + ". See MA log for further details";
+                    throw new DataFromLocalCacheFaildeException(throwMessage);
+                }
                 var resourcesDict = new Dictionary<string, IEmbeddedResourceObject>();
                 foreach (var response in responseList)
                 {
@@ -2936,25 +3008,43 @@ namespace VigoBAS.FINT.Edu
             }
         }
 
-        static private async Task<HalJsonParseResult[]> GetDataAsync(string felleskomponentUri, List<string> uriPaths, IHalHttpClient client, bool useLocalCache)
+        static private async Task<(HalJsonParseResult[], int)> GetDataAsync(string felleskomponentUri, List<string> uriPaths, IHalHttpClient client, bool useLocalCache, bool abortIfDownloadError)
         {
             Logger.Log.Info("GetDataAsync started");
 
-            IEnumerable<Task<HalJsonParseResult>> downloadTaskQuery =
-                    from uriPath in uriPaths select ProcessURLAsync(uriPath, felleskomponentUri, client, useLocalCache);
+            IEnumerable<Task<(HalJsonParseResult, int)>> downloadTaskQuery =
+                    from uriPath in uriPaths select ProcessURLAsync(uriPath, felleskomponentUri, client, useLocalCache, abortIfDownloadError);
 
-            Task<HalJsonParseResult>[] downloadTasks = downloadTaskQuery.ToArray();
+            Task<(HalJsonParseResult, int)>[] downloadTasks = downloadTaskQuery.ToArray();
 
-            HalJsonParseResult[] employeeData = await Task.WhenAll(downloadTasks);
+            (HalJsonParseResult parseResult, int dataRetrievalStatus)[] returnData = await Task.WhenAll(downloadTasks);
+
+            HalJsonParseResult[] parseResults = returnData.Select(element => element.parseResult).ToArray();
+
+            int dataRetrievalStatus;
+
+            if (returnData.All(element => element.dataRetrievalStatus == (int) DataRetrievalStatus.DownloadOK))
+            {
+                dataRetrievalStatus = (int)DataRetrievalStatus.DownloadOK;
+            }
+            else if (returnData.Any(element => element.dataRetrievalStatus == (int)DataRetrievalStatus.FileReadFailed))
+            {
+                dataRetrievalStatus = (int)DataRetrievalStatus.FileReadFailed;
+            }
+            else
+            {
+                dataRetrievalStatus = (int)DataRetrievalStatus.FileReadOK;
+            }
 
             Logger.Log.Info("GetDataAsync ended");
 
-            return employeeData;
+            return  (parseResults, dataRetrievalStatus);
         }
 
-        static private async Task<HalJsonParseResult> ProcessURLAsync(string uriPath, string felleskomponentUri, IHalHttpClient client, bool useLocalCache)
+        static private async Task<(HalJsonParseResult, int)> ProcessURLAsync(string uriPath, string felleskomponentUri, IHalHttpClient client, bool useLocalCache, bool abortIfDownloadError)
         {
             HalJsonParseResult result = null;
+            int dataRetrievalStatus = 0;
 
             string jsonFolder = MAUtils.MAFolder;
             string fileName = uriPath.Substring(1).Replace('/', '_');
@@ -2980,18 +3070,18 @@ namespace VigoBAS.FINT.Edu
                 Logger.Log.InfoFormat("Getting data from {0}", uriString);
                 try
                 {
-                    var sizeUri = uriString + "/cache/size";
+                    //var sizeUri = uriString + "/cache/size";
 
-                    string response = client.HttpClient.GetStringAsync(sizeUri).Result;
-                    var totalItems = JsonConvert.DeserializeObject<CacheSize>(response).Size;
+                    //string response = await client.HttpClient.GetStringAsync(sizeUri);
+                    //var totalItems = JsonConvert.DeserializeObject<CacheSize>(response).Size;
 
                     var httpResponse = await client.HttpClient.GetStringAsync(uri);
 
-                    Logger.Log.InfoFormat("Data from {0} returned. Parsing json response", uri.ToString());
+                    Logger.Log.Info($"Data from {uri} returned. Parsing json response");
                     var halJsonParser = new HalJsonParser();
                     result = halJsonParser.Parse(httpResponse);
 
-                    var stateValues = result.StateValues.First().Value;
+                    var totalItems = GetTotalItems(result.StateValues);
 
                     //Logger.Log.InfoFormat("Data from {0} returned with {1} items", uri.ToString(), totalItems.ToString());
 
@@ -3006,84 +3096,88 @@ namespace VigoBAS.FINT.Edu
                     }
                     else
                     {
+                        Logger.Log.Error($"Data from {uri} returned O items. Trying to get data from local cache instead");
                         if (File.Exists(filePath))
                         {
                             Logger.Log.InfoFormat("Getting last saved response from file {0}", filePath);
                             result = GetDataFromFile(filePath);
-                            Logger.Log.DebugFormat("Finished getting last saved response from file {0}", filePath);
+                            if (result != null)
+                            {                                
+                                Logger.Log.DebugFormat("Finished getting last saved response from file {0}", filePath);
+                            }
+                            else
+                            {
+                                Logger.Log.Error($"Reading from file {filePath} returned null");
+                                dataRetrievalStatus = (int)DataRetrievalStatus.FileReadFailed;
+                            }
                         }
                         else
                         {
-                            Logger.Log.InfoFormat("File {0} does not exist, no previous responses has been saved to disk", filePath);
+                            Logger.Log.Error($"File {filePath} does not exist"); 
+                            dataRetrievalStatus = (int)DataRetrievalStatus.FileReadFailed;
                         }
                     }
-                }
-                catch (AggregateException ex)
-                {
-                    Logger.Log.ErrorFormat("Getting data from {0} failed with response: {1}", uri.ToString(), ex.Message);
-                    throw ex;
                 }
 
                 catch (HalHttpRequestException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath);
-                    if (result == null)
-                    {
-                        throw ex;
-                    }
+                    (result, dataRetrievalStatus) = HandleRequestError(uri, ex, filePath, abortIfDownloadError);                    
                 }
                 catch (HttpRequestException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath);
-                    if (result == null)
-                    {
-                        Logger.Log.ErrorFormat("Reading file {0} returned no objects", filePath);
-                        throw ex;
-                    }
+                    (result, dataRetrievalStatus) = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
                 }
                 catch (TaskCanceledException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath);
-                    if (result == null)
-                    {
-                        Logger.Log.ErrorFormat("Reading file {0} returned no objects", filePath);
-                        throw ex;
-                    }
+                    (result, dataRetrievalStatus) = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
                 }
                 catch (WebException ex)
                 {
-                    result = HandleRequestError(uri, ex, filePath);
-                    if (result == null)
-                    {
-                        Logger.Log.ErrorFormat("Reading file {0} returned no objects", filePath);
-                        throw ex;
-                    }
+                    (result, dataRetrievalStatus) = HandleRequestError(uri, ex, filePath, abortIfDownloadError);
                 }
             }
-            return result;
+            return (result, dataRetrievalStatus);
         }
 
-        private static HalJsonParseResult HandleRequestError(Uri uri, Exception ex, string filePath)
+        private static int GetTotalItems(IEnumerable<IStateValue> stateValues)
+        {
+            int totalItems = 0;
+
+            foreach(IStateValue stateValue in stateValues)
+            {
+                if (stateValue.Name == "total_items")
+                {
+                    totalItems = Int32.Parse( stateValue.Value);
+                }
+            }
+            return totalItems;
+        }
+
+        private static (HalJsonParseResult, int) HandleRequestError(Uri uri, Exception ex, string filePath, bool abortIfDownloadError)
         {
             HalJsonParseResult result;
+            int readResult;
+            
             var message = ex?.Message;
             var exceptionType = ex?.GetType().ToString();
             var innerexception = ex?.InnerException?.Message;
-            Logger.Log.ErrorFormat("Getting resource uri: {0} failed with error type {1}. HTTP Message: {2}, Inner exception: {3}"
-                            , uri.ToString(), exceptionType, message, innerexception);
+            var errorMessage = $"Getting resource uri: {uri} failed with error type {exceptionType}. HTTP Message: {message}, Inner exception: {innerexception}";
+            Logger.Log.Error(errorMessage);
 
             if (File.Exists(filePath))
             {
                 Logger.Log.InfoFormat("Getting last saved response from file {0}", filePath);
                 result = GetDataFromFile(filePath);
+                readResult = (int)DataRetrievalStatus.FileReadOK;
                 Logger.Log.DebugFormat("Finished getting last saved response from file {0}", filePath);
             }
             else
             {
-                Logger.Log.InfoFormat("File {0} does not exist, no previous responses has been saved to disk", filePath);
+                readResult = (int)DataRetrievalStatus.FileReadFailed;
+                Logger.Log.Error($"File {filePath} does not exist");
                 result = null;
-            }
-            return result;
+            }            
+            return (result, readResult);
 
         }
 

@@ -40,6 +40,7 @@ namespace VigoBAS.FINT.Edu
             public const char path = '/';
             public const char roleSchool = '@';
             public const char categorySchool = '@';
+            public const char levelAtSchool = '@';
         }
         
 
@@ -61,6 +62,7 @@ namespace VigoBAS.FINT.Edu
 
             public const string useLocalCache = "Importer fra lokal cache";
             public const string abortIfResourceTypeEmpty = "Stopp import hvis en ressurstype er tom";
+            public const string abortIfDownloadError = "Stopp import ved nedlastingsfeil";
             public const string importStudentsWithoutStudyRelationShip = "Importer elever uten skoletilknytning";
 
             public const string useGroupMembershipResources = "Bruk gruppemedlemskapsressurser";
@@ -74,6 +76,7 @@ namespace VigoBAS.FINT.Edu
             public const string daysBeforeStudentEnds = "Antall dager etter aktivt elevforhold";
 
             public const string daysBeforeEmploymentStarts = "Antall dager før aktivt arbeidsforhold";
+            public const string daysBeforeEmploymentEnds = "Antall dager etter aktivt arbeidsforhold";
             public const string excludedResourceTypes = "Ignorer ressurskategorier";
             public const string excludedEmploymentTypes = "Ignorer arbeidsforholdtyper";
             public const string excludedPositionCodes = "Ignorer stillingskoder";
@@ -300,6 +303,7 @@ namespace VigoBAS.FINT.Edu
             public const string GruppeElevAntall = "GruppeElevAntall";
             public const string GruppeLarerListe = "GruppeLarerListe";
             public const string GruppeLarerOgElevListe = "GruppeLarerOgElevListe";
+            public const string GruppeGruppeListe = "GruppeBasisgruppeListe";
             public const string GruppeFagRef = "GruppeFagRef";
 
             public const string SkoleSystemId = "SkoleSystemId";
