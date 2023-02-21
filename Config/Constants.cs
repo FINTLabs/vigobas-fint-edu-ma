@@ -303,7 +303,7 @@ namespace VigoBAS.FINT.Edu
             public const string GruppeElevAntall = "GruppeElevAntall";
             public const string GruppeLarerListe = "GruppeLarerListe";
             public const string GruppeLarerOgElevListe = "GruppeLarerOgElevListe";
-            public const string GruppeGruppeListe = "BasisgruppeListe";
+            public const string GruppeGruppeListe = "GruppeBasisgruppeListe";
             public const string GruppeFagRef = "GruppeFagRef";
 
             public const string SkoleSystemId = "SkoleSystemId";
