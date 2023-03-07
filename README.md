@@ -6,8 +6,8 @@ Management Agent for Microsoft Identity Manager (MIM). Syncs educational data wi
 
 Version 1.7.0 is the first public versjon. For older versions see: https://vigobas.vigoiks.no/VigoBAS/systemdokumentasjon/releasenotes/ 
 
-## Version 1.7.99
-This is the 1.8.0-beta
+## Version 1.8.0
+Released 2023-03-07
 ### Features
 * Added level groups (trinngrupper per skole)
 * Added days after employment ends as config
