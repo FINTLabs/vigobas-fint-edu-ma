@@ -117,20 +117,6 @@ namespace VigoBAS.FINT.Edu.Utilities
             return periodIsValid;
         }
 
-        public static bool CheckExamGroupValid(DateTime? examDate, DateTime examPeriodStart, DateTime examPeriodEnd)
-        {
-            bool groupIsValid = false;   
-
-            if (examPeriodStart <= examDate && examDate <= examPeriodEnd)
-            {
-                groupIsValid = true;
-            }
-            else
-            {
-                Logger.Log.Debug($"Exam Date {examDate} not between {examPeriodStart} and {examPeriodEnd}. ExamGroup is not considered valid");
-            }
-            return groupIsValid;
-        }
         public static string Decrypt(SecureString inStr)
         {
             IntPtr ptr = Marshal.SecureStringToBSTR(inStr);
