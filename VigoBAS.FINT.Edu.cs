@@ -1939,7 +1939,7 @@ namespace VigoBAS.FINT.Edu
         }
 
 
-        private EduGroup HandleGroup(
+        private void HandleGroup(
             string groupType,
             string groupUri,
             string schoolUri,
@@ -2186,7 +2186,6 @@ namespace VigoBAS.FINT.Edu
                     }
                 }
             }
-            return eduGroup;
         }
 
         private string AddStudentToCS(
@@ -3341,19 +3340,6 @@ namespace VigoBAS.FINT.Edu
 
         }
 
-        private static HashSet<string> GetExamGroupsFromFile (string filePath)
-        {
-            HashSet<string> result = new HashSet<string>();
-
-            foreach (string line in File.ReadLines(filePath))
-            {
-                if (!result.TryGetValue(line, out string dummy))
-                {
-                    result.Add(line);
-                }
-            }
-            return result;
-        }
         private static HalJsonParseResult GetDataFromFile(string filePath)
         {
             HalJsonParseResult result;
