@@ -73,12 +73,15 @@ namespace VigoBAS.FINT.Edu
             public const string generateAggrEmployeeGroups = "Generer grupper for alle ansatte";
             public const string generateProgAreaGroups = "Generer programområdegrupper";
 
-            public const string examSchoolnumbersToImport = "Eksamensskoler";
-            public const string examPeriodStartDate = "Eksamensperiode startdato (yyyy-MM-dd)";
-            public const string examPeriodEndDate = "Eksamensperiode sluttdato (yyyy-MM-dd)";
+            public const string examCategoriesToImport = "Eksamensformer til import";
+            public const string examCategoriesToAggregatePerDate = "Samlegrupper per dato for eksamensformer";
+            public const string examgroupsVisibleFromDate = "Eksamensgrupper synlig fra dato (yyyy-MM-dd)";
+            //public const string examPeriodStartDate = "Eksamensperiode startdato (yyyy-MM-dd)";
+            public const string examgroupsVisibleToDate = "Eksamensgrupper synlig til dato (yyyy-MM-dd)";
 
             public const string daysBeforeStudentStarts = "Antall dager før aktivt elevforhold";
             public const string daysBeforeStudentEnds = "Antall dager etter aktivt elevforhold";
+            public const string importPurePrivateStudents = "Importer rene privatister";
 
             public const string daysBeforeEmploymentStarts = "Antall dager før aktivt arbeidsforhold";
             public const string daysBeforeEmploymentEnds = "Antall dager etter aktivt arbeidsforhold";
@@ -188,6 +191,7 @@ namespace VigoBAS.FINT.Edu
             public const string employmentType = "arbeidsforholdstype";
             public const string positionCode = "stillingskode";
             public const string leader = "leder";
+            public const string eksamensform = "eksamensform";
         }
 
         public struct ClassType
@@ -300,6 +304,7 @@ namespace VigoBAS.FINT.Edu
             public const string GruppeSystemId = "GruppeSystemId";
             public const string GruppeNavn = "GruppeNavn";
             public const string EduGroupType = "EduGroupType";
+            public const string EduGroupExamCategory = "EduGroupExamCategory";
             public const string GruppeBeskrivelse = "GruppeBeskrivelse";
             public const string GruppePeriodeStart = "GruppePeriodeStart";
             public const string GruppePeriodeSlutt = "GruppePeriodeSlutt";

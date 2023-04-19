@@ -61,6 +61,7 @@ namespace VigoBAS.FINT.Edu
         // Relasjoner elev
         public List<string> ElevforholdSkole { get; set; }
         public List<string> ElevforholdKategori { get; set; }
+        public string ElevforholdHovedkategori { get; set; }
         public List<string> ElevforholdBasisgruppe { get; set; }
         public List<string> ElevforholdKontaktlarergruppe { get; set; }
         public List<string> ElevforholdUndervisningsgruppe { get; set; }

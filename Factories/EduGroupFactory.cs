@@ -29,12 +29,58 @@ namespace VigoBAS.FINT.Edu
     {
         public static EduGroup Create(
             string schoolUri, 
-            string examDate
+            string examDate,
+            string examCategory
         )
         {
-            var groupUri = schoolUri + "_" + examDate;
-            var systemId = schoolUri.Split('/').Last() + "_" + examDate;
-            var groupName = examDate + " Alle kandidater";
+            var groupUri = schoolUri + "_" + examCategory + "_" + examDate;
+            var systemId = schoolUri.Split('/').Last() + "_" + examCategory + "_" + examDate;
+            var examform = string.Empty;
+
+            switch (examCategory)
+            {
+
+                case "S":
+                    {
+                        examform = "Skriftlig";
+                        break;
+                    }
+
+                case "M":
+                    {
+                        examform = "Muntlig";
+                        break;
+                    }
+
+                case "P":
+                    {
+                        examform = "Praktisk";
+                        break;
+                    }
+                case "SM":
+                    {
+                        examform = "Skriftlig muntlig";
+                        break;
+                    }
+                case "SP":
+                    {
+                        examform = "Skriftlig praktisk";
+                        break;
+                    }
+                case "MP":
+                    {
+                        examform = "Muntlig praktisk" ;
+                        break;
+                    }
+
+                case "TP":
+                    {
+                        examform = "Teorisk praktisk";
+                        break;
+                    }
+            }
+
+            var groupName = examDate + " Alle kandidater " + examform + " eksamen";
             var elevListe = new List<string>();
 
             return new EduGroup
@@ -42,7 +88,8 @@ namespace VigoBAS.FINT.Edu
                 GruppeSystemIdUri = groupUri,
                 GruppeSystemId = systemId,
                 GruppeNavn = groupName,
-                EduGroupType = ClassType.examGroup,
+                EduGroupType = ClassType.examGroup + '.' + GroupType.aggrStu,
+                Eksamensform = examCategory,
                 GruppeSkoleRef = schoolUri,
                 GruppeElevListe = elevListe
             };
@@ -51,6 +98,7 @@ namespace VigoBAS.FINT.Edu
             string systemIdUri,
             Gruppe basicGroup,
             string groupType,
+            string examCategory,
             IReadOnlyDictionary<string, IEnumerable<ILinkObject>> groupLinks,
             EduOrgUnit  school,
             EduGroup studyProgramme
@@ -90,6 +138,7 @@ namespace VigoBAS.FINT.Edu
                 GruppeSystemIdUri = systemIdUri,
                 GruppeSystemId = systemId,
                 EduGroupType = groupType,
+                Eksamensform = examCategory,
                 GruppeNavn = navn,
                 GruppeBeskrivelse = beskrivelse,
                 GruppePeriodeStart = periodeStart,

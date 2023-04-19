@@ -45,6 +45,7 @@ namespace VigoBAS.FINT.Edu
         public Grepkode Grepkode;
         public string GruppeFagRef;
         public EduGroup Utdanningsprogram;
+        public string Eksamensform;
         //public string GruppeVigoReferanse;
         public List<string> GruppeElevListe;
         public List<string> GruppeLarerListe;
@@ -94,6 +95,10 @@ namespace VigoBAS.FINT.Edu
             if (!string.IsNullOrEmpty(EduGroupType))
             {
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.EduGroupType, EduGroupType));
+            }
+            if (!string.IsNullOrEmpty(Eksamensform))
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.EduGroupExamCategory, Eksamensform));
             }
             if (!string.IsNullOrEmpty(GruppeBeskrivelse))
             {
