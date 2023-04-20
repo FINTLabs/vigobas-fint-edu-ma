@@ -285,6 +285,7 @@ namespace VigoBAS.FINT.Edu
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdUndervisningsgruppe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdSkole, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdKategori, AttributeType.Reference, AttributeOperation.ImportOnly));
+            eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.ElevforholdHovedkategori, AttributeType.String, AttributeOperation.ImportOnly));
 
             eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.SkoleressursSystemIdUri, AttributeType.String, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.SkoleressursFeidenavn, AttributeType.String, AttributeOperation.ImportExport));

@@ -283,6 +283,10 @@ namespace VigoBAS.FINT.Edu
                 }
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdKategori, members));
             }
+            if (!string.IsNullOrEmpty(ElevforholdHovedkategori))
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdHovedkategori, ElevforholdHovedkategori));
+            }
             // Personal skoleressurs
             if (!string.IsNullOrEmpty(SkoleressursSystemIdUri))
             {
