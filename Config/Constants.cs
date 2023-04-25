@@ -28,6 +28,7 @@ namespace VigoBAS.FINT.Edu
     class Constants
     {
         public const string dateFormat = "yyyy-MM-dd";
+        public const string hourFormat = "HH\\:mm\\:ss";
         public const string zeroDate = "1900-01-01";
         public const string infinityDate = "2099-01-01";
         public const int initialDelayMilliseconds = 500; 
@@ -72,8 +73,15 @@ namespace VigoBAS.FINT.Edu
             public const string generateAggrEmployeeGroups = "Generer grupper for alle ansatte";
             public const string generateProgAreaGroups = "Generer programområdegrupper";
 
+            public const string examCategoriesToImport = "Eksamensformer til import";
+            public const string examCategoriesToAggregatePerDate = "Samlegrupper per dato for eksamensformer";
+            public const string examgroupsVisibleFromDate = "Eksamensgrupper synlig fra dato (yyyy-MM-dd)";
+            //public const string examPeriodStartDate = "Eksamensperiode startdato (yyyy-MM-dd)";
+            public const string examgroupsVisibleToDate = "Eksamensgrupper synlig til dato (yyyy-MM-dd)";
+
             public const string daysBeforeStudentStarts = "Antall dager før aktivt elevforhold";
             public const string daysBeforeStudentEnds = "Antall dager etter aktivt elevforhold";
+            public const string importPurePrivateStudents = "Importer rene privatister";
 
             public const string daysBeforeEmploymentStarts = "Antall dager før aktivt arbeidsforhold";
             public const string daysBeforeEmploymentEnds = "Antall dager etter aktivt arbeidsforhold";
@@ -161,6 +169,7 @@ namespace VigoBAS.FINT.Edu
             public const string basicGroup = "basisgruppe";
             public const string contactTeacherGroup = "kontaktlarergruppe";
             public const string studyGroup = "undervisningsgruppe";
+            public const string examGroup = "eksamensgruppe";
             public const string groupMembership = "gruppemedlemskap";
             public const string subject = "fag";
             public const string level = "trinn";
@@ -182,6 +191,7 @@ namespace VigoBAS.FINT.Edu
             public const string employmentType = "arbeidsforholdstype";
             public const string positionCode = "stillingskode";
             public const string leader = "leder";
+            public const string eksamensform = "eksamensform";
         }
 
         public struct ClassType
@@ -271,6 +281,7 @@ namespace VigoBAS.FINT.Edu
             public const string ElevforholdUndervisningsgruppe = "ElevforholdUndervisningsgruppe";
             public const string ElevforholdSkole = "ElevforholdSkole";
             public const string ElevforholdKategori = "ElevforholdKategori";
+            public const string ElevforholdHovedkategori = "ElevforholdHovedkategori";
             public const string SkoleressursFeidenavn = "SkoleressursFeidenavn";
             public const string SkoleressursSystemIdUri = "SkoleressursSystemIdUri";
             public const string PersonalBrukernavn = "PersonalBrukernavn";
@@ -294,9 +305,12 @@ namespace VigoBAS.FINT.Edu
             public const string GruppeSystemId = "GruppeSystemId";
             public const string GruppeNavn = "GruppeNavn";
             public const string EduGroupType = "EduGroupType";
+            public const string EduGroupExamCategory = "EduGroupExamCategory";
             public const string GruppeBeskrivelse = "GruppeBeskrivelse";
             public const string GruppePeriodeStart = "GruppePeriodeStart";
             public const string GruppePeriodeSlutt = "GruppePeriodeSlutt";
+            public const string GruppePeriodeStartTime = "GruppePeriodeStartTime";
+            public const string GruppePeriodeSluttTime = "GruppePeriodeSluttTime";
             public const string GruppeSkoleRef = "GruppeSkoleRef";
             public const string GruppeSkoleSkolenummer = "GruppeSkoleSkolenummer";
             public const string GruppeElevListe = "GruppeElevListe";

@@ -37,12 +37,15 @@ namespace VigoBAS.FINT.Edu
         public string GruppeNavn;
         public string GruppePeriodeStart;
         public string GruppePeriodeSlutt;
+        public string GruppePeriodeStartTime;
+        public string GruppePeriodeSluttTime;
         public string GruppeSkoleRef;
         public string GruppeSkoleSkolenummer;
         //public string GruppeGrepReferanse;
         public Grepkode Grepkode;
         public string GruppeFagRef;
         public EduGroup Utdanningsprogram;
+        public string Eksamensform;
         //public string GruppeVigoReferanse;
         public List<string> GruppeElevListe;
         public List<string> GruppeLarerListe;
@@ -80,15 +83,23 @@ namespace VigoBAS.FINT.Edu
 
             */
             csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeSystemIdUri, GruppeSystemIdUri));
-            csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeSystemId, GruppeSystemId));
 
-            csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeNavn, GruppeNavn));
-
+            if (!string.IsNullOrEmpty(GruppeSystemId))
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeSystemId, GruppeSystemId));
+            }
+            if (!string.IsNullOrEmpty(GruppeNavn))
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeNavn, GruppeNavn));
+            }
             if (!string.IsNullOrEmpty(EduGroupType))
             {
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.EduGroupType, EduGroupType));
             }
-
+            if (!string.IsNullOrEmpty(Eksamensform))
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.EduGroupExamCategory, Eksamensform));
+            }
             if (!string.IsNullOrEmpty(GruppeBeskrivelse))
             {
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeBeskrivelse, GruppeBeskrivelse));
@@ -104,6 +115,14 @@ namespace VigoBAS.FINT.Edu
             if (!string.IsNullOrEmpty(GruppePeriodeSlutt))
             {
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppePeriodeSlutt, GruppePeriodeSlutt));
+            }
+            if (!string.IsNullOrEmpty(GruppePeriodeStartTime))
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppePeriodeStartTime, GruppePeriodeStartTime));
+            }
+            if (!string.IsNullOrEmpty(GruppePeriodeSluttTime))
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppePeriodeSluttTime, GruppePeriodeSluttTime));
             }
             if (!string.IsNullOrEmpty(GruppeSkoleRef))
             {
@@ -127,7 +146,7 @@ namespace VigoBAS.FINT.Edu
                     studfacmembers.Add(memberUri);
                 }
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeElevListe, members));
-                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeElevAntall, noOfMembers.ToString()));
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.GruppeElevAntall, noOfMembers));
             }
             if (GruppeLarerListe != null && GruppeLarerListe.Count > 0)
             {
