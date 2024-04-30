@@ -36,6 +36,7 @@ namespace VigoBAS.FINT.Edu
         public string ElevforholdGyldighetsperiodeSlutt { get; set; }
         public bool? ElevforholdHovedskole { get; set; }        
         public string ElevforholdElevkategori { get; set; }
+        public string ElevforholdProgramomrade { get; set; }
         public string ElevforholdElevRef { get; set; }
         public string ElevforholdSkoleRef { get; set; }
         public string ElevforholdBasisgruppeRef { get; set; }
@@ -80,6 +81,14 @@ namespace VigoBAS.FINT.Edu
             if (!string.IsNullOrEmpty(ElevforholdSkoleRef))
             {
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdSkoleRef, ElevforholdSkoleRef));
+            }
+            if (!string.IsNullOrEmpty(ElevforholdProgramomrade))
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdProgramomrade, ElevforholdProgramomrade));
+            }
+            if (!string.IsNullOrEmpty(ElevforholdBasisgruppeRef))
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdBasisgruppeRef, ElevforholdBasisgruppeRef));
             }
 
             return csentry;

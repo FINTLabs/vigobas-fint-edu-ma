@@ -34,13 +34,14 @@ namespace VigoBAS.FINT.Edu
             string studentUri,
             string schoolUri,
             string category,
+            string programmeareaUri,
             ElevforholdResource elevforholdResource
         )
         {
             var systemId = elevforholdResource.SystemId.Identifikatorverdi;
             var hovedskole = elevforholdResource.Hovedskole;
             var periodeStart = elevforholdResource.Gyldighetsperiode.Start.ToString();
-            var periodeSlutt = elevforholdResource.Gyldighetsperiode.Slutt.ToString(); ;
+            var periodeSlutt = elevforholdResource.Gyldighetsperiode.Slutt.ToString();             
         
             return new EduStudentRelationship
             {
@@ -51,7 +52,8 @@ namespace VigoBAS.FINT.Edu
                 ElevforholdGyldighetsperiodeSlutt = periodeSlutt, 
                 ElevforholdElevRef = studentUri,
                 ElevforholdSkoleRef = schoolUri,
-                ElevforholdElevkategori = category
+                ElevforholdElevkategori = category,
+                ElevforholdProgramomrade = programmeareaUri
             };
         }
     

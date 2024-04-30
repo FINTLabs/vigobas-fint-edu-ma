@@ -113,6 +113,17 @@ namespace VigoBAS.FINT.Edu
                             break;
 
                         }
+                    case ResourceLink.programmearea:
+                        {
+                            var linkObjects = links[linkKey];
+                            foreach (var linkObject in linkObjects)
+                            {
+                                var hrefValue = linkObject.Href.ToString();
+                                var link = Link.with(hrefValue);
+                                elevforholdResource.AddProgramomrade(link);
+                            }
+                            break;
+                        }
                 }
             }
             return elevforholdResource;

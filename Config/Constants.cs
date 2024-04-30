@@ -282,6 +282,7 @@ namespace VigoBAS.FINT.Edu
             public const string ElevforholdSkole = "ElevforholdSkole";
             public const string ElevforholdKategori = "ElevforholdKategori";
             public const string ElevforholdHovedkategori = "ElevforholdHovedkategori";
+            public const string ElevforholdProgramomrade = "ElevforholdProgramomrade";
             public const string SkoleressursFeidenavn = "SkoleressursFeidenavn";
             public const string SkoleressursSystemIdUri = "SkoleressursSystemIdUri";
             public const string PersonalBrukernavn = "PersonalBrukernavn";

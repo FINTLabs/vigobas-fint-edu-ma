@@ -281,12 +281,13 @@ namespace VigoBAS.FINT.Edu
 
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdMedlemskap, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdBasisgruppe, AttributeType.Reference, AttributeOperation.ImportOnly));
+            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdBasisgruppeRef, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdKontaktlarergruppe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdUndervisningsgruppe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdSkole, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdKategori, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.ElevforholdHovedkategori, AttributeType.String, AttributeOperation.ImportOnly));
-
+            eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.ElevforholdProgramomrade, AttributeType.String, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.SkoleressursSystemIdUri, AttributeType.String, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.SkoleressursFeidenavn, AttributeType.String, AttributeOperation.ImportExport));
             eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.PersonalBrukernavn, AttributeType.String, AttributeOperation.ImportExport));
@@ -2335,12 +2336,23 @@ namespace VigoBAS.FINT.Edu
 
                                 if (!string.IsNullOrEmpty(newEduRescourceUri))
                                 {
+                                    var programmeareaUri = string.Empty;
                                     var studentRelationshipResource = new ElevforholdResource();
                                     studentRelationshipResource = ElevforholdResourceFactory.Create(studentRelationShipData);
 
                                     if (!importedObjectsDict.TryGetValue(studentRelationshipUri, out ImportListItem dummyStudentRelationship))
                                     {
-                                        var eduStudentRelationship = EduStudentRelationshipFactory.Create(studentRelationshipUri, newEduRescourceUri, schoolUri, studentCategoryUri, studentRelationshipResource);
+                                        if (studentRelationShipLinks.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programmeareaLink))
+                                        {
+                                            programmeareaUri = LinkToString(programmeareaLink);
+                                        }
+                                        var eduStudentRelationship = EduStudentRelationshipFactory.Create(
+                                            studentRelationshipUri, 
+                                            newEduRescourceUri, 
+                                            schoolUri, 
+                                            studentCategoryUri, 
+                                            programmeareaUri,
+                                            studentRelationshipResource);
                                         importedObjectsDict.Add(studentRelationshipUri, new ImportListItem { eduStudentRelationship = eduStudentRelationship });
                                     }
 
@@ -2350,22 +2362,22 @@ namespace VigoBAS.FINT.Edu
                                     {
                                         isMainSchool = Convert.ToBoolean(hovedskoleValue.Value);
                                     }
-                                    var programmeareaUri = string.Empty;
+                                    //var programmeareaUri = string.Empty;
 
-                                    if (studentRelationShipLinks.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programmeareaLink))
-                                    {
-                                        programmeareaUri = LinkToString(programmeareaLink);
+                                    //if (studentRelationShipLinks.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programmeareaLink))
+                                    //{
+                                    //    programmeareaUri = LinkToString(programmeareaLink);
                                         
-                                        if (false)
-                                        {
-                                            AddStudentToProgrammeAreaGroup(
-                                                newEduRescourceUri,
-                                                programmeareaUri,
-                                                eduOrgUnit,
-                                                ref importedObjectsDict
-                                                );
-                                        }
-                                    }
+                                    //    if (false)
+                                    //    {
+                                    //        AddStudentToProgrammeAreaGroup(
+                                    //            newEduRescourceUri,
+                                    //            programmeareaUri,
+                                    //            eduOrgUnit,
+                                    //            ref importedObjectsDict
+                                    //            );
+                                    //    }
+                                    //}
                                     AddMembershipOrgUnitAndEduEntitementInfo(
                                         newEduRescourceUri,
                                         relationshipType,
