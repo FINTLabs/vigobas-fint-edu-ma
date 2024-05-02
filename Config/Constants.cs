@@ -83,12 +83,13 @@ namespace VigoBAS.FINT.Edu
             public const string daysBeforeStudentEnds = "Antall dager etter aktivt elevforhold";
             public const string importPurePrivateStudents = "Importer rene privatister";
 
+            public const string daysBeforeGroupStarts = "Antall dager før gruppen starter";
+            public const string daysBeforeGroupEnds = "Antall dager etter gruppen slutter";
             public const string daysBeforeEmploymentStarts = "Antall dager før aktivt arbeidsforhold";
             public const string daysBeforeEmploymentEnds = "Antall dager etter aktivt arbeidsforhold";
             public const string excludedResourceTypes = "Ignorer ressurskategorier";
             public const string excludedEmploymentTypes = "Ignorer arbeidsforholdtyper";
             public const string excludedPositionCodes = "Ignorer stillingskoder";
-            public const string importNoDaysAhead = "Antall dager fram i tid for grupper";
             public const string waitTime = "Ventetid oppdateringskall (millisekunder)";
             public const string lowerLimit = "Nedre grense statuskø";
             public const string upperLimit = "Øvre grense statuskø";
