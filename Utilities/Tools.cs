@@ -93,20 +93,18 @@ namespace VigoBAS.FINT.Edu.Utilities
             return normalizedUri;
         }
 
-        public static bool CheckValidPeriod(IStateValue periodeValue, int daysBefore, int daysAhead)
+        public static bool PeriodIsValid(IStateValue stateValue, int daysBefore, int daysAhead)
         {
             bool periodIsValid = false;
 
             var compareDate = DateTime.Today;
 
-            var period = JsonConvert.DeserializeObject<Periode>(periodeValue.Value);
+            var period = GetPeriodFromStateValue(stateValue);             
 
-            var periodStart = period.Start;
-            var calculatedPeriodStart = periodStart.AddDays(-daysBefore);
-            var periodSlutt = (period?.Slutt!=null) ? period.Slutt : DateTime.Parse(infinityDate);
-            var calulatedPeriodSlutt = (period?.Slutt != null) ? period.Slutt?.AddDays(daysAhead) : DateTime.Parse(infinityDate);
+            var periodStart = period.Start.Date.AddDays(-daysBefore);
+            var periodSlutt = GetPeriodeSluttAsDate(period, infinityDate).AddDays(daysAhead);
 
-            if (calculatedPeriodStart <= compareDate && calulatedPeriodSlutt >= compareDate)
+            if (periodStart <= compareDate && compareDate <= periodSlutt )
             {
                 periodIsValid = true;
             }
@@ -116,7 +114,18 @@ namespace VigoBAS.FINT.Edu.Utilities
             }
             return periodIsValid;
         }
+        public static bool ExamgroupsShouldBeVisible(DateTime visibleFromDate, DateTime visibleToDate)
+        {
+            return (visibleFromDate <= DateTime.Today) && (DateTime.Today <= visibleToDate);
+        }
+        public static bool ExamgroupIsInVisiblePeriod(IStateValue stateValue, DateTime visibleFromDate, DateTime visibleToDate) 
+        {
+            var period = GetPeriodFromStateValue(stateValue);
+            var periodStart = period.Start;
+            var periodSlutt = GetPeriodeSluttAsDate(period, infinityDate);
 
+            return (visibleFromDate <= periodStart) && (periodSlutt <= visibleToDate);
+        }
         public static string Decrypt(SecureString inStr)
         {
             IntPtr ptr = Marshal.SecureStringToBSTR(inStr);
@@ -186,6 +195,20 @@ namespace VigoBAS.FINT.Edu.Utilities
 
             // Return the fully-RFC3986-escaped string.
             return escaped.ToString();
+        }
+        private static Periode GetPeriodFromStateValue (IStateValue stateValue )
+        {            ;
+            if (stateValue.Type == "Array")
+            {
+                return JsonConvert.DeserializeObject<List<Periode>>(stateValue.Value)[0];
+            }
+                return JsonConvert.DeserializeObject<Periode>(stateValue.Value);
+        }
+        private static DateTime GetPeriodeSluttAsDate (Periode period, string infinityDate)
+        {
+            string sluttDateAsString = (period?.Slutt != null) ? period.Slutt.ToString() : infinityDate;
+
+            return DateTime.Parse(sluttDateAsString).Date;
         }
         public enum DataRetrievalStatus 
         {
