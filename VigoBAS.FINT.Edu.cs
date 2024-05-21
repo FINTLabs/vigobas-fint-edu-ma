@@ -1514,7 +1514,7 @@ namespace VigoBAS.FINT.Edu
 
                     var anchor = ImportedObjectsList[GetImportEntriesIndex].eduPerson.Anchor();
 
-                    if (ImportedObjectsList[GetImportEntriesIndex].eduPerson.ElevforholdHovedkategori != "privatist" || importPurePrivateStudents)
+                    if (!String.IsNullOrEmpty(ImportedObjectsList[GetImportEntriesIndex].eduPerson.PersonalAnsattnummer) || ImportedObjectsList[GetImportEntriesIndex].eduPerson.ElevforholdHovedkategori != "privatist" || importPurePrivateStudents)
                     {
                         Logger.Log.DebugFormat("Trying to add eduPerson csentry with anchor {0}", anchor);
                         csentries.Add(ImportedObjectsList[GetImportEntriesIndex].eduPerson.GetCSEntryChange());
