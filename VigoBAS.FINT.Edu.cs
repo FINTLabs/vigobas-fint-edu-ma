@@ -288,7 +288,8 @@ namespace VigoBAS.FINT.Edu
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdBasisgruppe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdBasisgruppeRef, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdKontaktlarergruppe, AttributeType.Reference, AttributeOperation.ImportOnly));
-            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdUndervisningsgruppe, AttributeType.Reference, AttributeOperation.ImportOnly));
+            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdUndervisningsgruppe, AttributeType.Reference, AttributeOperation.ImportOnly));//
+            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdEksamensgruppe, AttributeType.Reference, AttributeOperation.ImportOnly));//
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdSkole, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdKategori, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.ElevforholdHovedkategori, AttributeType.String, AttributeOperation.ImportOnly));
@@ -1062,19 +1063,20 @@ namespace VigoBAS.FINT.Edu
                                     studyProgramme = importListItemEduGroup.eduGroup;
                                 }
 
-                                //var studyprogrammeDataLinks = studyprogrammeData.Links;
+                                var studyprogrammeDataLinks = studyprogrammeData.Links;
 
-                                //if (studyprogrammeDataLinks.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programmeareas))
-                                //{
-                                //    foreach (var programmearea in programmeareas)
-                                //    {
-                                //        var groupUri = LinkToString(programmearea);
-                                //        if (_programomradeDict.TryGetValue(groupUri, out IEmbeddedResourceObject groupData))
-                                //        {
-                                //            HandleGroup(ClassType.programmeArea, groupUri, schoolUri, organisasjonIdUri, groupData, 0, examgroupsVisibleFromDate, studyProgramme, ref levelGroupDictionary, ref ssnToSystemId, ref importedObjectsDict);
-                                //        }
-                                //    }
-                                //}
+                                if (studyprogrammeDataLinks.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programmeareas))
+                                {
+                                    foreach (var programmearea in programmeareas)
+                                    {
+                                        var groupUri = LinkToString(programmearea);
+                                        if (_programomradeDict.TryGetValue(groupUri, out IEmbeddedResourceObject groupData))
+                                        {
+                                            // 0, examgroupsVisibleFromDate,
+                                            HandleGroup(ClassType.programmeArea, groupUri, schoolUri, organisasjonIdUri, groupData, studyProgramme, ref levelGroupDictionary, ref ssnToSystemId, ref importedObjectsDict);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -1514,14 +1516,14 @@ namespace VigoBAS.FINT.Edu
 
                     var anchor = ImportedObjectsList[GetImportEntriesIndex].eduPerson.Anchor();
 
-                    if (!String.IsNullOrEmpty(ImportedObjectsList[GetImportEntriesIndex].eduPerson.PersonalAnsattnummer) || ImportedObjectsList[GetImportEntriesIndex].eduPerson.ElevforholdHovedkategori != "privatist" || importPurePrivateStudents)
+                    if (ImportedObjectsList[GetImportEntriesIndex].eduPerson.AnsettelsesforholdSkole.Count > 0 || ImportedObjectsList[GetImportEntriesIndex].eduPerson.ElevforholdHovedkategori != "privatist" || importPurePrivateStudents)
                     {
                         Logger.Log.DebugFormat("Trying to add eduPerson csentry with anchor {0}", anchor);
                         csentries.Add(ImportedObjectsList[GetImportEntriesIndex].eduPerson.GetCSEntryChange());
                     }
                     else
                     {
-                        Logger.Log.DebugFormat("Student {0} has 'privatist' as only student category and is filtered from import to CS", anchor);
+                        Logger.Log.InfoFormat("Student {0} has 'privatist' as only student category and is filtered from import to CS", anchor);
                     }
                 }
                 if (ImportedObjectsList[GetImportEntriesIndex].eduGroup != null)
@@ -2097,12 +2099,12 @@ namespace VigoBAS.FINT.Edu
                                 membershipDict = _examGroupAndValidStudentRelationships;
                                 break;
                             }
-                        //case ClassType.programmeArea:
-                        //    {
-                        //        link = ResourceLink.programmearea;
-                        //        itemDict = _programomradeDict;
-                        //        break;
-                        //    }
+                        case ClassType.programmeArea:
+                            {
+                                link = ResourceLink.programmearea;
+                                itemDict = _programomradeDict;
+                                break;
+                            }
                         case ClassType.educationProgramme:
                             {
                                 link = ResourceLink.studyprogramme;
@@ -2707,6 +2709,11 @@ namespace VigoBAS.FINT.Edu
                         case ClassType.studyGroup:
                             {
                                 eduPerson.ElevforholdUndervisningsgruppe.Add(eduGroupAnchor);
+                                break;
+                            }
+                        case ClassType.examGroup:
+                            {
+                                eduPerson.ElevforholdEksamensgruppe.Add(eduGroupAnchor);
                                 break;
                             }
                     }
