@@ -39,6 +39,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http;
 using System.Threading.Tasks;
 using Vigo.Bas.ManagementAgent.Log;
 using VigoBAS.FINT.Edu.Utilities;
@@ -307,8 +308,10 @@ namespace VigoBAS.FINT.Edu
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.AnsettelsesforholdSkole, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.RolleOgSkole, AttributeType.String, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevkategoriOgSkole, AttributeType.String, AttributeOperation.ImportOnly));
-            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.EduPersonEntitlement, AttributeType.String, AttributeOperation.ImportOnly));
+            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.Eksamensdatoer, AttributeType.String, AttributeOperation.ImportOnly));
+            eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.AntallEksamener, AttributeType.Integer, AttributeOperation.ImportOnly));
 
+            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.EduPersonEntitlement, AttributeType.String, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.EduPersonOrgDN, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.EduPersonPrimaryOrgUnitDN, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.EduPersonOrgUnitDN, AttributeType.Reference, AttributeOperation.ImportOnly));
@@ -689,6 +692,10 @@ namespace VigoBAS.FINT.Edu
                                     {
                                         Logger.Log.DebugFormat("Eksamensgruppe {0} is outside visible period for exam groups", uriKey);
                                     }
+                                    else
+                                    {
+                                        Logger.Log.ErrorFormat("Eksamensgruppe {0} has an empty period", uriKey);
+                                    }
                                 }
                             }
                         }
@@ -1025,9 +1032,28 @@ namespace VigoBAS.FINT.Edu
 
                                         foreach (var member in examgroupMembers)
                                         {
+                                            Logger.Log.InfoFormat("Trying to add student {0} to exam group {1}", member, aggregatedExamgroupUri);
                                             if (!aggredateExamgroupMembers.Contains(member))
                                             {
                                                 aggredateExamgroupMembers.Add(member);
+                                                // add exam date to member
+                                                try
+                                                {                                                    
+                                                    if (importedObjectsDict.TryGetValue(member, out ImportListItem memberItem))
+                                                    {
+                                                        var student = memberItem.eduPerson;
+
+                                                        if (!student.Eksamensdatoer.Contains(examdate))
+                                                        {
+                                                            student.Eksamensdatoer.Add(examdate);
+                                                            student.AntallEksamener++;
+                                                        }
+                                                    }
+                                                }
+                                                catch (Exception e)
+                                                {
+                                                    Logger.Log.ErrorFormat("Adding exam date {0} to student {0} failed with expection {2}", examdate, member, e.Message);
+                                                }
                                             }
                                         }
                                     }
@@ -1103,67 +1129,76 @@ namespace VigoBAS.FINT.Edu
                                 {
                                     var schoolOrganizationElementUri = eduOrgUnit.SkoleOrganisasjonselement;
 
-                                    var personalResourceUri = LinkToString(personalResourceLink);
-
-                                    if (_personalressursDict.TryGetValue(personalResourceUri, out IEmbeddedResourceObject personalResource))
+                                    if (!String.IsNullOrEmpty(schoolOrganizationElementUri))
                                     {
-                                        var personalResourceLinks = personalResource.Links;
-                                        if (personalResourceLinks.TryGetValue(ResourceLink.resourceCategory, out IEnumerable<ILinkObject> resourceCategoryLink))
+                                        var personalResourceUri = LinkToString(personalResourceLink);
+
+                                        if (_personalressursDict.TryGetValue(personalResourceUri, out IEmbeddedResourceObject personalResource))
                                         {
-                                            string resourceCategoryId = GetIdValueFromLink(resourceCategoryLink);
-
-                                            if (!excludedResourceTypes.Contains(resourceCategoryId))
+                                            var personalResourceLinks = personalResource.Links;
+                                            if (personalResourceLinks.TryGetValue(ResourceLink.resourceCategory, out IEnumerable<ILinkObject> resourceCategoryLink))
                                             {
-                                                // check if this schoolresource has an active emplyment at this school
-                                                Logger.Log.InfoFormat("Checking active employments for schoolresource {0} at school {1}", schoolResourceUri, schoolUri);
+                                                string resourceCategoryId = GetIdValueFromLink(resourceCategoryLink);
 
-                                                (bool resourceIsActive, bool isMainSchool) = CheckResourceActiveAtSchool(personalResourceUri, schoolOrganizationElementUri,
-                                                    principalForSchoolDict,
-                                                    workplaceOrgUnitToSchoolOrgUnit,
-                                                    _personalressursDict,
-                                                    _arbeidsforholdDict,
-                                                    _organisasjonselementDict,
-                                                    daysBeforeEmploymentStarts,
-                                                    daysAfterEmploymentEnds,
-                                                    excludedEmploymentTypes,
-                                                    excludedPositionCodes
-                                                    );
-                                                if (resourceIsActive)
+                                                if (!excludedResourceTypes.Contains(resourceCategoryId))
                                                 {
-                                                    Logger.Log.InfoFormat("Resource {0} is active at school {1}", schoolResourceUri, schoolUri);
+                                                    // check if this schoolresource has an active emplyment at this school
+                                                    Logger.Log.InfoFormat("Checking active employments for schoolresource {0} at school {1}", schoolResourceUri, schoolUri);
 
-                                                    var newResourceUri = String.Empty;
+                                                    (bool resourceIsActive, bool isMainSchool) = CheckResourceActiveAtSchool(personalResourceUri, schoolOrganizationElementUri,
+                                                        principalForSchoolDict,
+                                                        workplaceOrgUnitToSchoolOrgUnit,
+                                                        _personalressursDict,
+                                                        _arbeidsforholdDict,
+                                                        _organisasjonselementDict,
+                                                        daysBeforeEmploymentStarts,
+                                                        daysAfterEmploymentEnds,
+                                                        excludedEmploymentTypes,
+                                                        excludedPositionCodes
+                                                        );
+                                                    if (resourceIsActive)
+                                                    {
+                                                        Logger.Log.InfoFormat("Resource {0} is active at school {1}", schoolResourceUri, schoolUri);
 
-                                                    if (!importedObjectsDict.TryGetValue(schoolResourceUri, out ImportListItem dummyImportListItem))
-                                                    {
-                                                        newResourceUri = AddNonStudentToCS(
-                                                            schoolResourceUri,
-                                                            organisasjonIdUri,
-                                                            schoolResourceData,
-                                                            ref ssnToSystemId,
-                                                            ref importedObjectsDict);
-                                                    }
-                                                    else
-                                                    {
-                                                        Logger.Log.InfoFormat("Resource {0} already exist in CS with this anchor. Adding new orgunit to resource", schoolResourceUri);
-                                                        newResourceUri = schoolResourceUri;
-                                                    }
-                                                    if (importedObjectsDict.TryGetValue(newResourceUri, out ImportListItem eduPersonData))
-                                                    {
-                                                        var eduPerson = eduPersonData.eduPerson;
-                                                        AddPersonToOrgUnit(ClassType.schoolresource, string.Empty, isMainSchool, ref eduPerson, ref eduOrgUnit);
+                                                        var newResourceUri = String.Empty;
+
+                                                        if (!importedObjectsDict.TryGetValue(schoolResourceUri, out ImportListItem dummyImportListItem))
+                                                        {
+                                                            newResourceUri = AddNonStudentToCS(
+                                                                schoolResourceUri,
+                                                                organisasjonIdUri,
+                                                                schoolResourceData,
+                                                                ref ssnToSystemId,
+                                                                ref importedObjectsDict);
+                                                        }
+                                                        else
+                                                        {
+                                                            Logger.Log.InfoFormat("Resource {0} already exist in CS with this anchor. Adding new orgunit to resource", schoolResourceUri);
+                                                            newResourceUri = schoolResourceUri;
+                                                        }
+                                                        if (importedObjectsDict.TryGetValue(newResourceUri, out ImportListItem eduPersonData))
+                                                        {
+                                                            var eduPerson = eduPersonData.eduPerson;
+                                                            AddPersonToOrgUnit(ClassType.schoolresource, string.Empty, isMainSchool, ref eduPerson, ref eduOrgUnit);
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            else
-                                            {
-                                                Logger.Log.InfoFormat("**EMPLOYEE-FILTER-RESOURCECATEGORY** Resource {0} is linked to personalresource {1} with resource category {2} and is therefore not added to CS", schoolResourceUri, personalResourceUri, resourceCategoryId);
+                                                else
+                                                {
+                                                    Logger.Log.InfoFormat("**EMPLOYEE-FILTER-RESOURCECATEGORY** Resource {0} is linked to personalresource {1} with resource category {2} and is therefore not added to CS", schoolResourceUri, personalResourceUri, resourceCategoryId);
+                                                }
                                             }
                                         }
+                                        else
+                                        {
+                                            Logger.Log.ErrorFormat("{0} linked to from resource {1} but not found on the /administrasjon/personal/personalressurs endpoint. The adapter is supplying inconsistent data", schoolResourceUri, personalResourceUri);
+                                        }
+
                                     }
                                     else
                                     {
-                                        Logger.Log.ErrorFormat("{0} linked to from resource {1} but not found on the /administrasjon/personal/personalressurs endpoint. The adapter is supplying inconsistent data", schoolResourceUri, personalResourceUri);
+                                        Logger.Log.ErrorFormat("Skole resource {0} is missing the link {1}. Active employments could not be calculated for skoleressurs resource {2}"
+                                            , schoolUri, ResourceLink.organization, schoolResourceUri);
                                     }
                                 }
                                 else
@@ -1514,7 +1549,7 @@ namespace VigoBAS.FINT.Edu
 
                     var anchor = ImportedObjectsList[GetImportEntriesIndex].eduPerson.Anchor();
 
-                    if (ImportedObjectsList[GetImportEntriesIndex].eduPerson.ElevforholdHovedkategori != "privatist" || importPurePrivateStudents)
+                    if (!String.IsNullOrEmpty(ImportedObjectsList[GetImportEntriesIndex].eduPerson.PersonalAnsattnummer) || ImportedObjectsList[GetImportEntriesIndex].eduPerson.ElevforholdHovedkategori != "privatist" || importPurePrivateStudents)
                     {
                         Logger.Log.DebugFormat("Trying to add eduPerson csentry with anchor {0}", anchor);
                         csentries.Add(ImportedObjectsList[GetImportEntriesIndex].eduPerson.GetCSEntryChange());
@@ -3000,9 +3035,32 @@ namespace VigoBAS.FINT.Edu
                         //Logger.Log.DebugFormat("Uri:{0}, grepkode: {1}", uri, grepkode.Kode);
                     }
                 }
-                catch
+                catch (AggregateException aggregateEx)
                 {
-                    Logger.Log.ErrorFormat("Getting grepcodes from {0} failed", grepUrl);
+                    aggregateEx.Handle(e =>
+                    {
+                        if (e is HttpRequestException ex)
+                        {
+                            var message = ex?.Message;
+                            var exceptionType = ex?.GetType().ToString();
+                            var innerexception = ex?.InnerException?.Message;
+                            var errorMessage = $"Getting grepcodes from {grepUrl} failed with error type {exceptionType}. Message: {message}, Inner exception: {innerexception}";
+                            Logger.Log.ErrorFormat(errorMessage);
+                            Logger.Log.ErrorFormat("Import is aborted");
+                            throw new GrepCodeDownloadException(errorMessage);
+                        }
+                        return false;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    var message = ex?.Message;
+                    var exceptionType = ex?.GetType().ToString();
+                    var innerexception = ex?.InnerException?.Message;
+                    var errorMessage = $"Getting grepcodes from {grepUrl} failed with error type {exceptionType}. Message: {message}, Inner exception: {innerexception}";
+                    Logger.Log.ErrorFormat(errorMessage);
+                    Logger.Log.ErrorFormat("Import is aborted");
+                    throw new GrepCodeDownloadException(errorMessage);
                 }
             }
             return grepCodeDict;

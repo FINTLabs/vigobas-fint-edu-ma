@@ -297,6 +297,8 @@ namespace VigoBAS.FINT.Edu
             public const string AnsettelsesforholdSkole = "AnsettelsesforholdSkole";
             public const string RolleOgSkole = "RolleOgSkole";
             public const string ElevkategoriOgSkole = "ElevkategoriOgSkole";
+            public const string Eksamensdatoer = "Eksamensdatoer";
+            public const string AntallEksamener = "AntallEksamener";
 
             public const string EduPersonEntitlement = "EduPersonEntitlement";
             public const string EduPersonOrgDN = "EduPersonOrgDN";
