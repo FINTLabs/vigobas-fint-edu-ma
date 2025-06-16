@@ -121,6 +121,11 @@ namespace VigoBAS.FINT.Edu.Utilities
         public static bool ExamgroupIsInVisiblePeriod(IStateValue stateValue, DateTime visibleFromDate, DateTime visibleToDate) 
         {
             var period = GetPeriodFromStateValue(stateValue);
+
+            if (period==null)
+            {
+                return false;
+            }
             var periodStart = period.Start;
             var periodSlutt = GetPeriodeSluttAsDate(period, infinityDate);
 
@@ -199,8 +204,12 @@ namespace VigoBAS.FINT.Edu.Utilities
         private static Periode GetPeriodFromStateValue (IStateValue stateValue )
         {            ;
             if (stateValue.Type == "Array")
-            {
-                return JsonConvert.DeserializeObject<List<Periode>>(stateValue.Value)[0];
+            {                
+                var stateValueList = JsonConvert.DeserializeObject<List<Periode>>(stateValue.Value);
+
+                if (stateValueList.Count() > 0)
+                    return stateValueList.First();
+                return null;
             }
                 return JsonConvert.DeserializeObject<Periode>(stateValue.Value);
         }

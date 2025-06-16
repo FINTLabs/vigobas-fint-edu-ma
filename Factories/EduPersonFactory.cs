@@ -76,6 +76,7 @@ namespace VigoBAS.FINT.Edu
             var eduPersonOrgUnitDN = new List<string>();
             var rolleOgSkole = new List<string>();
             var kategoriOgSkole = new List<string>();
+            var eksamensdatoer = new List<string>();
 
 
 
@@ -120,7 +121,9 @@ namespace VigoBAS.FINT.Edu
                 EduPersonPrimaryOrgUnitDN = eduPersonPrimaryOrgUnitDN,
                 EduPersonOrgUnitDN = eduPersonOrgUnitDN,
                 RolleOgSkole = rolleOgSkole,
-                ElevkategoriOgSkole = kategoriOgSkole
+                ElevkategoriOgSkole = kategoriOgSkole,
+                Eksamensdatoer = eksamensdatoer,
+                AntallEksamener = 0
             };
         }
         public static EduPerson Create(string systemIdUri, Person person, Skoleressurs skoleressurs, Personalressurs personalressurs, string orgId)

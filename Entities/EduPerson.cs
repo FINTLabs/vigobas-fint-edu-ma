@@ -88,6 +88,8 @@ namespace VigoBAS.FINT.Edu
 
         public List<string> RolleOgSkole { get; set; }
         public List<string> ElevkategoriOgSkole { get; set; }
+        public List<String> Eksamensdatoer { get; set; }
+        public int AntallEksamener { get; set; }
 
         //Feideattributter      
         public string EduPersonOrgDN { get; set; }
@@ -192,9 +194,9 @@ namespace VigoBAS.FINT.Edu
             {
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.PersonNavnEtternavn,PersonNavnEtternavn));
             }
-            if (!string.IsNullOrEmpty(PersonalKontaktinformasjonMobiltelefonnummer))
+            if (!string.IsNullOrEmpty(PersonKontaktinfomasjonMobiltelefonnummer))
             {
-                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.PersonKontaktinformasjonMobiltelefonnummer, PersonalKontaktinformasjonMobiltelefonnummer));
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.PersonKontaktinformasjonMobiltelefonnummer, PersonKontaktinfomasjonMobiltelefonnummer));
             }
             if (!string.IsNullOrEmpty(PersonalKontaktinformasjonEpostadresse))
             {
@@ -401,7 +403,20 @@ namespace VigoBAS.FINT.Edu
                 }
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevkategoriOgSkole, items));
             }
-
+            if (Eksamensdatoer != null && Eksamensdatoer.Count > 0)
+            {
+                IList<object> items = new List<object>();
+                foreach (var item in Eksamensdatoer)
+                {
+                    items.Add(item.ToString());
+                }
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.Eksamensdatoer, items));
+            }
+            if (AntallEksamener > 0)
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.AntallEksamener, AntallEksamener));
+                Logger.Log.DebugFormat("Number of exams for eduPerson {0} is {1}", Anchor(), AntallEksamener);
+            }
             return csentry;
 
         }
