@@ -198,9 +198,9 @@ namespace VigoBAS.FINT.Edu
             {
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.PersonKontaktinformasjonMobiltelefonnummer, PersonKontaktinfomasjonMobiltelefonnummer));
             }
-            if (!string.IsNullOrEmpty(PersonalKontaktinformasjonEpostadresse))
+            if (!string.IsNullOrEmpty(PersonKontaktinfomasjonEpostadresse))
             {
-                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.PersonKontaktinformasjonEpostadresse, PersonalKontaktinformasjonEpostadresse));
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.PersonKontaktinformasjonEpostadresse, PersonKontaktinfomasjonEpostadresse));
             }
             if (PersonBostedsadresseAdresselinje != null && PersonBostedsadresseAdresselinje.Count > 0)
             {
