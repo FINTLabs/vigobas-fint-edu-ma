@@ -65,6 +65,7 @@ namespace VigoBAS.FINT.Edu
         public List<string> ElevforholdBasisgruppe { get; set; }
         public List<string> ElevforholdKontaktlarergruppe { get; set; }
         public List<string> ElevforholdUndervisningsgruppe { get; set; }
+        public List<string> ElevforholdEksamensgruppe { get; set; }
 
         //Fint skoleressurs
         public string SkoleressursSystemIdUri { get; set; }
@@ -266,6 +267,15 @@ namespace VigoBAS.FINT.Edu
                     members.Add(member.ToString());
                 }
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdUndervisningsgruppe, members));
+            }
+            if (ElevforholdEksamensgruppe != null && ElevforholdEksamensgruppe.Count > 0)
+            {
+                IList<object> members = new List<object>();
+                foreach (var member in ElevforholdEksamensgruppe)
+                {
+                    members.Add(member.ToString());
+                }
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdEksamensgruppe, members));
             }
             if (ElevforholdSkole != null && ElevforholdSkole.Count > 0)
             {

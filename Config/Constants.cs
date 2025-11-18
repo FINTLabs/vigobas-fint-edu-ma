@@ -280,6 +280,7 @@ namespace VigoBAS.FINT.Edu
             public const string ElevforholdBasisgruppe = "ElevforholdBasisgruppe";
             public const string ElevforholdKontaktlarergruppe = "ElevforholdKontaktlarergruppe";
             public const string ElevforholdUndervisningsgruppe = "ElevforholdUndervisningsgruppe";
+            public const string ElevforholdEksamensgruppe = "ElevforholdEksamensgruppe";
             public const string ElevforholdSkole = "ElevforholdSkole";
             public const string ElevforholdKategori = "ElevforholdKategori";
             public const string ElevforholdHovedkategori = "ElevforholdHovedkategori";
