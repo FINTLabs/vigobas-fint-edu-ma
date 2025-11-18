@@ -112,17 +112,6 @@ namespace VigoBAS.FINT.Edu
             string periodeStartTime = string.Empty;
             string periodeSluttTime = string.Empty;
 
-            if (basicGroup.Periode.Count > 0)
-            {
-                periodeStart = basicGroup.Periode[0]?.Start.ToString(dateFormat);
-                periodeSlutt = basicGroup.Periode[0]?.Slutt?.ToString(dateFormat);
-
-                if (groupType == ClassType.examGroup)
-                {
-                    periodeStartTime = basicGroup.Periode[0]?.Start.ToString(hourFormat);
-                    periodeSluttTime = basicGroup.Periode[0]?.Slutt?.ToString(hourFormat);
-                }
-            }
             var grepkode = new Grepkode();
 
             var schoolUri = school.SystemIdUri;

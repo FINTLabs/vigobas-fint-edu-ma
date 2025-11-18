@@ -193,6 +193,8 @@ namespace VigoBAS.FINT.Edu
             public const string positionCode = "stillingskode";
             public const string leader = "leder";
             public const string eksamensform = "eksamensform";
+            public const string termin = "termin";
+            public const string skolear = "skolear";
         }
 
         public struct ClassType

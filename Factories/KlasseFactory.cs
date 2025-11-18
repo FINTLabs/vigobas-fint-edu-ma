@@ -18,20 +18,17 @@
 
 using System;
 using System.Collections.Generic;
-using FINT.Model.Felles;
 using FINT.Model.Felles.Kompleksedatatyper;
-using FINT.Model.Utdanning.Basisklasser;
-using FINT.Model.Utdanning.Vurdering;
-using FINT.Model.Utdanning.Timeplan;
+using FINT.Model.Utdanning.Elev;
 using HalClient.Net.Parser;
 using Newtonsoft.Json;
 using static VigoBAS.FINT.Edu.Constants;
 
 namespace VigoBAS.FINT.Edu
 {
-    class EksamensgruppeFactory
+    class KlasseFactory
     {
-        public static Eksamensgruppe Create(IReadOnlyDictionary<string, IStateValue> values)
+        public static Klasse Create(IReadOnlyDictionary<string, IStateValue> values)
         {
             var systemId = new Identifikator();
             string navn = String.Empty;
@@ -49,12 +46,11 @@ namespace VigoBAS.FINT.Edu
             {
                 beskrivelse = beskrivelseValue.Value;
             }
-
-            return new Eksamensgruppe
+            return new Klasse
             {
                 SystemId = systemId,
                 Beskrivelse = beskrivelse,
-                Navn = navn,
+                Navn = navn
             };
         }
     }
