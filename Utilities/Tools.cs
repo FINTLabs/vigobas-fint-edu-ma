@@ -114,6 +114,32 @@ namespace VigoBAS.FINT.Edu.Utilities
             }
             return periodIsValid;
         }
+
+        public static bool PeriodIsValid(Periode period, int daysBefore, int daysAhead)
+        {
+            bool periodIsValid = false;
+            var compareDate = DateTime.Today;
+            var periodStart = period.Start.Date.AddDays(-daysBefore);
+            var periodSlutt = GetPeriodeSluttAsDate(period, infinityDate).AddDays(daysAhead);
+
+            if (periodStart <= compareDate && compareDate <= periodSlutt)
+            {
+                periodIsValid = true;
+            }
+            else
+            {
+                Logger.Log.DebugFormat("Period starting {0} ending {1} is not considered valid", periodStart.ToString(), periodSlutt.ToString());
+            }
+            return periodIsValid;
+        }
+        public static Periode GetPeriodeFromTerminLinks(IEnumerable<ILinkObject> terminLinks)
+        {
+            return new Periode();
+        }
+        public static Periode GetPeriodeFromSkolearLink(IEnumerable<ILinkObject> skolearLink)
+        {
+            throw new NotImplementedException();
+        }
         public static bool ExamgroupsShouldBeVisible(DateTime visibleFromDate, DateTime visibleToDate)
         {
             return (visibleFromDate <= DateTime.Today) && (DateTime.Today <= visibleToDate);

@@ -482,6 +482,8 @@ namespace VigoBAS.FINT.Edu
                                                 undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, eksamensgruppeUri,  
                                                 skoleUri, ansattPersonUri, personalRessursUri, arbeidsforholdUri, organisasjonselementUri};
 
+            var groupResourceUris = new List<string>() { basisgruppeUri, kontaktlarergruppeUri, undervisningsgruppeUri, eksamensgruppeUri };
+
             if (useGroupMembershipResources)
             {
                 var groupMembershipEndPoints = new List<string>() { basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri };
@@ -588,28 +590,6 @@ namespace VigoBAS.FINT.Edu
                         else if (periodeValue != null)
                         {
                             Logger.Log.DebugFormat("Elevforhold {0} does not have a valid period", uriKey);
-                        }
-                    }
-                }
-                else if (resourceType == basisgruppeUri)
-                {
-                    if (resourceDict.TryGetValue(uriKey, out IEmbeddedResourceObject gruppeResource))
-                    {
-                        if (gruppeResource.State.TryGetValue(FintAttribute.periode, out IStateValue periodeValue))
-                        {
-                            if (PeriodIsValid(periodeValue, daysBeforeGroupStarts, daysBeforeGroupEnds))
-                            {
-                                _basisgruppeDict.Add(uriKey, gruppeResource);
-
-                                if (!useGroupMembershipResources)
-                                {
-                                    AddValidMembershipsForGroup(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ref _basicGroupAndValidStudentRelationships);
-                                }
-                            }
-                            else if (periodeValue != null)
-                            {
-                                Logger.Log.DebugFormat("Basisgruppe {0} does not have a valid period", uriKey);
-                            }
                         }
                     }
                 }
@@ -747,6 +727,40 @@ namespace VigoBAS.FINT.Edu
                         _organisasjonselementDict.Add(uriKey, orgElementObject);
 
                         UpdateResourceIdMappingDict(uriKey, orgElementObject, ref _orgelementIdMappingDict);
+                    }
+                }
+
+                else if (groupResourceUris.Contains(resourceType))
+                {
+                    if (resourceDict.TryGetValue(uriKey, out IEmbeddedResourceObject gruppeResource))
+                    {
+                        var periode = new Periode();
+                        var periodeSet = false;
+                        if (gruppeResource.Links.TryGetValue(ResourceLink.termin, out IEnumerable<ILinkObject> terminLinks))
+                        {
+                            periode = GetPeriodeFromTerminLinks(terminLinks);
+                            periodeSet = true;
+                        }
+                        if (!periodeSet && gruppeResource.Links.TryGetValue(ResourceLink.skolear, out IEnumerable<ILinkObject> skolearLink))
+                        {
+                            periode = GetPeriodeFromSkolearLink(skolearLink);
+                            periodeSet = true;
+                        }
+
+                        if (periodeSet)
+                        {
+                        if (resourceType == basisgruppeUri)
+                            {
+                                if (PeriodIsValid(periode, daysBeforeGroupStarts, daysBeforeGroupEnds))
+                                {
+                                    _basisgruppeDict.Add(uriKey, gruppeResource);
+                                }
+                                else
+                                {
+                                    Logger.Log.DebugFormat("Basisgruppe {0} does not have a valid period", uriKey);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -2061,7 +2075,8 @@ namespace VigoBAS.FINT.Edu
                 {
                     case ClassType.basicGroup:
                         {
-                            group = BasisgruppeFactory.Create(groupState);
+                            //group = BasisgruppeFactory.Create(groupState);
+                            group = KlasseFactory.Create(groupState);
                             break;
                         }
                     case ClassType.contactTeacherGroup:
