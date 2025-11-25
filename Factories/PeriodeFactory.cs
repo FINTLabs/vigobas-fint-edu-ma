@@ -26,33 +26,25 @@ using static VigoBAS.FINT.Edu.Constants;
 
 namespace VigoBAS.FINT.Edu
 {
-    class FagFactory
+    class PeriodeFactory
     {
-        public static Fag Create(IReadOnlyDictionary<string, IStateValue> values)
+        public static Periode Create(IReadOnlyDictionary<string, IStateValue> values)
         {
-            var systemId = new Identifikator();
-            string navn = String.Empty;
-            string beskrivelse = String.Empty;
+            var periode = new Periode();
+            if (values.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue periodeValue))
+            {
+               periode = JsonConvert.DeserializeObject<Periode>(periodeValue.Value);
 
-            if (values.TryGetValue(FintAttribute.systemId, out IStateValue systemIDValue))
-            {
-                systemId = JsonConvert.DeserializeObject<Identifikator>(systemIDValue.Value);
             }
-            if (values.TryGetValue(FintAttribute.navn, out IStateValue navnValue))
+            if (periode.Start != null && periode.Slutt != null)
             {
-                navn = navnValue.Value;
+                return periode;
             }
-            if (values.TryGetValue(FintAttribute.beskrivelse, out IStateValue beskrivelseValue))
+            else 
             {
-                beskrivelse = beskrivelseValue.Value;
+                return null;
             }
 
-            return new Fag
-            {
-                SystemId = systemId,
-                Beskrivelse = beskrivelse,
-                Navn = navn               
-            };
         }
     }
 }

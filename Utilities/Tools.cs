@@ -132,9 +132,36 @@ namespace VigoBAS.FINT.Edu.Utilities
             }
             return periodIsValid;
         }
-        public static Periode GetPeriodeFromTerminLinks(IEnumerable<ILinkObject> terminLinks)
+        public static Periode GetPeriodeFromLinks(IEnumerable<ILinkObject> periodeLinks, Dictionary<string, Periode> periodeDictionary)
         {
-            return new Periode();
+            DateTime start = new DateTime();
+            DateTime slutt = new DateTime();
+
+            foreach (var link in periodeLinks)
+            {
+                var periodeUri = LinkToString(link);
+
+                if (periodeDictionary.TryGetValue(periodeUri, out Periode periodeFound))
+                {
+                    var startFound = periodeFound.Start;
+                    var sluttFound = (DateTime)periodeFound.Slutt;
+
+                    if (start == DateTime.MinValue || startFound < start)
+                    {
+                        start = startFound;
+                    }
+                    if (sluttFound > slutt)
+                    {
+                        slutt = sluttFound;
+                    }
+                }
+                else
+                {
+                    Logger.Log.Error($"Referenced termin/skolear {periodeUri} not found or is invalid");
+                    return null;
+                }
+            }
+            return new Periode() { Start = start, Slutt = slutt };
         }
         public static Periode GetPeriodeFromSkolearLink(IEnumerable<ILinkObject> skolearLink)
         {

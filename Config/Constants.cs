@@ -95,7 +95,7 @@ namespace VigoBAS.FINT.Edu
             public const string upperLimit = "Øvre grense statuskø";
         }
 
-        public struct DefaultValue
+        public struct FintValue
         {
             public const string xClient = "test";
             public const string scope = "fint-client";
@@ -112,6 +112,7 @@ namespace VigoBAS.FINT.Edu
             public const string utdanningElevKontaktlarergruppeUri = "/utdanning/elev/kontaktlarergruppe";
             public const string utdanningElevKontaktlarergruppeMedlemskapUri = "/utdanning/elev/kontaktlarergruppemedlemskap";
             public const string utdanningVurderingEksamensgruppeUri = "/utdanning/vurdering/eksamensgruppe";
+            public const string utdanningVurderingEksamensgruppeMedlemskapUri = "/utdanning/vurdering/eksamensgruppemedlemskap";
             public const string utdanningElevSkoleressursUri = "/utdanning/elev/skoleressurs";
             public const string utdanningTimeplanUndervisningsgruppeUri = "/utdanning/timeplan/undervisningsgruppe";
             public const string utdanningTimeplanUndervisningsgruppeMedlemskapUri = "/utdanning/timeplan/undervisningsgruppemedlemskap";
@@ -120,6 +121,8 @@ namespace VigoBAS.FINT.Edu
             public const string utdanningUtdanningsprogramProgramomradeUri = "/utdanning/utdanningsprogram/programomrade";
             public const string utdanningUtdanningsprogramUtdanningsprogramUri = "/utdanning/utdanningsprogram/utdanningsprogram";
             public const string utdanningUtdanningsprogramSkoleUri = "/utdanning/utdanningsprogram/skole";
+            public const string utdanningKodeverkTerminUri = "/utdanning/kodeverk/termin";
+            public const string utdanningKodeverkSkolearUri = "/utdanning/kodeverk/skolear";
             public const string administrasjonPersonalPersonUri = "/administrasjon/personal/person";
             public const string administrasjonPersonalPersonalRessursUri = "/administrasjon/personal/personalressurs";
             public const string administrasjonPersonalArbeidsforholdUri = "/administrasjon/personal/arbeidsforhold";

@@ -56,8 +56,7 @@ namespace VigoBAS.FINT.Edu
             {
                 SystemId = systemId,
                 Beskrivelse = beskrivelse,
-                Navn = navn,
-                Periode = periode,
+                Navn = navn
             };
         }
     }

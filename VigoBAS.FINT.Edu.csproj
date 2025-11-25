@@ -362,6 +362,7 @@
     <Compile Include="Factories\KlasseFactory.cs" />
     <Compile Include="Factories\KontaktlarergruppeFactory.cs" />
     <Compile Include="Factories\OrganisasjonselementFactory.cs" />
+    <Compile Include="Factories\PeriodeFactory.cs" />
     <Compile Include="Factories\PersonalressursFactory.cs" />
     <Compile Include="Factories\ProgramomradeFactory.cs" />
     <Compile Include="Factories\SkoleFactory.cs" />

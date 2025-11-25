@@ -22,6 +22,7 @@ using FINT.Model.Utdanning.Basisklasser;
 using HalClient.Net.Parser;
 using Newtonsoft.Json;
 using static VigoBAS.FINT.Edu.Constants;
+using FINT.Model.Felles.Kompleksedatatyper;
 
 namespace VigoBAS.FINT.Edu
 {
@@ -97,6 +98,7 @@ namespace VigoBAS.FINT.Edu
         public static EduGroup Create(
             string systemIdUri,
             Gruppe basicGroup,
+            Periode validPeriod,
             string groupType,
             string examCategory,
             IReadOnlyDictionary<string, IEnumerable<ILinkObject>> groupLinks,
@@ -107,8 +109,8 @@ namespace VigoBAS.FINT.Edu
             var systemId = basicGroup.SystemId.Identifikatorverdi;
             var navn = basicGroup.Navn;
             var beskrivelse = basicGroup?.Beskrivelse;
-            string periodeStart = string.Empty;
-            string periodeSlutt = string.Empty;
+            string periodeStart = validPeriod.Start.ToString(dateFormat);
+            string periodeSlutt = validPeriod.Slutt?.ToString(dateFormat);
             string periodeStartTime = string.Empty;
             string periodeSluttTime = string.Empty;
 
