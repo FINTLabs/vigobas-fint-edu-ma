@@ -46,6 +46,7 @@ namespace VigoBAS.FINT.Edu
         public string GruppeFagRef;
         public EduGroup Utdanningsprogram;
         public string Eksamensform;
+        public string Eksamensdato;
         //public string GruppeVigoReferanse;
         public List<string> GruppeElevListe;
         public List<string> GruppeLarerListe;
@@ -99,6 +100,10 @@ namespace VigoBAS.FINT.Edu
             if (!string.IsNullOrEmpty(Eksamensform))
             {
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.EduGroupExamCategory, Eksamensform));
+            }
+            if (!string.IsNullOrEmpty(Eksamensdato))
+            {
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.EduGroupExamDate, Eksamensdato));
             }
             if (!string.IsNullOrEmpty(GruppeBeskrivelse))
             {

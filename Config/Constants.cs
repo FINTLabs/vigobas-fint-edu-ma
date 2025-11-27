@@ -222,6 +222,7 @@ namespace VigoBAS.FINT.Edu
             public const string navn = "navn";
             public const string beskrivelse = "beskrivelse";
             public const string periode = "periode";
+            public const string eksamensdato = "eksamensdato";
             public const string elevnummer = "elevnummer";
             public const string brukernavn = "brukernavn";
             public const string feidenavn = "feidenavn";
@@ -316,6 +317,7 @@ namespace VigoBAS.FINT.Edu
             public const string GruppeNavn = "GruppeNavn";
             public const string EduGroupType = "EduGroupType";
             public const string EduGroupExamCategory = "EduGroupExamCategory";
+            public const string EduGroupExamDate = "EduGroupExamDate";
             public const string GruppeBeskrivelse = "GruppeBeskrivelse";
             public const string GruppePeriodeStart = "GruppePeriodeStart";
             public const string GruppePeriodeSlutt = "GruppePeriodeSlutt";

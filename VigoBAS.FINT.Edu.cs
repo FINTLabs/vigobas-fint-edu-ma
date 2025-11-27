@@ -326,7 +326,8 @@ namespace VigoBAS.FINT.Edu
             // Attribute
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeSystemId, AttributeType.String, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.EduGroupType, AttributeType.String, AttributeOperation.ImportOnly)); //
-            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.EduGroupExamCategory, AttributeType.String, AttributeOperation.ImportOnly)); 
+            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.EduGroupExamCategory, AttributeType.String, AttributeOperation.ImportOnly));
+            eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.EduGroupExamDate, AttributeType.String, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeNavn, AttributeType.String, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppeBeskrivelse, AttributeType.String, AttributeOperation.ImportOnly));
             eduGroup.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.GruppePeriodeStart, AttributeType.String, AttributeOperation.ImportOnly));
@@ -537,8 +538,10 @@ namespace VigoBAS.FINT.Edu
                 //Logger.Log.DebugFormat("Adding resource {0} to dictionary", uriKey);
                 var resourceType = GetUriPathForClass(uriKey);
 
-                itemsCountPerComponent[resourceType]++; 
-                
+                itemsCountPerComponent[resourceType]++;
+
+                bool isExamGroupMembership = resourceType.Equals(FintValue.utdanningVurderingEksamensgruppeMedlemskapUri) ? true : false;
+
                 if (groupResourceUris.Contains(resourceType))
                 {
                     if (resourceDict.TryGetValue(uriKey, out IEmbeddedResourceObject gruppeResource))
@@ -699,17 +702,17 @@ namespace VigoBAS.FINT.Edu
                     }
                     case FintValue.utdanningElevBasisgruppeMedlemskapUri:
                     {
-                        AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ResourceLink.basicGroup, ref _basicGroupAndValidStudentRelationships);
+                        AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.basicGroup, ref _basicGroupAndValidStudentRelationships);
                             break;
                     }
                     case FintValue.utdanningElevKontaktlarergruppeMedlemskapUri:
                     {
-                        AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ResourceLink.contactTeacherGroup, ref _contactGroupAndValidStudentRelationships);
+                        AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.contactTeacherGroup, ref _contactGroupAndValidStudentRelationships);;
                             break;
                     }
                     case FintValue.utdanningTimeplanUndervisningsgruppeMedlemskapUri:
                     {
-                        AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ResourceLink.studyGroup, ref _studyGroupAndValidStudentRelationships);
+                        AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.studyGroup, ref _studyGroupAndValidStudentRelationships);
                             break;
                     }
                     case FintValue.utdanningVurderingEksamensgruppeMedlemskapUri:
@@ -717,7 +720,7 @@ namespace VigoBAS.FINT.Edu
                             if (examGroupsIsVisible)
                             {
                                 //TODO implement separate logic for exam groups
-                                AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, ResourceLink.studyGroup, ref _examGroupAndValidStudentRelationships);
+                                AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.examGroup, ref _examGroupAndValidStudentRelationships);
                             }
                             break;
                         }
@@ -1025,7 +1028,7 @@ namespace VigoBAS.FINT.Edu
 
                                 if (examCategoriesToAggregatePerDateList.Contains(examCategory))
                                 {
-                                    var examdate = examgroupItem.eduGroup.GruppePeriodeStart;
+                                    var examdate = examgroupItem.eduGroup.Eksamensdato;
 
                                     var aggregatedExamgroupUri = schoolUri + '_' + examCategory + '_' + examdate;
 
@@ -1057,6 +1060,7 @@ namespace VigoBAS.FINT.Edu
                                                         {
                                                             student.Eksamensdatoer.Add(examdate);
                                                             student.AntallEksamener++;
+                                                            student.ElevforholdEksamensgruppe.Add(aggregatedExamgroupUri);
                                                         }
                                                     }
                                                 }
@@ -1468,13 +1472,13 @@ namespace VigoBAS.FINT.Edu
             }
             return periodeDict;
         }
-        private void AddValidMembership(string uriKey, Dictionary<string, IEmbeddedResourceObject> resourceDict, int dayBeforeStudentStarts, int dayBeforeStudentEnds, string groupRelation, ref Dictionary<string, List<string>> groupAndValidStudentRelationships)
+        private void AddValidMembership(string uriKey, Dictionary<string, IEmbeddedResourceObject> resourceDict, int dayBeforeStudentStarts, int dayBeforeStudentEnds, bool isExamGroupMembership, string groupRelation, ref Dictionary<string, List<string>> groupAndValidStudentRelationships)
         {
             if (resourceDict.TryGetValue(uriKey, out IEmbeddedResourceObject membershipResource))
             {
                 bool membershipIsValid = true;
 
-                if (membershipResource.State.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue periodeValue))
+                if (!isExamGroupMembership && membershipResource.State.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue periodeValue))
                 {
                     membershipIsValid = PeriodIsValid(periodeValue, dayBeforeStudentStarts, dayBeforeStudentEnds);
                 }
@@ -2112,7 +2116,8 @@ namespace VigoBAS.FINT.Edu
                 var groupState = groupData.State;
                 var groupLinks = groupData.Links;
                 Gruppe group = null;
-                String examCategory = String.Empty;
+                string examCategory = String.Empty;
+                DateTime? examDate = null;
 
                 switch (groupType)
                 {
@@ -2134,9 +2139,11 @@ namespace VigoBAS.FINT.Edu
                         }
                     case ClassType.examGroup:
                         {
-                            if (groupLinks.TryGetValue(ResourceLink.eksamensform, out IEnumerable<ILinkObject> eksamensformLink))
-                            {
+                            if (groupLinks.TryGetValue(ResourceLink.eksamensform, out IEnumerable<ILinkObject> eksamensformLink) &&
+                                groupState.TryGetValue(FintAttribute.eksamensdato, out IStateValue eksamensdatoValue))
+                            {                                
                                 examCategory = GetIdValueFromLink(eksamensformLink);
+                                examDate = DateTime.Parse(eksamensdatoValue.Value);
                                 group = UtdanningsprogramFactory.Create(groupState);
                                 
                             }
@@ -2159,7 +2166,7 @@ namespace VigoBAS.FINT.Edu
 
                     if (groupPeriodDict.TryGetValue(groupUri, out Periode validPeriod))
                     {
-                        eduGroup = EduGroupFactory.Create(groupUri, group, validPeriod, groupType, examCategory, groupLinks, eduOrgUnit, studyProgramme);
+                        eduGroup = EduGroupFactory.Create(groupUri, group, validPeriod, groupType, examCategory, examDate, groupLinks, eduOrgUnit, studyProgramme);
 
                         Logger.Log.InfoFormat("Adding new resource to CS: {0}", groupUri);
 

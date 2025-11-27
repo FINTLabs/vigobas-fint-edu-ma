@@ -36,6 +36,7 @@ namespace VigoBAS.FINT.Edu
             var systemId = new Identifikator();
             string navn = String.Empty;
             string beskrivelse = String.Empty;
+            DateTime? eksamensdato = new DateTime?();
 
             if (values.TryGetValue(FintAttribute.systemId, out IStateValue systemIDValue))
             {
@@ -49,12 +50,17 @@ namespace VigoBAS.FINT.Edu
             {
                 beskrivelse = beskrivelseValue.Value;
             }
+            if (values.TryGetValue(FintAttribute.eksamensdato, out IStateValue eksamensdatoValue))
+            {
+                eksamensdato = DateTime.Parse(eksamensdatoValue.Value);
+            }
 
             return new Eksamensgruppe
             {
                 SystemId = systemId,
                 Beskrivelse = beskrivelse,
                 Navn = navn,
+                Eksamensdato = eksamensdato
             };
         }
     }

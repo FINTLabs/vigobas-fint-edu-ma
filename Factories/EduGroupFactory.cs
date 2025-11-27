@@ -23,6 +23,7 @@ using HalClient.Net.Parser;
 using Newtonsoft.Json;
 using static VigoBAS.FINT.Edu.Constants;
 using FINT.Model.Felles.Kompleksedatatyper;
+using System;
 
 namespace VigoBAS.FINT.Edu
 {
@@ -101,6 +102,7 @@ namespace VigoBAS.FINT.Edu
             Periode validPeriod,
             string groupType,
             string examCategory,
+            DateTime? examDate,
             IReadOnlyDictionary<string, IEnumerable<ILinkObject>> groupLinks,
             EduOrgUnit  school,
             EduGroup studyProgramme
@@ -111,6 +113,7 @@ namespace VigoBAS.FINT.Edu
             var beskrivelse = basicGroup?.Beskrivelse;
             string periodeStart = validPeriod.Start.ToString(dateFormat);
             string periodeSlutt = validPeriod.Slutt?.ToString(dateFormat);
+            string eksamensdato = examDate?.ToString(dateFormat);
             string periodeStartTime = string.Empty;
             string periodeSluttTime = string.Empty;
 
@@ -130,6 +133,7 @@ namespace VigoBAS.FINT.Edu
                 GruppeSystemId = systemId,
                 EduGroupType = groupType,
                 Eksamensform = examCategory,
+                Eksamensdato = eksamensdato,
                 GruppeNavn = navn,
                 GruppeBeskrivelse = beskrivelse,
                 GruppePeriodeStart = periodeStart,

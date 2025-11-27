@@ -64,6 +64,7 @@ namespace VigoBAS.FINT.Edu
             var basisgruppemedlemskap = new List<string>();
             var kontaktlarergruppemedlemskap = new List<string>();
             var undervisningsgruppemedlemskap = new List<string>();
+            var eksamensgruppemedlemskap = new List<string>();
 
             var elevforholdSkole = new List<string>();
             var elevforholdKategori = new List<string>();
@@ -110,10 +111,12 @@ namespace VigoBAS.FINT.Edu
                 ElevforholdBasisgruppe = basisgruppemedlemskap,
                 ElevforholdKontaktlarergruppe = kontaktlarergruppemedlemskap,
                 ElevforholdUndervisningsgruppe = undervisningsgruppemedlemskap,
+                ElevforholdEksamensgruppe = eksamensgruppemedlemskap,
                 ElevforholdSkole = elevforholdSkole,
                 ElevforholdKategori = elevforholdKategori,
                 UndervisningsforholdSkole = undervisningsforholdSkole,
                 UndervisningsforholdMedlemskap = undervisningsforholdMedlemskap,
+                
                 AnsettelsesforholdSkole = ansettelsesforholdSkole,
 
                 EduPersonEntitlement = eduPersonEntitlement,
@@ -157,7 +160,8 @@ namespace VigoBAS.FINT.Edu
 
             var basisgruppemedlemskap = new List<string>();
             var kontaktlarergruppemedlemskap = new List<string>();
-            var undervisningsgruppemedlemskap = new List<string>();       
+            var undervisningsgruppemedlemskap = new List<string>();  
+            var eksamensgruppemedlemskap = new List<string>();
 
             var elevforholdSkole = new List<string>();
             var elevforholdKategori = new List<string>();
@@ -201,6 +205,7 @@ namespace VigoBAS.FINT.Edu
                 ElevforholdBasisgruppe = basisgruppemedlemskap,
                 ElevforholdKontaktlarergruppe = kontaktlarergruppemedlemskap,
                 ElevforholdUndervisningsgruppe = undervisningsgruppemedlemskap,
+                ElevforholdEksamensgruppe = eksamensgruppemedlemskap,
                 ElevforholdSkole = elevforholdSkole,
                 ElevforholdKategori = elevforholdKategori,
                 UndervisningsforholdSkole = undervisningsforholdSkole,
