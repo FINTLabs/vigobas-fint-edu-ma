@@ -66,8 +66,6 @@ namespace VigoBAS.FINT.Edu
             public const string abortIfDownloadError = "Stopp import ved nedlastingsfeil";
             public const string importStudentsWithoutStudyRelationShip = "Importer elever uten skoletilknytning";
 
-            public const string useGroupMembershipResources = "Bruk gruppemedlemskapsressurser";
-
             public const string generateAggrStudentGroups = "Generer grupper for alle elever";
             public const string generateAggrFacultyGroups = "Generer grupper for alle lærere";
             public const string generateAggrEmployeeGroups = "Generer grupper for alle ansatte";

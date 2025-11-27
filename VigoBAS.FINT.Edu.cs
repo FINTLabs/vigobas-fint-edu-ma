@@ -192,7 +192,6 @@ namespace VigoBAS.FINT.Edu
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateLabelParameter("Parametre grupper"));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.daysBeforeGroupStarts, String.Empty, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.daysBeforeGroupEnds, String.Empty, String.Empty));
-                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(Param.useGroupMembershipResources, false));
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateDividerParameter());
 
@@ -478,8 +477,6 @@ namespace VigoBAS.FINT.Edu
             //bool importStudentsWithoutStudyRelationShip = configParameters[Param.importStudentsWithoutStudyRelationShip].Value == "1";
             bool importStudentsWithoutStudyRelationShip = false;
 
-            bool useGroupMembershipResources = _importConfigParameters[Param.useGroupMembershipResources].Value == "1";
-
             var periodComponentList = new List<string>() { terminUri, skolearUri };
             Dictionary<string, Periode> periodResourceDict = GetTerminAndSkolearPerioder(configParameters, periodComponentList);
             var groupPeriodDict = new Dictionary<string, Periode>();
@@ -487,18 +484,12 @@ namespace VigoBAS.FINT.Edu
             var componentList = new List<string>() {  elevPersonUri, elevUri, elevforholdUri, undervisningsforholdUri,
                                                 skoleressursUri, basisgruppeUri,  kontaktlarergruppeUri,
                                                 undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, eksamensgruppeUri,
+                                                basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri, eksamensgruppeMedlemskapUri,
                                                 skoleUri, ansattPersonUri, personalRessursUri, arbeidsforholdUri, organisasjonselementUri};
-
-            //var componentList = new List<string>() {   basisgruppeUri, undervisningsgruppeUri};
 
             var groupResourceUris = new List<string>() { basisgruppeUri, kontaktlarergruppeUri,
                                                 undervisningsgruppeUri, eksamensgruppeUri };
 
-            if (useGroupMembershipResources)
-            {
-                var groupMembershipEndPoints = new List<string>() { basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri, eksamensgruppeMedlemskapUri };
-                componentList.AddRange(groupMembershipEndPoints);
-            }
             var itemsCountPerComponent = new Dictionary<string, int>();
 
             foreach (var component in componentList)
@@ -535,7 +526,6 @@ namespace VigoBAS.FINT.Edu
 
             foreach (var uriKey in resourceDict.Keys)
             {
-                //Logger.Log.DebugFormat("Adding resource {0} to dictionary", uriKey);
                 var resourceType = GetUriPathForClass(uriKey);
 
                 itemsCountPerComponent[resourceType]++;
