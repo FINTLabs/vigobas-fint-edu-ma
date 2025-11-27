@@ -492,7 +492,7 @@ namespace VigoBAS.FINT.Edu
             //var componentList = new List<string>() {   basisgruppeUri, undervisningsgruppeUri};
 
             var groupResourceUris = new List<string>() { basisgruppeUri, kontaktlarergruppeUri,
-                                                undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, eksamensgruppeUri };
+                                                undervisningsgruppeUri, eksamensgruppeUri };
 
             if (useGroupMembershipResources)
             {
@@ -589,32 +589,12 @@ namespace VigoBAS.FINT.Edu
                                             _undervisningsgruppeDict.Add(uriKey, gruppeResource);
                                             break;
                                         }
-                                    case FintValue.utdanningTimeplanFagUri:
-                                        {
-                                            _fagDict.Add(uriKey, gruppeResource);
-                                            break;
-                                        }
                                     case FintValue.utdanningVurderingEksamensgruppeUri:
                                         {
                                             if (examGroupsIsVisible)
                                             {
                                                 _eksamensgruppeDict.Add(uriKey, gruppeResource);
                                             }
-                                            break;
-                                        }
-                                    case FintValue.utdanningUtdanningsprogramArstrinnUri:
-                                        {
-                                            _arstrinnDict.Add(uriKey, gruppeResource);
-                                            break;
-                                        }
-                                    case FintValue.utdanningUtdanningsprogramProgramomradeUri:
-                                        {
-                                            _programomradeDict.Add(uriKey, gruppeResource);
-                                            break;
-                                        }
-                                    case FintValue.utdanningUtdanningsprogramUtdanningsprogramUri:
-                                        {
-                                            _utdanningsprogramDict.Add(uriKey, gruppeResource);
                                             break;
                                         }
                                 }
@@ -699,7 +679,27 @@ namespace VigoBAS.FINT.Edu
                             }
                         }
                             break;
-                    }
+                        }
+                    case FintValue.utdanningTimeplanFagUri:
+                        {
+                            _fagDict.Add(uriKey, resourceDict[uriKey]);
+                            break;
+                        }
+                    case FintValue.utdanningUtdanningsprogramArstrinnUri:
+                        {
+                            _arstrinnDict.Add(uriKey, resourceDict[uriKey]);
+                            break;
+                        }
+                    case FintValue.utdanningUtdanningsprogramProgramomradeUri:
+                        {
+                            _programomradeDict.Add(uriKey, resourceDict[uriKey]);
+                            break;
+                        }
+                    case FintValue.utdanningUtdanningsprogramUtdanningsprogramUri:
+                        {
+                            _utdanningsprogramDict.Add(uriKey, resourceDict[uriKey]);
+                            break;
+                        }
                     case FintValue.utdanningElevBasisgruppeMedlemskapUri:
                     {
                         AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.basicGroup, ref _basicGroupAndValidStudentRelationships);
@@ -719,7 +719,6 @@ namespace VigoBAS.FINT.Edu
                         {
                             if (examGroupsIsVisible)
                             {
-                                //TODO implement separate logic for exam groups
                                 AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.examGroup, ref _examGroupAndValidStudentRelationships);
                             }
                             break;
