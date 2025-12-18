@@ -108,7 +108,7 @@ namespace VigoBAS.FINT.Edu
                             {
                                 var hrefValue = linkObject.Href.ToString();
                                 var link = Link.with(hrefValue);
-                                elevforholdResource.AddBasisgruppe(link);
+                                //elevforholdResource.AddBasisgruppe(link);
                             }
                             break;
 
@@ -120,7 +120,7 @@ namespace VigoBAS.FINT.Edu
                             {
                                 var hrefValue = linkObject.Href.ToString();
                                 var link = Link.with(hrefValue);
-                                elevforholdResource.AddProgramomrade(link);
+                                //elevforholdResource.AddProgramomrade(link);
                             }
                             break;
                         }

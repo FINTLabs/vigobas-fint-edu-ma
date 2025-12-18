@@ -36,7 +36,6 @@ namespace VigoBAS.FINT.Edu
             var systemId = new Identifikator();
             string navn = String.Empty;
             string beskrivelse = String.Empty;
-            var periode = new List<Periode>();
 
             if (values.TryGetValue(FintAttribute.systemId, out IStateValue systemIDValue))
             {
@@ -50,17 +49,12 @@ namespace VigoBAS.FINT.Edu
             {
                 beskrivelse = beskrivelseValue.Value;
             }
-            if (values.TryGetValue(FintAttribute.periode, out IStateValue periodeValue))
-            {
-                periode = JsonConvert.DeserializeObject<List<Periode>>(periodeValue.Value);
-            }
 
             return new Undervisningsgruppe
             {
                 SystemId = systemId,
                 Beskrivelse = beskrivelse,
                 Navn = navn,
-                Periode = periode,
             };
         }
     }

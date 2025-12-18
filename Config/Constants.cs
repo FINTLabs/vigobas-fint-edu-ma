@@ -66,8 +66,6 @@ namespace VigoBAS.FINT.Edu
             public const string abortIfDownloadError = "Stopp import ved nedlastingsfeil";
             public const string importStudentsWithoutStudyRelationShip = "Importer elever uten skoletilknytning";
 
-            public const string useGroupMembershipResources = "Bruk gruppemedlemskapsressurser";
-
             public const string generateAggrStudentGroups = "Generer grupper for alle elever";
             public const string generateAggrFacultyGroups = "Generer grupper for alle lærere";
             public const string generateAggrEmployeeGroups = "Generer grupper for alle ansatte";
@@ -95,7 +93,7 @@ namespace VigoBAS.FINT.Edu
             public const string upperLimit = "Øvre grense statuskø";
         }
 
-        public struct DefaultValue
+        public struct FintValue
         {
             public const string xClient = "test";
             public const string scope = "fint-client";
@@ -112,6 +110,7 @@ namespace VigoBAS.FINT.Edu
             public const string utdanningElevKontaktlarergruppeUri = "/utdanning/elev/kontaktlarergruppe";
             public const string utdanningElevKontaktlarergruppeMedlemskapUri = "/utdanning/elev/kontaktlarergruppemedlemskap";
             public const string utdanningVurderingEksamensgruppeUri = "/utdanning/vurdering/eksamensgruppe";
+            public const string utdanningVurderingEksamensgruppeMedlemskapUri = "/utdanning/vurdering/eksamensgruppemedlemskap";
             public const string utdanningElevSkoleressursUri = "/utdanning/elev/skoleressurs";
             public const string utdanningTimeplanUndervisningsgruppeUri = "/utdanning/timeplan/undervisningsgruppe";
             public const string utdanningTimeplanUndervisningsgruppeMedlemskapUri = "/utdanning/timeplan/undervisningsgruppemedlemskap";
@@ -120,6 +119,8 @@ namespace VigoBAS.FINT.Edu
             public const string utdanningUtdanningsprogramProgramomradeUri = "/utdanning/utdanningsprogram/programomrade";
             public const string utdanningUtdanningsprogramUtdanningsprogramUri = "/utdanning/utdanningsprogram/utdanningsprogram";
             public const string utdanningUtdanningsprogramSkoleUri = "/utdanning/utdanningsprogram/skole";
+            public const string utdanningKodeverkTerminUri = "/utdanning/kodeverk/termin";
+            public const string utdanningKodeverkSkolearUri = "/utdanning/kodeverk/skolear";
             public const string administrasjonPersonalPersonUri = "/administrasjon/personal/person";
             public const string administrasjonPersonalPersonalRessursUri = "/administrasjon/personal/personalressurs";
             public const string administrasjonPersonalArbeidsforholdUri = "/administrasjon/personal/arbeidsforhold";
@@ -193,6 +194,8 @@ namespace VigoBAS.FINT.Edu
             public const string positionCode = "stillingskode";
             public const string leader = "leder";
             public const string eksamensform = "eksamensform";
+            public const string termin = "termin";
+            public const string skolear = "skolear";
         }
 
         public struct ClassType
@@ -217,6 +220,7 @@ namespace VigoBAS.FINT.Edu
             public const string navn = "navn";
             public const string beskrivelse = "beskrivelse";
             public const string periode = "periode";
+            public const string eksamensdato = "eksamensdato";
             public const string elevnummer = "elevnummer";
             public const string brukernavn = "brukernavn";
             public const string feidenavn = "feidenavn";
@@ -280,6 +284,7 @@ namespace VigoBAS.FINT.Edu
             public const string ElevforholdBasisgruppe = "ElevforholdBasisgruppe";
             public const string ElevforholdKontaktlarergruppe = "ElevforholdKontaktlarergruppe";
             public const string ElevforholdUndervisningsgruppe = "ElevforholdUndervisningsgruppe";
+            public const string ElevforholdEksamensgruppe = "ElevforholdEksamensgruppe";
             public const string ElevforholdSkole = "ElevforholdSkole";
             public const string ElevforholdKategori = "ElevforholdKategori";
             public const string ElevforholdHovedkategori = "ElevforholdHovedkategori";
@@ -310,6 +315,7 @@ namespace VigoBAS.FINT.Edu
             public const string GruppeNavn = "GruppeNavn";
             public const string EduGroupType = "EduGroupType";
             public const string EduGroupExamCategory = "EduGroupExamCategory";
+            public const string EduGroupExamDate = "EduGroupExamDate";
             public const string GruppeBeskrivelse = "GruppeBeskrivelse";
             public const string GruppePeriodeStart = "GruppePeriodeStart";
             public const string GruppePeriodeSlutt = "GruppePeriodeSlutt";

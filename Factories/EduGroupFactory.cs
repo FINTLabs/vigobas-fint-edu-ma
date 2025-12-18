@@ -22,6 +22,8 @@ using FINT.Model.Utdanning.Basisklasser;
 using HalClient.Net.Parser;
 using Newtonsoft.Json;
 using static VigoBAS.FINT.Edu.Constants;
+using FINT.Model.Felles.Kompleksedatatyper;
+using System;
 
 namespace VigoBAS.FINT.Edu
 {
@@ -97,8 +99,10 @@ namespace VigoBAS.FINT.Edu
         public static EduGroup Create(
             string systemIdUri,
             Gruppe basicGroup,
+            Periode validPeriod,
             string groupType,
             string examCategory,
+            DateTime? examDate,
             IReadOnlyDictionary<string, IEnumerable<ILinkObject>> groupLinks,
             EduOrgUnit  school,
             EduGroup studyProgramme
@@ -107,22 +111,12 @@ namespace VigoBAS.FINT.Edu
             var systemId = basicGroup.SystemId.Identifikatorverdi;
             var navn = basicGroup.Navn;
             var beskrivelse = basicGroup?.Beskrivelse;
-            string periodeStart = string.Empty;
-            string periodeSlutt = string.Empty;
+            string periodeStart = validPeriod.Start.ToString(dateFormat);
+            string periodeSlutt = validPeriod.Slutt?.ToString(dateFormat);
+            string eksamensdato = examDate?.ToString(dateFormat);
             string periodeStartTime = string.Empty;
             string periodeSluttTime = string.Empty;
 
-            if (basicGroup.Periode.Count > 0)
-            {
-                periodeStart = basicGroup.Periode[0]?.Start.ToString(dateFormat);
-                periodeSlutt = basicGroup.Periode[0]?.Slutt?.ToString(dateFormat);
-
-                if (groupType == ClassType.examGroup)
-                {
-                    periodeStartTime = basicGroup.Periode[0]?.Start.ToString(hourFormat);
-                    periodeSluttTime = basicGroup.Periode[0]?.Slutt?.ToString(hourFormat);
-                }
-            }
             var grepkode = new Grepkode();
 
             var schoolUri = school.SystemIdUri;
@@ -139,6 +133,7 @@ namespace VigoBAS.FINT.Edu
                 GruppeSystemId = systemId,
                 EduGroupType = groupType,
                 Eksamensform = examCategory,
+                Eksamensdato = eksamensdato,
                 GruppeNavn = navn,
                 GruppeBeskrivelse = beskrivelse,
                 GruppePeriodeStart = periodeStart,

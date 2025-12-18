@@ -36,7 +36,7 @@ namespace VigoBAS.FINT.Edu
             var systemId = new Identifikator();
             string navn = String.Empty;
             string beskrivelse = String.Empty;
-            var periode = new List<Periode>();
+            DateTime? eksamensdato = new DateTime?();
 
             if (values.TryGetValue(FintAttribute.systemId, out IStateValue systemIDValue))
             {
@@ -50,9 +50,9 @@ namespace VigoBAS.FINT.Edu
             {
                 beskrivelse = beskrivelseValue.Value;
             }
-            if (values.TryGetValue(FintAttribute.periode, out IStateValue periodeValue))
+            if (values.TryGetValue(FintAttribute.eksamensdato, out IStateValue eksamensdatoValue))
             {
-                periode = JsonConvert.DeserializeObject<List<Periode>>(periodeValue.Value);
+                eksamensdato = DateTime.Parse(eksamensdatoValue.Value);
             }
 
             return new Eksamensgruppe
@@ -60,7 +60,7 @@ namespace VigoBAS.FINT.Edu
                 SystemId = systemId,
                 Beskrivelse = beskrivelse,
                 Navn = navn,
-                Periode = periode,
+                Eksamensdato = eksamensdato
             };
         }
     }

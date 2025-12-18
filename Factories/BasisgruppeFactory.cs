@@ -18,9 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using FINT.Model.Felles;
 using FINT.Model.Felles.Kompleksedatatyper;
-using FINT.Model.Utdanning.Basisklasser;
 using FINT.Model.Utdanning.Elev;
 using HalClient.Net.Parser;
 using Newtonsoft.Json;
@@ -35,7 +33,6 @@ namespace VigoBAS.FINT.Edu
             var systemId = new Identifikator();
             string navn = String.Empty;
             string beskrivelse = String.Empty;
-            var periode = new List<Periode>();
 
             if (values.TryGetValue(FintAttribute.systemId, out IStateValue systemIDValue))
             {
@@ -49,18 +46,12 @@ namespace VigoBAS.FINT.Edu
             {
                 beskrivelse = beskrivelseValue.Value;
             }
-            if (values.TryGetValue(FintAttribute.periode, out IStateValue periodeValue))
-            {
-                periode = JsonConvert.DeserializeObject<List<Periode>>(periodeValue.Value);
-            }
-
             return new Basisgruppe
             {
                 SystemId = systemId,
                 Beskrivelse = beskrivelse,
-                Navn = navn,
-                Periode = periode,
-            }; 
+                Navn = navn
+            };
         }
     }
 }

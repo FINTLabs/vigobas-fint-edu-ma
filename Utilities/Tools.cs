@@ -114,6 +114,59 @@ namespace VigoBAS.FINT.Edu.Utilities
             }
             return periodIsValid;
         }
+
+        public static bool PeriodIsValid(Periode period, int daysBefore, int daysAhead)
+        {
+            bool periodIsValid = false;
+            var compareDate = DateTime.Today;
+            var periodStart = period.Start.Date.AddDays(-daysBefore);
+            var periodSlutt = GetPeriodeSluttAsDate(period, infinityDate).AddDays(daysAhead);
+
+            if (periodStart <= compareDate && compareDate <= periodSlutt)
+            {
+                periodIsValid = true;
+            }
+            else
+            {
+                Logger.Log.DebugFormat("Period starting {0} ending {1} is not considered valid", periodStart.ToString(), periodSlutt.ToString());
+            }
+            return periodIsValid;
+        }
+        public static Periode GetPeriodeFromLinks(IEnumerable<ILinkObject> periodeLinks, Dictionary<string, Periode> periodeDictionary)
+        {
+            DateTime start = new DateTime();
+            DateTime slutt = new DateTime();
+
+            foreach (var link in periodeLinks)
+            {
+                var periodeUri = LinkToString(link);
+
+                if (periodeDictionary.TryGetValue(periodeUri, out Periode periodeFound))
+                {
+                    var startFound = periodeFound.Start;
+                    var sluttFound = (DateTime)periodeFound.Slutt;
+
+                    if (start == DateTime.MinValue || startFound < start)
+                    {
+                        start = startFound;
+                    }
+                    if (sluttFound > slutt)
+                    {
+                        slutt = sluttFound;
+                    }
+                }
+                else
+                {
+                    Logger.Log.Error($"Referenced termin/skolear {periodeUri} not found or is invalid");
+                    return null;
+                }
+            }
+            return new Periode() { Start = start, Slutt = slutt };
+        }
+        public static Periode GetPeriodeFromSkolearLink(IEnumerable<ILinkObject> skolearLink)
+        {
+            throw new NotImplementedException();
+        }
         public static bool ExamgroupsShouldBeVisible(DateTime visibleFromDate, DateTime visibleToDate)
         {
             return (visibleFromDate <= DateTime.Today) && (DateTime.Today <= visibleToDate);
