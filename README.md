@@ -2,12 +2,15 @@
 
 ## Description
 
-Management Agent for Microsoft Identity Manager (MIM). Syncs educational data with any school administration system (SAS) that is connected to FINT. Currently Visma InSchool is the only SAS connected to FINT.
+Management Agent for Microsoft Identity Manager (MIM). Syncs educational data with any school administration system (SAS) that is connected to FINT. Currently InSchool is the only SAS connected to FINT.
 
 Version 1.7.0 is the first public versjon. For older versions see: https://vigobas.vigoiks.no/VigoBAS/systemdokumentasjon/releasenotes/ 
 
 ## Version 1.12.0
 Released 2025-12-18
+
+This is a "pre-information model version 4" release that might be used in production environments. All use of deprecated information elements are removed. With the exeption of Basisgruppe/Klasse, this version relies entirely on elements that will still be available in version 4. 
+
 ### Features
 * Updated to information model 3.21
 * All members in basic, study, level and exam groups are generated through medlemskaps-resources
