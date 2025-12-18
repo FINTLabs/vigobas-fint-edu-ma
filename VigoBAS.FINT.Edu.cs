@@ -2112,8 +2112,8 @@ namespace VigoBAS.FINT.Edu
                 {
                     case ClassType.basicGroup:
                         {
-                            //group = BasisgruppeFactory.Create(groupState);
-                            group = KlasseFactory.Create(groupState);
+                            group = BasisgruppeFactory.Create(groupState);
+                            //group = KlasseFactory.Create(groupState);
                             break;
                         }
                     case ClassType.contactTeacherGroup:
