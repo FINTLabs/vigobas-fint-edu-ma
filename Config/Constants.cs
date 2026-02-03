@@ -105,8 +105,8 @@ namespace VigoBAS.FINT.Edu
             public const string utdanningElevElevforholdUri = "/utdanning/elev/elevforhold";
             public const string utdanningElevUndervisningsforholdUri = "/utdanning/elev/undervisningsforhold";
             public const string utdanningElevMedlemskapUri = "/utdanning/elev/medlemskap";
-            public const string utdanningElevBasisgruppeUri = "/utdanning/elev/basisgruppe";
-            public const string utdanningElevBasisgruppeMedlemskapUri = "/utdanning/elev/basisgruppemedlemskap";
+            public const string utdanningElevBasisgruppeUri = "/utdanning/elev/klasse";
+            public const string utdanningElevBasisgruppeMedlemskapUri = "/utdanning/elev/klassemedlemskap";
             public const string utdanningElevKontaktlarergruppeUri = "/utdanning/elev/kontaktlarergruppe";
             public const string utdanningElevKontaktlarergruppeMedlemskapUri = "/utdanning/elev/kontaktlarergruppemedlemskap";
             public const string utdanningVurderingEksamensgruppeUri = "/utdanning/vurdering/eksamensgruppe";
@@ -168,7 +168,7 @@ namespace VigoBAS.FINT.Edu
             public const string student = "elev";
             public const string member = "medlem";
             public const string group = "gruppe";
-            public const string basicGroup = "basisgruppe";
+            public const string basicGroup = "klasse";
             public const string contactTeacherGroup = "kontaktlarergruppe";
             public const string studyGroup = "undervisningsgruppe";
             public const string examGroup = "eksamensgruppe";
@@ -200,7 +200,7 @@ namespace VigoBAS.FINT.Edu
 
         public struct ClassType
         {
-            public const string basicGroup = "basisgruppe";
+            public const string basicGroup = "klasse";
             public const string contactTeacherGroup = "kontaktlarergruppe";
             public const string studyGroup = "undervisningsgruppe";
             

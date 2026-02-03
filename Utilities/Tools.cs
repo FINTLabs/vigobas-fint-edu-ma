@@ -93,6 +93,16 @@ namespace VigoBAS.FINT.Edu.Utilities
             return normalizedUri;
         }
 
+        public static bool MembershipIsValid(string uriKey, IEmbeddedResourceObject membershipResource, int dayBeforeStudentStarts, int dayBeforeStudentEnds)
+        {
+            if (membershipResource.State.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue periodeValue))
+            {
+                return PeriodIsValid(periodeValue, dayBeforeStudentStarts, dayBeforeStudentEnds);
+            }
+            Logger.Log.DebugFormat("Medlemskap {0} has no gyldighetsperiode, therefore concidered valid", uriKey);
+            return true;
+        }
+
         public static bool PeriodIsValid(IStateValue stateValue, int daysBefore, int daysAhead)
         {
             bool periodIsValid = false;

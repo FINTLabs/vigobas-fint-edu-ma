@@ -1464,14 +1464,8 @@ namespace VigoBAS.FINT.Edu
         private void AddValidMembership(string uriKey, Dictionary<string, IEmbeddedResourceObject> resourceDict, int dayBeforeStudentStarts, int dayBeforeStudentEnds, bool isExamGroupMembership, string groupRelation, ref Dictionary<string, List<string>> groupAndValidStudentRelationships)
         {
             if (resourceDict.TryGetValue(uriKey, out IEmbeddedResourceObject membershipResource))
-            {
-                bool membershipIsValid = true;
-
-                if (!isExamGroupMembership && membershipResource.State.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue periodeValue))
-                {
-                    membershipIsValid = PeriodIsValid(periodeValue, dayBeforeStudentStarts, dayBeforeStudentEnds);
-                }
-                if (membershipIsValid)
+            {                 
+                if (MembershipIsValid(uriKey, membershipResource, dayBeforeStudentStarts, dayBeforeStudentEnds))
                 {
                     if (membershipResource.Links.TryGetValue(groupRelation, out IEnumerable<ILinkObject> groupLink))
                     {
@@ -2111,9 +2105,8 @@ namespace VigoBAS.FINT.Edu
                 switch (groupType)
                 {
                     case ClassType.basicGroup:
-                        {
-                            group = BasisgruppeFactory.Create(groupState);
-                            //group = KlasseFactory.Create(groupState);
+                        {                        
+                            group = KlasseFactory.Create(groupState);
                             break;
                         }
                     case ClassType.contactTeacherGroup:
@@ -2234,24 +2227,21 @@ namespace VigoBAS.FINT.Edu
 
                         importedObjectsDict.Add(groupUri, new ImportListItem() { eduGroup = eduGroup });
 
-                        if (groupData.Links.TryGetValue(ResourceLink.studentRelationship, out IEnumerable<ILinkObject> groupMembershipLinks))
+                        if (membershipDict.TryGetValue(groupUri, out List<string> validStudentRelationships))
                         {
-                            //var studentRelationships = groupData.Links[ClassType.studentRelationship];
-                            if (membershipDict.TryGetValue(groupUri, out List<string> validStudentRelationships))
-                            {
-                                AddEduPersonsInGroupToCS(
-                                    ClassType.studentRelationship,
-                                    groupUri,
-                                    schoolUri,
-                                    orgUri,
-                                    validStudentRelationships,
-                                    _elevforholdDict,
-                                    _elevDict,
-                                    _elevPersonDict,
-                                    ref ssnToSystemId,
-                                    ref importedObjectsDict);
-                            }
+                            AddEduPersonsInGroupToCS(
+                                ClassType.studentRelationship,
+                                groupUri,
+                                schoolUri,
+                                orgUri,
+                                validStudentRelationships,
+                                _elevforholdDict,
+                                _elevDict,
+                                _elevPersonDict,
+                                ref ssnToSystemId,
+                                ref importedObjectsDict);
                         }
+
                         if (groupData.Links.TryGetValue(ResourceLink.teachingRelationship, out IEnumerable<ILinkObject> teachingRelationshipLinks))
                         {
                             List<string> teachingRelationships = new List<string>();
