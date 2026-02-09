@@ -1009,57 +1009,74 @@ namespace VigoBAS.FINT.Edu
 
                     if (examGroupUriList.Count > 0)
                     {
+                        Logger.Log.InfoFormat("Starting generation of exam groups for school {0}", schoolUri);
                         foreach (var groupUri in examGroupUriList)
                         {
+                            Logger.Log.DebugFormat("Starting with exam group {0}", groupUri);
+
                             if (importedObjectsDict.TryGetValue(groupUri, out ImportListItem examgroupItem))
                             {
-                                var examCategory = examgroupItem.eduGroup.Eksamensform;
-
-                                if (examCategoriesToAggregatePerDateList.Contains(examCategory))
+                                if (examgroupItem.eduGroup.Eksamensform != null)
                                 {
-                                    var examdate = examgroupItem.eduGroup.Eksamensdato;
+                                    var examCategory = examgroupItem.eduGroup.Eksamensform;
 
-                                    var aggregatedExamgroupUri = schoolUri + '_' + examCategory + '_' + examdate;
-
-
-                                    if (!importedObjectsDict.TryGetValue(aggregatedExamgroupUri, out ImportListItem dummyItem))
+                                    if (examCategoriesToAggregatePerDateList.Contains(examCategory))
                                     {
-                                        importedObjectsDict.Add(aggregatedExamgroupUri, new ImportListItem { eduGroup = EduGroupFactory.Create(schoolUri, examdate, examCategory) });
-                                    }
-                                    if (importedObjectsDict.TryGetValue(aggregatedExamgroupUri, out ImportListItem aggregatedExamgroupItem))
-                                    {
-                                        var examgroupMembers = examgroupItem.eduGroup.GruppeElevListe;
-                                        var aggredateExamgroupMembers = aggregatedExamgroupItem.eduGroup.GruppeElevListe;
-
-
-                                        foreach (var member in examgroupMembers)
+                                        if (examgroupItem.eduGroup.Eksamensdato != null)
                                         {
-                                            Logger.Log.InfoFormat("Trying to add student {0} to exam group {1}", member, aggregatedExamgroupUri);
-                                            if (!aggredateExamgroupMembers.Contains(member))
-                                            {
-                                                aggredateExamgroupMembers.Add(member);
-                                                // add exam date to member
-                                                try
-                                                {                                                    
-                                                    if (importedObjectsDict.TryGetValue(member, out ImportListItem memberItem))
-                                                    {
-                                                        var student = memberItem.eduPerson;
+                                            var examdate = examgroupItem.eduGroup.Eksamensdato;
 
-                                                        if (!student.Eksamensdatoer.Contains(examdate))
+                                            var aggregatedExamgroupUri = schoolUri + '_' + examCategory + '_' + examdate;
+
+                                            if (!importedObjectsDict.TryGetValue(aggregatedExamgroupUri, out ImportListItem dummyItem))
+                                            {
+                                                importedObjectsDict.Add(aggregatedExamgroupUri, new ImportListItem { eduGroup = EduGroupFactory.Create(schoolUri, examdate, examCategory) });
+                                            }
+                                            if (importedObjectsDict.TryGetValue(aggregatedExamgroupUri, out ImportListItem aggregatedExamgroupItem))
+                                            {
+                                                var examgroupMembers = examgroupItem.eduGroup.GruppeElevListe;
+                                                var aggredateExamgroupMembers = aggregatedExamgroupItem.eduGroup.GruppeElevListe;
+
+
+                                                foreach (var member in examgroupMembers)
+                                                {
+                                                    Logger.Log.InfoFormat("Trying to add student {0} to exam group {1}", member, aggregatedExamgroupUri);
+                                                    if (!aggredateExamgroupMembers.Contains(member))
+                                                    {
+                                                        aggredateExamgroupMembers.Add(member);
+                                                        // add exam date to member
+                                                        try
                                                         {
-                                                            student.Eksamensdatoer.Add(examdate);
-                                                            student.AntallEksamener++;
-                                                            student.ElevforholdEksamensgruppe.Add(aggregatedExamgroupUri);
+                                                            if (importedObjectsDict.TryGetValue(member, out ImportListItem memberItem))
+                                                            {
+                                                                var student = memberItem.eduPerson;
+
+                                                                if (!student.Eksamensdatoer.Contains(examdate))
+                                                                {
+                                                                    student.Eksamensdatoer.Add(examdate);
+                                                                    student.AntallEksamener++;
+                                                                    student.ElevforholdEksamensgruppe.Add(aggregatedExamgroupUri);
+                                                                }
+                                                            }
+                                                        }
+                                                        catch (Exception e)
+                                                        {
+                                                            Logger.Log.ErrorFormat("Adding exam date {0} to student {0} failed with expection {2}", examdate, member, e.Message);
                                                         }
                                                     }
                                                 }
-                                                catch (Exception e)
-                                                {
-                                                    Logger.Log.ErrorFormat("Adding exam date {0} to student {0} failed with expection {2}", examdate, member, e.Message);
-                                                }
                                             }
                                         }
+                                        else
+                                        {
+                                            Logger.Log.ErrorFormat("Exam group {0} is missing eksamensdato", groupUri);
+                                        }
                                     }
+
+                                }
+                                else
+                                {
+                                    Logger.Log.ErrorFormat("Exam group {0} is missing eksamensform", groupUri);
                                 }
                             }
                         }
@@ -2126,7 +2143,7 @@ namespace VigoBAS.FINT.Edu
                             {                                
                                 examCategory = GetIdValueFromLink(eksamensformLink);
                                 examDate = DateTime.Parse(eksamensdatoValue.Value);
-                                group = UtdanningsprogramFactory.Create(groupState);
+                                group = EksamensgruppeFactory.Create(groupState);
                                 
                             }
                             break;
