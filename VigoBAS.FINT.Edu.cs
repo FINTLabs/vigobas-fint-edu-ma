@@ -82,6 +82,7 @@ namespace VigoBAS.FINT.Edu
         private Dictionary<string, IEmbeddedResourceObject> _fagDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _arstrinnDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _programomradeDict = new Dictionary<string, IEmbeddedResourceObject>();
+        private Dictionary<string, IEmbeddedResourceObject> _programomradeMedlemskapDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _utdanningsprogramDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _skoleDict = new Dictionary<string, IEmbeddedResourceObject>();
 
@@ -450,8 +451,8 @@ namespace VigoBAS.FINT.Edu
             var undervisningsforholdUri = FintValue.utdanningElevUndervisningsforholdUri;
             //var medlemskapUri = DefaultValue.utdanningElevMedlemskapUri;
             var skoleressursUri = FintValue.utdanningElevSkoleressursUri;
-            var basisgruppeUri = FintValue.utdanningElevBasisgruppeUri;
-            var basisgruppeMedlemskapUri = FintValue.utdanningElevBasisgruppeMedlemskapUri;
+            var basisgruppeUri = FintValue.utdanningElevKlasseUri;
+            var basisgruppeMedlemskapUri = FintValue.utdanningElevKlasseMedlemskapUri;
             var kontaktlarergruppeUri = FintValue.utdanningElevKontaktlarergruppeUri;
             var kontaktlarergruppeMedlemskapUri = FintValue.utdanningElevKontaktlarergruppeMedlemskapUri;
             var undervisningsgruppeUri = FintValue.utdanningTimeplanUndervisningsgruppeUri;
@@ -461,6 +462,7 @@ namespace VigoBAS.FINT.Edu
             var fagUri = FintValue.utdanningTimeplanFagUri;
             var arstrinnUri = FintValue.utdanningUtdanningsprogramArstrinnUri;
             var programomradeUri = FintValue.utdanningUtdanningsprogramProgramomradeUri;
+            var programomradeMedlemskapUri = FintValue.utdanningUtdanningsprogramProgramomradeMedlemskapUri;
             var utdanningsprogramUri = FintValue.utdanningUtdanningsprogramUtdanningsprogramUri;
             var skoleUri = FintValue.utdanningUtdanningsprogramSkoleUri;
             var ansattPersonUri = FintValue.administrasjonPersonalPersonUri;
@@ -484,7 +486,8 @@ namespace VigoBAS.FINT.Edu
             var componentList = new List<string>() {  elevPersonUri, elevUri, elevforholdUri, undervisningsforholdUri,
                                                 skoleressursUri, basisgruppeUri,  kontaktlarergruppeUri,
                                                 undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, eksamensgruppeUri,
-                                                basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri, eksamensgruppeMedlemskapUri,
+                                                basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri,
+                                                programomradeMedlemskapUri, eksamensgruppeMedlemskapUri,
                                                 skoleUri, ansattPersonUri, personalRessursUri, arbeidsforholdUri, organisasjonselementUri};
 
             var groupResourceUris = new List<string>() { basisgruppeUri, kontaktlarergruppeUri,
@@ -563,7 +566,7 @@ namespace VigoBAS.FINT.Edu
 
                                 switch (resourceType)
                                 {
-                                    case FintValue.utdanningElevBasisgruppeUri:
+                                    case FintValue.utdanningElevKlasseUri:
                                         {
                                             _basisgruppeDict.Add(uriKey, gruppeResource);
                                             break;
@@ -685,14 +688,19 @@ namespace VigoBAS.FINT.Edu
                             _programomradeDict.Add(uriKey, resourceDict[uriKey]);
                             break;
                         }
+                    case FintValue.utdanningUtdanningsprogramProgramomradeMedlemskapUri:
+                        {
+                            _programomradeMedlemskapDict.Add(uriKey, resourceDict[uriKey]);
+                            break;
+                        }
                     case FintValue.utdanningUtdanningsprogramUtdanningsprogramUri:
                         {
                             _utdanningsprogramDict.Add(uriKey, resourceDict[uriKey]);
                             break;
                         }
-                    case FintValue.utdanningElevBasisgruppeMedlemskapUri:
+                    case FintValue.utdanningElevKlasseMedlemskapUri:
                     {
-                        AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.basicGroup, ref _basicGroupAndValidStudentRelationships);
+                        AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.classGroup, ref _basicGroupAndValidStudentRelationships);
                             break;
                     }
                     case FintValue.utdanningElevKontaktlarergruppeMedlemskapUri:
@@ -713,6 +721,7 @@ namespace VigoBAS.FINT.Edu
                             }
                             break;
                         }
+
                     case FintValue.utdanningUtdanningsprogramSkoleUri:
                     {
                         var schoolResource = resourceDict[uriKey];
@@ -950,7 +959,7 @@ namespace VigoBAS.FINT.Edu
 
                     var skoleDataLinks = skoleData.Links;
 
-                    var groupLinks = new Collection<string> { ResourceLink.basicGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup, ResourceLink.examGroup };
+                    var groupLinks = new Collection<string> { ResourceLink.classGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup, ResourceLink.examGroup };
 
                     var levelGroupDictionary = new Dictionary<string, (List<string> studentmembers, List<string> teachermembers, List<string>basGroupmembers)>();
 
@@ -964,7 +973,7 @@ namespace VigoBAS.FINT.Edu
 
                             switch (groupLink)
                             {
-                                case ResourceLink.basicGroup:
+                                case ResourceLink.classGroup:
                                     {
                                         gruppeDict = _basisgruppeDict;
                                         break;
@@ -1009,57 +1018,74 @@ namespace VigoBAS.FINT.Edu
 
                     if (examGroupUriList.Count > 0)
                     {
+                        Logger.Log.InfoFormat("Starting generation of exam groups for school {0}", schoolUri);
                         foreach (var groupUri in examGroupUriList)
                         {
+                            Logger.Log.DebugFormat("Starting with exam group {0}", groupUri);
+
                             if (importedObjectsDict.TryGetValue(groupUri, out ImportListItem examgroupItem))
                             {
-                                var examCategory = examgroupItem.eduGroup.Eksamensform;
-
-                                if (examCategoriesToAggregatePerDateList.Contains(examCategory))
+                                if (examgroupItem.eduGroup.Eksamensform != null)
                                 {
-                                    var examdate = examgroupItem.eduGroup.Eksamensdato;
+                                    var examCategory = examgroupItem.eduGroup.Eksamensform;
 
-                                    var aggregatedExamgroupUri = schoolUri + '_' + examCategory + '_' + examdate;
-
-
-                                    if (!importedObjectsDict.TryGetValue(aggregatedExamgroupUri, out ImportListItem dummyItem))
+                                    if (examCategoriesToAggregatePerDateList.Contains(examCategory))
                                     {
-                                        importedObjectsDict.Add(aggregatedExamgroupUri, new ImportListItem { eduGroup = EduGroupFactory.Create(schoolUri, examdate, examCategory) });
-                                    }
-                                    if (importedObjectsDict.TryGetValue(aggregatedExamgroupUri, out ImportListItem aggregatedExamgroupItem))
-                                    {
-                                        var examgroupMembers = examgroupItem.eduGroup.GruppeElevListe;
-                                        var aggredateExamgroupMembers = aggregatedExamgroupItem.eduGroup.GruppeElevListe;
-
-
-                                        foreach (var member in examgroupMembers)
+                                        if (examgroupItem.eduGroup.Eksamensdato != null)
                                         {
-                                            Logger.Log.InfoFormat("Trying to add student {0} to exam group {1}", member, aggregatedExamgroupUri);
-                                            if (!aggredateExamgroupMembers.Contains(member))
-                                            {
-                                                aggredateExamgroupMembers.Add(member);
-                                                // add exam date to member
-                                                try
-                                                {                                                    
-                                                    if (importedObjectsDict.TryGetValue(member, out ImportListItem memberItem))
-                                                    {
-                                                        var student = memberItem.eduPerson;
+                                            var examdate = examgroupItem.eduGroup.Eksamensdato;
 
-                                                        if (!student.Eksamensdatoer.Contains(examdate))
+                                            var aggregatedExamgroupUri = schoolUri + '_' + examCategory + '_' + examdate;
+
+                                            if (!importedObjectsDict.TryGetValue(aggregatedExamgroupUri, out ImportListItem dummyItem))
+                                            {
+                                                importedObjectsDict.Add(aggregatedExamgroupUri, new ImportListItem { eduGroup = EduGroupFactory.Create(schoolUri, examdate, examCategory) });
+                                            }
+                                            if (importedObjectsDict.TryGetValue(aggregatedExamgroupUri, out ImportListItem aggregatedExamgroupItem))
+                                            {
+                                                var examgroupMembers = examgroupItem.eduGroup.GruppeElevListe;
+                                                var aggredateExamgroupMembers = aggregatedExamgroupItem.eduGroup.GruppeElevListe;
+
+
+                                                foreach (var member in examgroupMembers)
+                                                {
+                                                    Logger.Log.InfoFormat("Trying to add student {0} to exam group {1}", member, aggregatedExamgroupUri);
+                                                    if (!aggredateExamgroupMembers.Contains(member))
+                                                    {
+                                                        aggredateExamgroupMembers.Add(member);
+                                                        // add exam date to member
+                                                        try
                                                         {
-                                                            student.Eksamensdatoer.Add(examdate);
-                                                            student.AntallEksamener++;
-                                                            student.ElevforholdEksamensgruppe.Add(aggregatedExamgroupUri);
+                                                            if (importedObjectsDict.TryGetValue(member, out ImportListItem memberItem))
+                                                            {
+                                                                var student = memberItem.eduPerson;
+
+                                                                if (!student.Eksamensdatoer.Contains(examdate))
+                                                                {
+                                                                    student.Eksamensdatoer.Add(examdate);
+                                                                    student.AntallEksamener++;
+                                                                    student.ElevforholdEksamensgruppe.Add(aggregatedExamgroupUri);
+                                                                }
+                                                            }
+                                                        }
+                                                        catch (Exception e)
+                                                        {
+                                                            Logger.Log.ErrorFormat("Adding exam date {0} to student {0} failed with expection {2}", examdate, member, e.Message);
                                                         }
                                                     }
                                                 }
-                                                catch (Exception e)
-                                                {
-                                                    Logger.Log.ErrorFormat("Adding exam date {0} to student {0} failed with expection {2}", examdate, member, e.Message);
-                                                }
                                             }
                                         }
+                                        else
+                                        {
+                                            Logger.Log.ErrorFormat("Exam group {0} is missing eksamensdato", groupUri);
+                                        }
                                     }
+
+                                }
+                                else
+                                {
+                                    Logger.Log.ErrorFormat("Exam group {0} is missing eksamensform", groupUri);
                                 }
                             }
                         }
@@ -1464,14 +1490,8 @@ namespace VigoBAS.FINT.Edu
         private void AddValidMembership(string uriKey, Dictionary<string, IEmbeddedResourceObject> resourceDict, int dayBeforeStudentStarts, int dayBeforeStudentEnds, bool isExamGroupMembership, string groupRelation, ref Dictionary<string, List<string>> groupAndValidStudentRelationships)
         {
             if (resourceDict.TryGetValue(uriKey, out IEmbeddedResourceObject membershipResource))
-            {
-                bool membershipIsValid = true;
-
-                if (!isExamGroupMembership && membershipResource.State.TryGetValue(FintAttribute.gyldighetsperiode, out IStateValue periodeValue))
-                {
-                    membershipIsValid = PeriodIsValid(periodeValue, dayBeforeStudentStarts, dayBeforeStudentEnds);
-                }
-                if (membershipIsValid)
+            {                 
+                if (MembershipIsValid(uriKey, membershipResource, dayBeforeStudentStarts, dayBeforeStudentEnds))
                 {
                     if (membershipResource.Links.TryGetValue(groupRelation, out IEnumerable<ILinkObject> groupLink))
                     {
@@ -2111,9 +2131,8 @@ namespace VigoBAS.FINT.Edu
                 switch (groupType)
                 {
                     case ClassType.basicGroup:
-                        {
-                            group = BasisgruppeFactory.Create(groupState);
-                            //group = KlasseFactory.Create(groupState);
+                        {                        
+                            group = KlasseFactory.Create(groupState);
                             break;
                         }
                     case ClassType.contactTeacherGroup:
@@ -2133,7 +2152,7 @@ namespace VigoBAS.FINT.Edu
                             {                                
                                 examCategory = GetIdValueFromLink(eksamensformLink);
                                 examDate = DateTime.Parse(eksamensdatoValue.Value);
-                                group = UtdanningsprogramFactory.Create(groupState);
+                                group = EksamensgruppeFactory.Create(groupState);
                                 
                             }
                             break;
@@ -2234,24 +2253,21 @@ namespace VigoBAS.FINT.Edu
 
                         importedObjectsDict.Add(groupUri, new ImportListItem() { eduGroup = eduGroup });
 
-                        if (groupData.Links.TryGetValue(ResourceLink.studentRelationship, out IEnumerable<ILinkObject> groupMembershipLinks))
+                        if (membershipDict.TryGetValue(groupUri, out List<string> validStudentRelationships))
                         {
-                            //var studentRelationships = groupData.Links[ClassType.studentRelationship];
-                            if (membershipDict.TryGetValue(groupUri, out List<string> validStudentRelationships))
-                            {
-                                AddEduPersonsInGroupToCS(
-                                    ClassType.studentRelationship,
-                                    groupUri,
-                                    schoolUri,
-                                    orgUri,
-                                    validStudentRelationships,
-                                    _elevforholdDict,
-                                    _elevDict,
-                                    _elevPersonDict,
-                                    ref ssnToSystemId,
-                                    ref importedObjectsDict);
-                            }
+                            AddEduPersonsInGroupToCS(
+                                ClassType.studentRelationship,
+                                groupUri,
+                                schoolUri,
+                                orgUri,
+                                validStudentRelationships,
+                                _elevforholdDict,
+                                _elevDict,
+                                _elevPersonDict,
+                                ref ssnToSystemId,
+                                ref importedObjectsDict);
                         }
+
                         if (groupData.Links.TryGetValue(ResourceLink.teachingRelationship, out IEnumerable<ILinkObject> teachingRelationshipLinks))
                         {
                             List<string> teachingRelationships = new List<string>();
@@ -2472,9 +2488,25 @@ namespace VigoBAS.FINT.Edu
 
                                     if (!importedObjectsDict.TryGetValue(studentRelationshipUri, out ImportListItem dummyStudentRelationship))
                                     {
-                                        if (studentRelationShipLinks.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programmeareaLink))
+                                        if (studentRelationShipLinks.TryGetValue(ResourceLink.programmeareaMembership, out IEnumerable<ILinkObject> programmeareaMembershipLink))
                                         {
-                                            programmeareaUri = LinkToString(programmeareaLink);
+                                            string programmeareaMembershipUri = LinkToString(programmeareaMembershipLink);
+                                            if (_programomradeMedlemskapDict.TryGetValue(programmeareaMembershipUri, out IEmbeddedResourceObject programmeareaMembershipObject))
+                                            {
+                                                if (programmeareaMembershipObject.Links.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programAreaLink))
+                                                {
+                                                    programmeareaUri = LinkToString(programAreaLink);
+                                                    Logger.Log.DebugFormat("Program area membership {0} is linked to program area {1}", programmeareaMembershipUri, programmeareaUri);
+                                                }
+                                                else
+                                                {
+                                                    Logger.Log.ErrorFormat("Program area membership {0} is missing program area link", programmeareaMembershipUri);
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Logger.Log.InfoFormat("Student relationship {0} is missing program area membership link", studentRelationshipUri);
                                         }
                                         var eduStudentRelationship = EduStudentRelationshipFactory.Create(
                                             studentRelationshipUri, 
@@ -2492,12 +2524,6 @@ namespace VigoBAS.FINT.Edu
                                     {
                                         isMainSchool = Convert.ToBoolean(hovedskoleValue.Value);
                                     }
-                                    //var programmeareaUri = string.Empty;
-
-                                    //if (studentRelationShipLinks.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programmeareaLink))
-                                    //{
-                                    //    programmeareaUri = LinkToString(programmeareaLink);
-                                        
                                     //    if (false)
                                     //    {
                                     //        AddStudentToProgrammeAreaGroup(

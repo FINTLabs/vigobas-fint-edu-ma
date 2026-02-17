@@ -26,9 +26,9 @@ using static VigoBAS.FINT.Edu.Constants;
 
 namespace VigoBAS.FINT.Edu
 {
-    class BasisgruppeFactory
+    class KlasseFactory
     {
-        public static Basisgruppe Create(IReadOnlyDictionary<string, IStateValue> values)
+        public static Klasse Create(IReadOnlyDictionary<string, IStateValue> values)
         {
             var systemId = new Identifikator();
             string navn = String.Empty;
@@ -46,7 +46,7 @@ namespace VigoBAS.FINT.Edu
             {
                 beskrivelse = beskrivelseValue.Value;
             }
-            return new Basisgruppe
+            return new Klasse
             {
                 SystemId = systemId,
                 Beskrivelse = beskrivelse,

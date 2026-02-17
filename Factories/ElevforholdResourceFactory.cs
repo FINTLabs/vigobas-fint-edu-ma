@@ -101,7 +101,7 @@ namespace VigoBAS.FINT.Edu
                             }
                             break;
                         }
-                    case ResourceLink.basicGroup:
+                    case ResourceLink.classGroup:
                         { 
                             var linkObjects = links[linkKey];
                             foreach (var linkObject in linkObjects)
