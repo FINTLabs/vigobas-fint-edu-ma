@@ -82,6 +82,7 @@ namespace VigoBAS.FINT.Edu
         private Dictionary<string, IEmbeddedResourceObject> _fagDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _arstrinnDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _programomradeDict = new Dictionary<string, IEmbeddedResourceObject>();
+        private Dictionary<string, IEmbeddedResourceObject> _programomradeMedlemskapDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _utdanningsprogramDict = new Dictionary<string, IEmbeddedResourceObject>();
         private Dictionary<string, IEmbeddedResourceObject> _skoleDict = new Dictionary<string, IEmbeddedResourceObject>();
 
@@ -450,8 +451,8 @@ namespace VigoBAS.FINT.Edu
             var undervisningsforholdUri = FintValue.utdanningElevUndervisningsforholdUri;
             //var medlemskapUri = DefaultValue.utdanningElevMedlemskapUri;
             var skoleressursUri = FintValue.utdanningElevSkoleressursUri;
-            var basisgruppeUri = FintValue.utdanningElevBasisgruppeUri;
-            var basisgruppeMedlemskapUri = FintValue.utdanningElevBasisgruppeMedlemskapUri;
+            var basisgruppeUri = FintValue.utdanningElevKlasseUri;
+            var basisgruppeMedlemskapUri = FintValue.utdanningElevKlasseMedlemskapUri;
             var kontaktlarergruppeUri = FintValue.utdanningElevKontaktlarergruppeUri;
             var kontaktlarergruppeMedlemskapUri = FintValue.utdanningElevKontaktlarergruppeMedlemskapUri;
             var undervisningsgruppeUri = FintValue.utdanningTimeplanUndervisningsgruppeUri;
@@ -461,6 +462,7 @@ namespace VigoBAS.FINT.Edu
             var fagUri = FintValue.utdanningTimeplanFagUri;
             var arstrinnUri = FintValue.utdanningUtdanningsprogramArstrinnUri;
             var programomradeUri = FintValue.utdanningUtdanningsprogramProgramomradeUri;
+            var programomradeMedlemskapUri = FintValue.utdanningUtdanningsprogramProgramomradeMedlemskapUri;
             var utdanningsprogramUri = FintValue.utdanningUtdanningsprogramUtdanningsprogramUri;
             var skoleUri = FintValue.utdanningUtdanningsprogramSkoleUri;
             var ansattPersonUri = FintValue.administrasjonPersonalPersonUri;
@@ -484,7 +486,8 @@ namespace VigoBAS.FINT.Edu
             var componentList = new List<string>() {  elevPersonUri, elevUri, elevforholdUri, undervisningsforholdUri,
                                                 skoleressursUri, basisgruppeUri,  kontaktlarergruppeUri,
                                                 undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, eksamensgruppeUri,
-                                                basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri, eksamensgruppeMedlemskapUri,
+                                                basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri,
+                                                programomradeMedlemskapUri, eksamensgruppeMedlemskapUri,
                                                 skoleUri, ansattPersonUri, personalRessursUri, arbeidsforholdUri, organisasjonselementUri};
 
             var groupResourceUris = new List<string>() { basisgruppeUri, kontaktlarergruppeUri,
@@ -563,7 +566,7 @@ namespace VigoBAS.FINT.Edu
 
                                 switch (resourceType)
                                 {
-                                    case FintValue.utdanningElevBasisgruppeUri:
+                                    case FintValue.utdanningElevKlasseUri:
                                         {
                                             _basisgruppeDict.Add(uriKey, gruppeResource);
                                             break;
@@ -685,14 +688,19 @@ namespace VigoBAS.FINT.Edu
                             _programomradeDict.Add(uriKey, resourceDict[uriKey]);
                             break;
                         }
+                    case FintValue.utdanningUtdanningsprogramProgramomradeMedlemskapUri:
+                        {
+                            _programomradeMedlemskapDict.Add(uriKey, resourceDict[uriKey]);
+                            break;
+                        }
                     case FintValue.utdanningUtdanningsprogramUtdanningsprogramUri:
                         {
                             _utdanningsprogramDict.Add(uriKey, resourceDict[uriKey]);
                             break;
                         }
-                    case FintValue.utdanningElevBasisgruppeMedlemskapUri:
+                    case FintValue.utdanningElevKlasseMedlemskapUri:
                     {
-                        AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.basicGroup, ref _basicGroupAndValidStudentRelationships);
+                        AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.classGroup, ref _basicGroupAndValidStudentRelationships);
                             break;
                     }
                     case FintValue.utdanningElevKontaktlarergruppeMedlemskapUri:
@@ -713,6 +721,7 @@ namespace VigoBAS.FINT.Edu
                             }
                             break;
                         }
+
                     case FintValue.utdanningUtdanningsprogramSkoleUri:
                     {
                         var schoolResource = resourceDict[uriKey];
@@ -950,7 +959,7 @@ namespace VigoBAS.FINT.Edu
 
                     var skoleDataLinks = skoleData.Links;
 
-                    var groupLinks = new Collection<string> { ResourceLink.basicGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup, ResourceLink.examGroup };
+                    var groupLinks = new Collection<string> { ResourceLink.classGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup, ResourceLink.examGroup };
 
                     var levelGroupDictionary = new Dictionary<string, (List<string> studentmembers, List<string> teachermembers, List<string>basGroupmembers)>();
 
@@ -964,7 +973,7 @@ namespace VigoBAS.FINT.Edu
 
                             switch (groupLink)
                             {
-                                case ResourceLink.basicGroup:
+                                case ResourceLink.classGroup:
                                     {
                                         gruppeDict = _basisgruppeDict;
                                         break;
@@ -2479,9 +2488,25 @@ namespace VigoBAS.FINT.Edu
 
                                     if (!importedObjectsDict.TryGetValue(studentRelationshipUri, out ImportListItem dummyStudentRelationship))
                                     {
-                                        if (studentRelationShipLinks.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programmeareaLink))
+                                        if (studentRelationShipLinks.TryGetValue(ResourceLink.programmeareaMembership, out IEnumerable<ILinkObject> programmeareaMembershipLink))
                                         {
-                                            programmeareaUri = LinkToString(programmeareaLink);
+                                            string programmeareaMembershipUri = LinkToString(programmeareaMembershipLink);
+                                            if (_programomradeMedlemskapDict.TryGetValue(programmeareaMembershipUri, out IEmbeddedResourceObject programmeareaMembershipObject))
+                                            {
+                                                if (programmeareaMembershipObject.Links.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programAreaLink))
+                                                {
+                                                    programmeareaUri = LinkToString(programAreaLink);
+                                                    Logger.Log.DebugFormat("Program area membership {0} is linked to program area {1}", programmeareaMembershipUri, programmeareaUri);
+                                                }
+                                                else
+                                                {
+                                                    Logger.Log.ErrorFormat("Program area membership {0} is missing program area link", programmeareaMembershipUri);
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Logger.Log.InfoFormat("Student relationship {0} is missing program area membership link", studentRelationshipUri);
                                         }
                                         var eduStudentRelationship = EduStudentRelationshipFactory.Create(
                                             studentRelationshipUri, 
@@ -2499,12 +2524,6 @@ namespace VigoBAS.FINT.Edu
                                     {
                                         isMainSchool = Convert.ToBoolean(hovedskoleValue.Value);
                                     }
-                                    //var programmeareaUri = string.Empty;
-
-                                    //if (studentRelationShipLinks.TryGetValue(ResourceLink.programmearea, out IEnumerable<ILinkObject> programmeareaLink))
-                                    //{
-                                    //    programmeareaUri = LinkToString(programmeareaLink);
-                                        
                                     //    if (false)
                                     //    {
                                     //        AddStudentToProgrammeAreaGroup(

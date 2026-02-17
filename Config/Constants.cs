@@ -105,8 +105,8 @@ namespace VigoBAS.FINT.Edu
             public const string utdanningElevElevforholdUri = "/utdanning/elev/elevforhold";
             public const string utdanningElevUndervisningsforholdUri = "/utdanning/elev/undervisningsforhold";
             public const string utdanningElevMedlemskapUri = "/utdanning/elev/medlemskap";
-            public const string utdanningElevBasisgruppeUri = "/utdanning/elev/klasse";
-            public const string utdanningElevBasisgruppeMedlemskapUri = "/utdanning/elev/klassemedlemskap";
+            public const string utdanningElevKlasseUri = "/utdanning/elev/klasse";
+            public const string utdanningElevKlasseMedlemskapUri = "/utdanning/elev/klassemedlemskap";
             public const string utdanningElevKontaktlarergruppeUri = "/utdanning/elev/kontaktlarergruppe";
             public const string utdanningElevKontaktlarergruppeMedlemskapUri = "/utdanning/elev/kontaktlarergruppemedlemskap";
             public const string utdanningVurderingEksamensgruppeUri = "/utdanning/vurdering/eksamensgruppe";
@@ -117,6 +117,7 @@ namespace VigoBAS.FINT.Edu
             public const string utdanningTimeplanFagUri = "/utdanning/timeplan/fag";
             public const string utdanningUtdanningsprogramArstrinnUri = "/utdanning/utdanningsprogram/arstrinn";
             public const string utdanningUtdanningsprogramProgramomradeUri = "/utdanning/utdanningsprogram/programomrade";
+            public const string utdanningUtdanningsprogramProgramomradeMedlemskapUri = "/utdanning/utdanningsprogram/programomrademedlemskap";
             public const string utdanningUtdanningsprogramUtdanningsprogramUri = "/utdanning/utdanningsprogram/utdanningsprogram";
             public const string utdanningUtdanningsprogramSkoleUri = "/utdanning/utdanningsprogram/skole";
             public const string utdanningKodeverkTerminUri = "/utdanning/kodeverk/termin";
@@ -168,7 +169,7 @@ namespace VigoBAS.FINT.Edu
             public const string student = "elev";
             public const string member = "medlem";
             public const string group = "gruppe";
-            public const string basicGroup = "klasse";
+            public const string classGroup = "klasse";
             public const string contactTeacherGroup = "kontaktlarergruppe";
             public const string studyGroup = "undervisningsgruppe";
             public const string examGroup = "eksamensgruppe";
@@ -176,9 +177,11 @@ namespace VigoBAS.FINT.Edu
             public const string subject = "fag";
             public const string level = "trinn";
             public const string programmearea = "programomrade";
+            public const string programmeareaMembership = "programomrademedlemskap";
             public const string studyprogramme = "utdanningsprogram";
             public const string personalResource = "personalressurs";
             public const string studentRelationship = "elevforhold";
+
             public const string studentCategory = "kategori";
             public const string teachingRelationship = "undervisningsforhold";
             public const string employment = "arbeidsforhold";
