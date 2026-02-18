@@ -15,6 +15,12 @@ This version is to be used in be used in beta enviroments only until all data in
 ### Features
 * Updated to information model 4.0.0 
 
+## Version 1.12.1
+Released 2026-02-19
+
+### Bugfixes
+* Exam group handling is fixed
+* Grep codes for subject, program area and study program are generated correctly
 
 ## Version 1.12.0
 Released 2025-12-18
