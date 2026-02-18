@@ -16,7 +16,7 @@ This version is to be used in be used in beta enviroments only until all data in
 * Updated to information model 4.0.0 
 
 ## Version 1.12.1
-Released 2026-02-19
+Released 2026-02-18
 
 ### Bugfixes
 * Exam group handling is fixed
