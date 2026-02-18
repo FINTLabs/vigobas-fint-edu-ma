@@ -451,8 +451,8 @@ namespace VigoBAS.FINT.Edu
             var undervisningsforholdUri = FintValue.utdanningElevUndervisningsforholdUri;
             //var medlemskapUri = DefaultValue.utdanningElevMedlemskapUri;
             var skoleressursUri = FintValue.utdanningElevSkoleressursUri;
-            var basisgruppeUri = FintValue.utdanningElevKlasseUri;
-            var basisgruppeMedlemskapUri = FintValue.utdanningElevKlasseMedlemskapUri;
+            var basisgruppeUri = FintValue.utdanningElevBasisgruppeUri;
+            var basisgruppeMedlemskapUri = FintValue.utdanningElevBasisgruppeMedlemskapUri;
             var kontaktlarergruppeUri = FintValue.utdanningElevKontaktlarergruppeUri;
             var kontaktlarergruppeMedlemskapUri = FintValue.utdanningElevKontaktlarergruppeMedlemskapUri;
             var undervisningsgruppeUri = FintValue.utdanningTimeplanUndervisningsgruppeUri;
@@ -566,7 +566,7 @@ namespace VigoBAS.FINT.Edu
 
                                 switch (resourceType)
                                 {
-                                    case FintValue.utdanningElevKlasseUri:
+                                    case FintValue.utdanningElevBasisgruppeUri:
                                         {
                                             _basisgruppeDict.Add(uriKey, gruppeResource);
                                             break;
@@ -698,7 +698,7 @@ namespace VigoBAS.FINT.Edu
                             _utdanningsprogramDict.Add(uriKey, resourceDict[uriKey]);
                             break;
                         }
-                    case FintValue.utdanningElevKlasseMedlemskapUri:
+                    case FintValue.utdanningElevBasisgruppeMedlemskapUri:
                     {
                         AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.classGroup, ref _basicGroupAndValidStudentRelationships);
                             break;
