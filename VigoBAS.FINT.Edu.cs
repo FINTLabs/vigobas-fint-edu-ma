@@ -205,7 +205,7 @@ namespace VigoBAS.FINT.Edu
 
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateLabelParameter("Parametre eksamen"));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.examCategoriesToImport, String.Empty, String.Empty));
-                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.examCategoriesToAggregatePerDate, String.Empty, String.Empty));
+                    //configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.examCategoriesToAggregatePerDate, String.Empty, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.examgroupsVisibleFromDate, String.Empty, String.Empty));
                     //configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.examPeriodStartDate, String.Empty, String.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(Param.examgroupsVisibleToDate, String.Empty, String.Empty));
@@ -513,11 +513,9 @@ namespace VigoBAS.FINT.Edu
             string endGroupValue = _importConfigParameters[Param.daysBeforeGroupEnds].Value;
             int daysBeforeGroupEnds = (string.IsNullOrEmpty(endGroupValue)) ? 0 : Int32.Parse(endGroupValue);
 
+
             string examCategoriesToImport = _importConfigParameters[Param.examCategoriesToImport].Value;
             string[] examCategoriesToImportList = (string.IsNullOrEmpty(examCategoriesToImport)) ? null : examCategoriesToImport.Split(',');
-
-            string examCategoriesToAggregatePerDate = _importConfigParameters[Param.examCategoriesToAggregatePerDate].Value;
-            string[] examCategoriesToAggregatePerDateList = (string.IsNullOrEmpty(examCategoriesToAggregatePerDate)) ? null : examCategoriesToAggregatePerDate.Split(',');
 
             string examgroupsVisibleFromDateValue = (string.IsNullOrEmpty(_importConfigParameters[Param.examgroupsVisibleFromDate].Value)) ? zeroDate: _importConfigParameters[Param.examgroupsVisibleFromDate].Value;
             DateTime examgroupsVisibleFromDate = DateTime.Parse(examgroupsVisibleFromDateValue);
@@ -525,8 +523,18 @@ namespace VigoBAS.FINT.Edu
             string examgroupsVisibleToDateValue = (string.IsNullOrEmpty(_importConfigParameters[Param.examgroupsVisibleToDate].Value)) ? infinityDate : _importConfigParameters[Param.examgroupsVisibleToDate].Value;
             DateTime examgroupsVisibleToDate = DateTime.Parse(examgroupsVisibleToDateValue).AddDays(1);
 
-            var examGroupsIsVisible = ExamgroupsShouldBeVisible(examgroupsVisibleFromDate, examgroupsVisibleToDate);
+            var examGroupsIsVisible = examCategoriesToImportList != null && ExamgroupsShouldBeVisible(examgroupsVisibleFromDate, examgroupsVisibleToDate);
 
+            if (examGroupsIsVisible)
+            {
+                Logger.Log.InfoFormat("Exam groups will imported for exam categories {0}", examCategoriesToImport);
+            }
+            else
+            {
+                var noImportReason = examCategoriesToImportList == null ? "there are no exam categories to import" : "current date outside visible period";
+                 Logger.Log.InfoFormat("Exam groups will not be imported because {0}", noImportReason);
+            }
+            
             foreach (var uriKey in resourceDict.Keys)
             {
                 var resourceType = GetUriPathForClass(uriKey);
@@ -584,7 +592,7 @@ namespace VigoBAS.FINT.Edu
                                         }
                                     case FintValue.utdanningVurderingEksamensgruppeUri:
                                         {
-                                            if (examGroupsIsVisible)
+                                            if (examGroupsIsVisible && GroupHasValidExamCategory(gruppeResource, examCategoriesToImportList))
                                             {
                                                 _eksamensgruppeDict.Add(uriKey, gruppeResource);
                                             }
@@ -959,7 +967,12 @@ namespace VigoBAS.FINT.Edu
 
                     var skoleDataLinks = skoleData.Links;
 
-                    var groupLinks = new Collection<string> { ResourceLink.classGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup, ResourceLink.examGroup };
+                    var groupLinks = new Collection<string> { ResourceLink.classGroup, ResourceLink.studyGroup, ResourceLink.contactTeacherGroup};
+
+                    if (examGroupsIsVisible)
+                    {
+                        groupLinks.Add(ResourceLink.examGroup);
+                    }
 
                     var levelGroupDictionary = new Dictionary<string, (List<string> studentmembers, List<string> teachermembers, List<string>basGroupmembers)>();
 
@@ -1018,7 +1031,7 @@ namespace VigoBAS.FINT.Edu
 
                     if (examGroupUriList.Count > 0)
                     {
-                        Logger.Log.InfoFormat("Starting generation of exam groups for school {0}", schoolUri);
+                        Logger.Log.InfoFormat("Starting generation of aggregated exam groups for school {0}", schoolUri);
                         foreach (var groupUri in examGroupUriList)
                         {
                             Logger.Log.DebugFormat("Starting with exam group {0}", groupUri);
@@ -1029,7 +1042,7 @@ namespace VigoBAS.FINT.Edu
                                 {
                                     var examCategory = examgroupItem.eduGroup.Eksamensform;
 
-                                    if (examCategoriesToAggregatePerDateList.Contains(examCategory))
+                                    if (examCategoriesToImportList.Contains(examCategory))
                                     {
                                         if (examgroupItem.eduGroup.Eksamensdato != null)
                                         {
@@ -1040,6 +1053,7 @@ namespace VigoBAS.FINT.Edu
                                             if (!importedObjectsDict.TryGetValue(aggregatedExamgroupUri, out ImportListItem dummyItem))
                                             {
                                                 importedObjectsDict.Add(aggregatedExamgroupUri, new ImportListItem { eduGroup = EduGroupFactory.Create(schoolUri, examdate, examCategory) });
+                                                Logger.Log.InfoFormat("Created aggregated exam group {0}", aggregatedExamgroupUri);
                                             }
                                             if (importedObjectsDict.TryGetValue(aggregatedExamgroupUri, out ImportListItem aggregatedExamgroupItem))
                                             {
@@ -1049,7 +1063,7 @@ namespace VigoBAS.FINT.Edu
 
                                                 foreach (var member in examgroupMembers)
                                                 {
-                                                    Logger.Log.InfoFormat("Trying to add student {0} to exam group {1}", member, aggregatedExamgroupUri);
+                                                    Logger.Log.InfoFormat("Trying to add student {0} to aggregated exam group {1}", member, aggregatedExamgroupUri);
                                                     if (!aggredateExamgroupMembers.Contains(member))
                                                     {
                                                         aggredateExamgroupMembers.Add(member);
@@ -1461,6 +1475,16 @@ namespace VigoBAS.FINT.Edu
             GetImportEntriesPageSize = importRunStep.PageSize;
 
             return new OpenImportConnectionResults();
+        }
+
+        private bool GroupHasValidExamCategory(IEmbeddedResourceObject gruppeResource, string[] examCategoriesToImport)
+        {   
+            if (gruppeResource.Links.TryGetValue(ResourceLink.eksamensform, out IEnumerable<ILinkObject> eksamensformLink))
+            {
+                return examCategoriesToImport.Contains(GetIdValueFromLink(eksamensformLink));
+            }
+
+            return false;
         }
 
         private Dictionary<string, Periode> GetTerminAndSkolearPerioder(KeyedCollection<string, ConfigParameter> configParameters, List<string> componentList)

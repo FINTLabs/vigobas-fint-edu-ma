@@ -72,7 +72,7 @@ namespace VigoBAS.FINT.Edu
             public const string generateProgAreaGroups = "Generer programområdegrupper";
 
             public const string examCategoriesToImport = "Eksamensformer til import";
-            public const string examCategoriesToAggregatePerDate = "Samlegrupper per dato for eksamensformer";
+            //public const string examCategoriesToAggregatePerDate = "Samlegrupper per dato for eksamensformer";
             public const string examgroupsVisibleFromDate = "Eksamensgrupper synlig fra dato (yyyy-MM-dd)";
             //public const string examPeriodStartDate = "Eksamensperiode startdato (yyyy-MM-dd)";
             public const string examgroupsVisibleToDate = "Eksamensgrupper synlig til dato (yyyy-MM-dd)";
