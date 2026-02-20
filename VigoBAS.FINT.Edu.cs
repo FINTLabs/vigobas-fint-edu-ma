@@ -483,15 +483,34 @@ namespace VigoBAS.FINT.Edu
             Dictionary<string, Periode> periodResourceDict = GetTerminAndSkolearPerioder(configParameters, periodComponentList);
             var groupPeriodDict = new Dictionary<string, Periode>();
 
+            string examCategoriesToImport = _importConfigParameters[Param.examCategoriesToImport].Value;
+            string[] examCategoriesToImportList = (string.IsNullOrEmpty(examCategoriesToImport)) ? null : examCategoriesToImport.Split(',');
+
+            string examgroupsVisibleFromDateValue = (string.IsNullOrEmpty(_importConfigParameters[Param.examgroupsVisibleFromDate].Value)) ? zeroDate : _importConfigParameters[Param.examgroupsVisibleFromDate].Value;
+            DateTime examgroupsVisibleFromDate = DateTime.Parse(examgroupsVisibleFromDateValue);
+
+            string examgroupsVisibleToDateValue = (string.IsNullOrEmpty(_importConfigParameters[Param.examgroupsVisibleToDate].Value)) ? infinityDate : _importConfigParameters[Param.examgroupsVisibleToDate].Value;
+            DateTime examgroupsVisibleToDate = DateTime.Parse(examgroupsVisibleToDateValue).AddDays(1);
+
+            var examGroupsIsVisible = examCategoriesToImportList != null && ExamgroupsShouldBeVisible(examgroupsVisibleFromDate, examgroupsVisibleToDate);
+
             var componentList = new List<string>() {  elevPersonUri, elevUri, elevforholdUri, undervisningsforholdUri,
                                                 skoleressursUri, basisgruppeUri,  kontaktlarergruppeUri,
-                                                undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, eksamensgruppeUri,
+                                                undervisningsgruppeUri, fagUri, arstrinnUri, utdanningsprogramUri, programomradeUri, 
                                                 basisgruppeMedlemskapUri, kontaktlarergruppeMedlemskapUri, undervisningsgruppeMedlemskapUri,
-                                                programomradeMedlemskapUri, eksamensgruppeMedlemskapUri,
+                                                programomradeMedlemskapUri, 
                                                 skoleUri, ansattPersonUri, personalRessursUri, arbeidsforholdUri, organisasjonselementUri};
 
             var groupResourceUris = new List<string>() { basisgruppeUri, kontaktlarergruppeUri,
                                                 undervisningsgruppeUri, eksamensgruppeUri };
+
+            if (examGroupsIsVisible)
+            {
+                componentList.Add(eksamensgruppeMedlemskapUri);
+                componentList.Add(eksamensgruppeUri);
+
+                groupResourceUris.Add(eksamensgruppeUri);
+            }
 
             var itemsCountPerComponent = new Dictionary<string, int>();
 
@@ -512,18 +531,6 @@ namespace VigoBAS.FINT.Edu
             int daysBeforeGroupStarts = (string.IsNullOrEmpty(startGroupValue)) ? 0 : Int32.Parse(startGroupValue);
             string endGroupValue = _importConfigParameters[Param.daysBeforeGroupEnds].Value;
             int daysBeforeGroupEnds = (string.IsNullOrEmpty(endGroupValue)) ? 0 : Int32.Parse(endGroupValue);
-
-
-            string examCategoriesToImport = _importConfigParameters[Param.examCategoriesToImport].Value;
-            string[] examCategoriesToImportList = (string.IsNullOrEmpty(examCategoriesToImport)) ? null : examCategoriesToImport.Split(',');
-
-            string examgroupsVisibleFromDateValue = (string.IsNullOrEmpty(_importConfigParameters[Param.examgroupsVisibleFromDate].Value)) ? zeroDate: _importConfigParameters[Param.examgroupsVisibleFromDate].Value;
-            DateTime examgroupsVisibleFromDate = DateTime.Parse(examgroupsVisibleFromDateValue);
-
-            string examgroupsVisibleToDateValue = (string.IsNullOrEmpty(_importConfigParameters[Param.examgroupsVisibleToDate].Value)) ? infinityDate : _importConfigParameters[Param.examgroupsVisibleToDate].Value;
-            DateTime examgroupsVisibleToDate = DateTime.Parse(examgroupsVisibleToDateValue).AddDays(1);
-
-            var examGroupsIsVisible = examCategoriesToImportList != null && ExamgroupsShouldBeVisible(examgroupsVisibleFromDate, examgroupsVisibleToDate);
 
             if (examGroupsIsVisible)
             {
