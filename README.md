@@ -13,7 +13,16 @@ Released on 2026-02-17
 This version is to be used in be used in beta enviroments only until all data in the FINT api environment are updated to information model 4.
 
 ### Features
-* Updated to information model 4.0.0 
+* Updated to information model 4.0.0
+
+## Version 1.12.2
+Released 2026-02-23
+
+### Features
+* FINT exam group data are downloaded only if there are exam category in config and current date are in visible period for exam groups
+
+### Bugfixes
+* Handling of empty list exam category in config is fixed
 
 ## Version 1.12.1
 Released 2026-02-18
