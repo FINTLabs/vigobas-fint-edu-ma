@@ -286,8 +286,8 @@ namespace VigoBAS.FINT.Edu
             eduPerson.Attributes.Add(SchemaAttribute.CreateSingleValuedAttribute(CSAttribute.PersonKontaktinformasjonEpostadresse, AttributeType.String, AttributeOperation.ImportOnly));
 
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdMedlemskap, AttributeType.Reference, AttributeOperation.ImportOnly));
-            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdBasisgruppe, AttributeType.Reference, AttributeOperation.ImportOnly));
-            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdBasisgruppeRef, AttributeType.Reference, AttributeOperation.ImportOnly));
+            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdKlasse, AttributeType.Reference, AttributeOperation.ImportOnly));
+            eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdKlasseRef, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdKontaktlarergruppe, AttributeType.Reference, AttributeOperation.ImportOnly));
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdUndervisningsgruppe, AttributeType.Reference, AttributeOperation.ImportOnly));//
             eduPerson.Attributes.Add(SchemaAttribute.CreateMultiValuedAttribute(CSAttribute.ElevforholdEksamensgruppe, AttributeType.Reference, AttributeOperation.ImportOnly));//
@@ -451,8 +451,8 @@ namespace VigoBAS.FINT.Edu
             var undervisningsforholdUri = FintValue.utdanningElevUndervisningsforholdUri;
             //var medlemskapUri = DefaultValue.utdanningElevMedlemskapUri;
             var skoleressursUri = FintValue.utdanningElevSkoleressursUri;
-            var basisgruppeUri = FintValue.utdanningElevBasisgruppeUri;
-            var basisgruppeMedlemskapUri = FintValue.utdanningElevBasisgruppeMedlemskapUri;
+            var basisgruppeUri = FintValue.utdanningElevKlasseUri;
+            var basisgruppeMedlemskapUri = FintValue.utdanningElevKlasseMedlemskapUri;
             var kontaktlarergruppeUri = FintValue.utdanningElevKontaktlarergruppeUri;
             var kontaktlarergruppeMedlemskapUri = FintValue.utdanningElevKontaktlarergruppeMedlemskapUri;
             var undervisningsgruppeUri = FintValue.utdanningTimeplanUndervisningsgruppeUri;
@@ -581,7 +581,7 @@ namespace VigoBAS.FINT.Edu
 
                                 switch (resourceType)
                                 {
-                                    case FintValue.utdanningElevBasisgruppeUri:
+                                    case FintValue.utdanningElevKlasseUri:
                                         {
                                             _basisgruppeDict.Add(uriKey, gruppeResource);
                                             break;
@@ -713,7 +713,7 @@ namespace VigoBAS.FINT.Edu
                             _utdanningsprogramDict.Add(uriKey, resourceDict[uriKey]);
                             break;
                         }
-                    case FintValue.utdanningElevBasisgruppeMedlemskapUri:
+                    case FintValue.utdanningElevKlasseMedlemskapUri:
                     {
                         AddValidMembership(uriKey, resourceDict, daysBeforeStudentStarts, daysBeforeStudentEnds, isExamGroupMembership, ResourceLink.classGroup, ref _basicGroupAndValidStudentRelationships);
                             break;
@@ -2161,7 +2161,7 @@ namespace VigoBAS.FINT.Edu
 
                 switch (groupType)
                 {
-                    case ClassType.basicGroup:
+                    case ClassType.classGroup:
                         {                        
                             group = KlasseFactory.Create(groupState);
                             break;
@@ -2220,7 +2220,7 @@ namespace VigoBAS.FINT.Edu
                                     membershipDict = _contactGroupAndValidStudentRelationships;
                                     break;
                                 }
-                            case ClassType.basicGroup:
+                            case ClassType.classGroup:
                                 {
                                     link = ResourceLink.level;
                                     itemDict = _arstrinnDict;
@@ -2319,7 +2319,7 @@ namespace VigoBAS.FINT.Edu
                                 ref ssnToSystemId,
                                 ref importedObjectsDict);
                         }
-                        if (groupType == ClassType.basicGroup)
+                        if (groupType == ClassType.classGroup)
                         {
                             string levelGroupUri;
 
@@ -2847,9 +2847,9 @@ namespace VigoBAS.FINT.Edu
                 {
                     switch (groupType)
                     {
-                        case ClassType.basicGroup:
+                        case ClassType.classGroup:
                             {
-                                eduPerson.ElevforholdBasisgruppe.Add(eduGroupAnchor);
+                                eduPerson.ElevforholdKlasse.Add(eduGroupAnchor);
                                 break;
                             }
                         case ClassType.contactTeacherGroup:
@@ -3209,14 +3209,14 @@ namespace VigoBAS.FINT.Edu
                 var grepCode = group?.Grepkode.Kode;
 
                 var prefixedOrgNumber = Feide.PrefixOrgNumber + orgNumber;
-                var descriptionPrefix = (groupType == ClassType.basicGroup) ? "Basisgruppe " : "Undervisningsgruppe ";
+                var descriptionPrefix = (groupType == ClassType.classGroup) ? "Basisgruppe " : "Undervisningsgruppe ";
 
                 switch (groupType)
                 {
-                    case ClassType.basicGroup:
+                    case ClassType.classGroup:
                     case ClassType.studyGroup:
                         {
-                            string groupTypeCode = ((groupType == ClassType.basicGroup) ? Feide.Basisgruppekode : Feide.undervisningsgruppekode);
+                            string groupTypeCode = ((groupType == ClassType.classGroup) ? Feide.klassekode : Feide.undervisningsgruppekode);
                             string urlEncodedGroupName = (groupName != null) ? EscapeUriDataStringRfc3986(groupName) : String.Empty;
                             string urlEncodedGroupNameLowerCase = (groupName != null) ? EscapeUriDataStringRfc3986(groupName.ToLower()) : String.Empty;
                             string urlEncodedGroupDescription = (groupName != null) ? EscapeUriDataStringRfc3986(descriptionPrefix + groupName) : String.Empty;
@@ -3228,7 +3228,7 @@ namespace VigoBAS.FINT.Edu
                             }
 
                             string groupstring = Feide.PrefixUrnGroup + groupTypeCode + Feide.delimiter;
-                            groupstring += (groupType == ClassType.basicGroup ? String.Empty : grepCode) + Feide.delimiter;
+                            groupstring += (groupType == ClassType.classGroup ? String.Empty : grepCode) + Feide.delimiter;
                             groupstring += prefixedOrgNumber + Feide.delimiter + urlEncodedGroupName + Feide.delimiter;
                             groupstring += timespan + Feide.delimiter;
                             groupstring += role + Feide.delimiter + urlEncodedGroupDescription;
