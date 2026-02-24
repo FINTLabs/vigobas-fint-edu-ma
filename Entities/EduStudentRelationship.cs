@@ -39,7 +39,7 @@ namespace VigoBAS.FINT.Edu
         public string ElevforholdProgramomrade { get; set; }
         public string ElevforholdElevRef { get; set; }
         public string ElevforholdSkoleRef { get; set; }
-        public string ElevforholdBasisgruppeRef { get; set; }
+        public string ElevforholdKlasseRef { get; set; }
 
         public string Anchor()
         {
@@ -86,9 +86,9 @@ namespace VigoBAS.FINT.Edu
             {
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdProgramomrade, ElevforholdProgramomrade));
             }
-            if (!string.IsNullOrEmpty(ElevforholdBasisgruppeRef))
+            if (!string.IsNullOrEmpty(ElevforholdKlasseRef))
             {
-                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdBasisgruppeRef, ElevforholdBasisgruppeRef));
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdKlasseRef, ElevforholdKlasseRef));
             }
 
             return csentry;

@@ -62,7 +62,7 @@ namespace VigoBAS.FINT.Edu
         public List<string> ElevforholdSkole { get; set; }
         public List<string> ElevforholdKategori { get; set; }
         public string ElevforholdHovedkategori { get; set; }
-        public List<string> ElevforholdBasisgruppe { get; set; }
+        public List<string> ElevforholdKlasse { get; set; }
         public List<string> ElevforholdKontaktlarergruppe { get; set; }
         public List<string> ElevforholdUndervisningsgruppe { get; set; }
         public List<string> ElevforholdEksamensgruppe { get; set; }
@@ -241,14 +241,14 @@ namespace VigoBAS.FINT.Edu
                 csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.PersonKontaktinformasjonPostadressePoststed,PersonPostadressePoststed));
             }
 
-            if (ElevforholdBasisgruppe != null && ElevforholdBasisgruppe.Count > 0)
+            if (ElevforholdKlasse != null && ElevforholdKlasse.Count > 0)
             {
                 IList<object> members = new List<object>();
-                foreach (var member in ElevforholdBasisgruppe)
+                foreach (var member in ElevforholdKlasse)
                 {
                     members.Add(member.ToString());
                 }
-                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdBasisgruppe, members));
+                csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(CSAttribute.ElevforholdKlasse, members));
             }
             if (ElevforholdKontaktlarergruppe != null && ElevforholdKontaktlarergruppe.Count > 0)
             {

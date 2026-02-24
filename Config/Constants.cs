@@ -105,8 +105,8 @@ namespace VigoBAS.FINT.Edu
             public const string utdanningElevElevforholdUri = "/utdanning/elev/elevforhold";
             public const string utdanningElevUndervisningsforholdUri = "/utdanning/elev/undervisningsforhold";
             public const string utdanningElevMedlemskapUri = "/utdanning/elev/medlemskap";
-            public const string utdanningElevBasisgruppeUri = "/utdanning/elev/basisgruppe";
-            public const string utdanningElevBasisgruppeMedlemskapUri = "/utdanning/elev/basisgruppemedlemskap";
+            public const string utdanningElevKlasseUri = "/utdanning/elev/klasse";
+            public const string utdanningElevKlasseMedlemskapUri = "/utdanning/elev/klassemedlemskap";
             public const string utdanningElevKontaktlarergruppeUri = "/utdanning/elev/kontaktlarergruppe";
             public const string utdanningElevKontaktlarergruppeMedlemskapUri = "/utdanning/elev/kontaktlarergruppemedlemskap";
             public const string utdanningVurderingEksamensgruppeUri = "/utdanning/vurdering/eksamensgruppe";
@@ -169,7 +169,7 @@ namespace VigoBAS.FINT.Edu
             public const string student = "elev";
             public const string member = "medlem";
             public const string group = "gruppe";
-            public const string classGroup = "basisgruppe";
+            public const string classGroup = "klasse";
             public const string contactTeacherGroup = "kontaktlarergruppe";
             public const string studyGroup = "undervisningsgruppe";
             public const string examGroup = "eksamensgruppe";
@@ -203,7 +203,7 @@ namespace VigoBAS.FINT.Edu
 
         public struct ClassType
         {
-            public const string basicGroup = "basisgruppe";
+            public const string classGroup = "klasse";
             public const string contactTeacherGroup = "kontaktlarergruppe";
             public const string studyGroup = "undervisningsgruppe";
             
@@ -284,7 +284,7 @@ namespace VigoBAS.FINT.Edu
             public const string PersonKontaktinformasjonPostadressePostnummer = "PersonKontaktinformasjonPostadressePostnummer";
             public const string PersonKontaktinformasjonPostadressePoststed = "PersonKontaktinformasjonPostadressePoststed";
             public const string ElevforholdMedlemskap = "ElevforholdMedlemskap";
-            public const string ElevforholdBasisgruppe = "ElevforholdBasisgruppe";
+            public const string ElevforholdKlasse = "ElevforholdKlasse";
             public const string ElevforholdKontaktlarergruppe = "ElevforholdKontaktlarergruppe";
             public const string ElevforholdUndervisningsgruppe = "ElevforholdUndervisningsgruppe";
             public const string ElevforholdEksamensgruppe = "ElevforholdEksamensgruppe";
@@ -330,7 +330,7 @@ namespace VigoBAS.FINT.Edu
             public const string GruppeElevAntall = "GruppeElevAntall";
             public const string GruppeLarerListe = "GruppeLarerListe";
             public const string GruppeLarerOgElevListe = "GruppeLarerOgElevListe";
-            public const string GruppeGruppeListe = "GruppeBasisgruppeListe";
+            public const string GruppeGruppeListe = "GruppeKlasseListe";
             public const string GruppeFagRef = "GruppeFagRef";
 
             public const string SkoleSystemId = "SkoleSystemId";
@@ -390,7 +390,7 @@ namespace VigoBAS.FINT.Edu
             public const string ElevforholdElevkategori = "ElevforholdElevkategori";
             public const string ElevforholdElevRef = "ElevforholdElevRef";
             public const string ElevforholdSkoleRef = "ElevforholdSkoleRef";
-            public const string ElevforholdBasisgruppeRef = "ElevforholdBasisgruppeRef";
+            public const string ElevforholdKlasseRef = "ElevforholdKlasseRef";
         }
 
         public struct Feide
@@ -405,7 +405,7 @@ namespace VigoBAS.FINT.Edu
             public const string PrefixUrnGroup = "urn:mace:feide.no:go:group:";
             public const string PrefixUrnGroupId = "urn:mace:feide.no:go:groupid:";
 
-            public const string Basisgruppekode = "b";
+            public const string klassekode = "b";
             public const string undervisningsgruppekode = "u";
             public const string annengruppekode = "a";
 

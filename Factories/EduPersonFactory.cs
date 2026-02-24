@@ -108,7 +108,7 @@ namespace VigoBAS.FINT.Edu
                 ElevKontaktinformasjonEpostadresse = epostadresse,
                 ElevKontaktinformasjonMobiltelfonnummer = mobilnummer,
 
-                ElevforholdBasisgruppe = basisgruppemedlemskap,
+                ElevforholdKlasse = basisgruppemedlemskap,
                 ElevforholdKontaktlarergruppe = kontaktlarergruppemedlemskap,
                 ElevforholdUndervisningsgruppe = undervisningsgruppemedlemskap,
                 ElevforholdEksamensgruppe = eksamensgruppemedlemskap,
@@ -202,7 +202,7 @@ namespace VigoBAS.FINT.Edu
                 PersonalKontaktinformasjonSip = sip,
 
                 SkoleressursFeidenavn = feidenavn,
-                ElevforholdBasisgruppe = basisgruppemedlemskap,
+                ElevforholdKlasse = basisgruppemedlemskap,
                 ElevforholdKontaktlarergruppe = kontaktlarergruppemedlemskap,
                 ElevforholdUndervisningsgruppe = undervisningsgruppemedlemskap,
                 ElevforholdEksamensgruppe = eksamensgruppemedlemskap,
