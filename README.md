@@ -9,11 +9,10 @@ Version 1.7.0 is the first public versjon. For older versions see: https://vigob
 ### Agent changes 2.X.Y compared with version 1.X.Y
 * Program area groups are not imported to connector space
 * Only subject referenced by study or exam groups are imported to connector space
-
-#### Connector space changes
-* EduPerson.ElevforholdBasisgruppe -> EduPerson.ElevforholdKlasse
-* EduStudentRelationship.ElevforholdBasisgruppeRef -> EduStudentRelationship.ElevforholdKlasseRef
-* EduGroup.GruppeBasisgruppeListe -> EduGroup.GruppeKlasseListe
+* Connector space changes:
+  * EduPerson.ElevforholdBasisgruppe -> EduPerson.ElevforholdKlasse
+  * EduStudentRelationship.ElevforholdBasisgruppeRef -> EduStudentRelationship.ElevforholdKlasseRef
+  * EduGroup.GruppeBasisgruppeListe -> EduGroup.GruppeKlasseListe
 
 
 ## Version 2.0.1
